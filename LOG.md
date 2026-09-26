@@ -59,3 +59,9 @@
 - Решение: D-014 (снимок OSM 2026-07-24 против съёмки 2021-07-26).
 - Ждёт человека: правка разметки в QGIS (`verified=true`, слепая перепроверка 10 % для G2), дообучение в ноутбуке, `threshold-sweep`, `verification.csv` ≥ 50 строк.
 - Команды проверки: `ruff format . && ruff check --fix .` — чисто; `pytest -q -m "not slow and not network and not gpu"` — 327 passed.
+
+## [2026-09-27] Orchestrator — внешний датасет SpaceNet 2
+- Сделано: `src/geoqc/cv/external.py` (листинг S3 ListObjectsV2, детерминированная выборка, загрузка с кэшем и `SOURCE.json`, чип 512 px в UTM 0,3 м, растяжка p2–p98, фильтры площади/nodata, сплит 80/20 по городу, выход как у `export-dataset`); `external_report.py` (рисунки `docs/datasets/figures/spacenet2_*`, `reports/external_spacenet2.json`); CLI `fetch-external`/`prepare-external`/`report-external`, `make external-data`; `DATA_SOURCE` в ноутбуке; `docs/datasets/spacenet2.md`; D-015. Реальный прогон: 300 тайлов, 288 чипов (12 пропущены по nodata), 3873 здания.
+- Решения: D-015. В режиме `spacenet` ноутбук не трогает `config/cv.yaml` и карточку модели, sweep пропускается.
+- Не получилось / риски: доменный сдвиг (спутник, другой сезон и регион); разметка SpaceNet неполная.
+- Команды проверки: `.venv/bin/pytest tests/cv/test_external.py -q`; `make external-data`; `make notebooks-check`.

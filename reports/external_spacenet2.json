@@ -1,0 +1,183 @@
+{
+  "dataset_dir": "data/interim/external/spacenet2",
+  "meta": {
+    "dataset": "SpaceNet 2 Buildings (train subset)",
+    "license": "CC BY-SA 4.0",
+    "attribution": "SpaceNet on AWS (SpaceNet Partners, Maxar WorldView-3), CC BY-SA 4.0",
+    "gsd_m": 0.3,
+    "size_px": 512,
+    "min_area_m2": 12.0,
+    "stretch_percentiles": [
+      2,
+      98
+    ],
+    "seed": 42,
+    "holdout_fraction": 0.2,
+    "n_train": 229,
+    "n_holdout": 59,
+    "n_instances": 3873,
+    "n_skipped_nodata": 12,
+    "by_city": {
+      "AOI_2_Vegas": {
+        "chips": 99,
+        "instances": 1830
+      },
+      "AOI_3_Paris": {
+        "chips": 93,
+        "instances": 1141
+      },
+      "AOI_4_Shanghai": {
+        "chips": 96,
+        "instances": 902
+      }
+    },
+    "generated_at": "2026-09-26T23:06:47+00:00"
+  },
+  "spacenet": {
+    "AOI_2_Vegas": {
+      "chips": 99,
+      "share_empty_chips": 0.101,
+      "buildings_per_chip_mean": 18.5,
+      "buildings_per_chip_p90": 36.0,
+      "coverage_mean": 0.181,
+      "share_partial": 0.328,
+      "valid_fraction_mean": 0.994,
+      "n": 1830,
+      "area_m2": {
+        "p10": 26.3,
+        "p25": 95.0,
+        "p50": 180.2,
+        "p75": 244.5,
+        "p90": 352.5
+      },
+      "share_small_lt_50m2": 0.164,
+      "share_large_gt_500m2": 0.056,
+      "vertices_median": 8.0,
+      "share_with_holes": 0.0,
+      "rectangularity_median": 0.877,
+      "share_touching": 0.012
+    },
+    "AOI_3_Paris": {
+      "chips": 93,
+      "share_empty_chips": 0.462,
+      "buildings_per_chip_mean": 12.3,
+      "buildings_per_chip_p90": 37.599999999999994,
+      "coverage_mean": 0.071,
+      "share_partial": 0.137,
+      "valid_fraction_mean": 0.828,
+      "n": 1141,
+      "area_m2": {
+        "p10": 25.1,
+        "p25": 51.1,
+        "p50": 89.4,
+        "p75": 124.7,
+        "p90": 195.1
+      },
+      "share_small_lt_50m2": 0.247,
+      "share_large_gt_500m2": 0.02,
+      "vertices_median": 4.0,
+      "share_with_holes": 0.0,
+      "rectangularity_median": 0.938,
+      "share_touching": 0.063
+    },
+    "AOI_4_Shanghai": {
+      "chips": 96,
+      "share_empty_chips": 0.26,
+      "buildings_per_chip_mean": 9.4,
+      "buildings_per_chip_p90": 24.0,
+      "coverage_mean": 0.133,
+      "share_partial": 0.343,
+      "valid_fraction_mean": 0.995,
+      "n": 902,
+      "area_m2": {
+        "p10": 26.0,
+        "p25": 51.7,
+        "p50": 123.0,
+        "p75": 257.2,
+        "p90": 593.9
+      },
+      "share_small_lt_50m2": 0.238,
+      "share_large_gt_500m2": 0.123,
+      "vertices_median": 4.0,
+      "share_with_holes": 0.0,
+      "rectangularity_median": 0.924,
+      "share_touching": 0.096
+    }
+  },
+  "aoi_osm": {
+    "buildings_per_tile_mean": 5.6,
+    "share_empty_tiles": 0.379,
+    "n": 1516,
+    "area_m2": {
+      "p10": 17.7,
+      "p25": 37.9,
+      "p50": 105.3,
+      "p75": 201.9,
+      "p90": 604.4
+    },
+    "share_small_lt_50m2": 0.303,
+    "share_large_gt_500m2": 0.114,
+    "vertices_median": 4.0,
+    "share_with_holes": 0.004,
+    "rectangularity_median": 0.998,
+    "share_touching": 0.068
+  },
+  "color": {
+    "AOI_2_Vegas": {
+      "mean": [
+        93.6,
+        90.8,
+        91.1
+      ],
+      "std": [
+        69.0,
+        66.9,
+        65.7
+      ]
+    },
+    "AOI_3_Paris": {
+      "mean": [
+        89.9,
+        91.6,
+        91.0
+      ],
+      "std": [
+        62.2,
+        63.0,
+        61.5
+      ]
+    },
+    "AOI_4_Shanghai": {
+      "mean": [
+        82.4,
+        78.8,
+        78.9
+      ],
+      "std": [
+        61.7,
+        60.9,
+        60.4
+      ]
+    },
+    "AOI": {
+      "mean": [
+        112.9,
+        127.4,
+        104.7
+      ],
+      "std": [
+        58.4,
+        48.3,
+        49.0
+      ]
+    }
+  },
+  "figures": [
+    "docs/datasets/figures/spacenet2_cases.jpg",
+    "docs/datasets/figures/spacenet2_color.png",
+    "docs/datasets/figures/spacenet2_samples.jpg",
+    "docs/datasets/figures/spacenet2_stats.png",
+    "docs/datasets/figures/spacenet2_vs_aoi.jpg"
+  ],
+  "note": "descriptive statistics of the training material, not model metrics"
+}

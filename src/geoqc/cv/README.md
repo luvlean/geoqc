@@ -100,12 +100,18 @@ geoqc cv predict --split all|val|test [--to-db] [--limit N] [--out path] [--devi
 geoqc cv export-dataset [--labels data/labels/val/buildings.geojson] [--out data/interim/dataset] [--seed 42] [--holdout-fraction 0.2] [--allow-unverified]
 geoqc cv threshold-sweep --split val [--holdout] [--detections data/interim/detections_val.geojson] [--limit N] [--no-update-config] [--allow-unverified]
 geoqc cv bundle [--tiles all|val] [--out data/interim/bundle.zip] [--no-dataset]
+geoqc cv fetch-external [--city AOI_3_Paris ...] [--per-city 100]
+geoqc cv prepare-external [--city ...] [--out data/interim/external/spacenet2]
+geoqc cv report-external [--per-city 4]
 ```
 
 Примеры: `geoqc cv predict --split all --to-db` (полный прогон, как в `make detect`);
 `geoqc cv predict --split val --backend mock --limit 2` (smoke без весов);
 `geoqc cv threshold-sweep --split val --holdout` (после дообучения — только на holdout-части val).
 `--allow-unverified` нужен лишь для smoke-прогонов на `draft.geojson`, метрики по нему — не метрики.
+`*-external` — SpaceNet 2 (`external.py`, `external_report.py`, блок `external:` в `config/cv.yaml`, `make external-data`):
+загрузка из публичного S3, перепроекция в UTM 0,3 м, чипы 512 px в формате `export-dataset`, рисунки и статистика.
+Описание и выводы — `docs/datasets/spacenet2.md`.
 
 ## Параметры `config/cv.yaml`
 
