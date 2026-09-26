@@ -57,6 +57,19 @@ def load_config(config_dir: Path | None = None) -> dict[str, Any]:
     return cfg
 
 
+def repo_relative(value: Any) -> Any:
+    """Absolute paths inside the repo -> repo-relative, recursively (for committed reports)."""
+    if isinstance(value, dict):
+        return {k: repo_relative(v) for k, v in value.items()}
+    if isinstance(value, list | tuple):
+        return [repo_relative(v) for v in value]
+    if isinstance(value, Path):
+        value = str(value)
+    if isinstance(value, str) and value.startswith(str(REPO_ROOT) + "/"):
+        return Path(value).relative_to(REPO_ROOT).as_posix()
+    return value
+
+
 def resolve_path(rel: str | os.PathLike[str]) -> Path:
     """Resolve a repo-relative path from config to an absolute path."""
     p = Path(rel)

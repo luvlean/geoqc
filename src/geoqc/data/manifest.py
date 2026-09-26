@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from geoqc.config import resolve_path
+from geoqc.config import repo_relative, resolve_path
 
 MANIFEST_PATH = resolve_path("data/manifest.json")
 
@@ -46,6 +46,7 @@ def load_manifest(path: Path = MANIFEST_PATH) -> dict[str, Any]:
 
 
 def save_manifest(data: dict[str, Any], path: Path = MANIFEST_PATH) -> Path:
+    data = repo_relative(data)
     data["created_at"] = datetime.now(UTC).isoformat(timespec="seconds")
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as fh:

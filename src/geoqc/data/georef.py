@@ -37,6 +37,8 @@ from scipy.signal import fftconvolve
 from shapely.geometry import Polygon
 from shapely.geometry.base import BaseGeometry
 
+from geoqc.config import repo_relative
+
 log = logging.getLogger(__name__)
 
 
@@ -262,5 +264,5 @@ def check_georef(
     }
     report_path.parent.mkdir(parents=True, exist_ok=True)
     with report_path.open("w", encoding="utf-8") as fh:
-        json.dump(report, fh, ensure_ascii=False, indent=1)
+        json.dump(repo_relative(report), fh, ensure_ascii=False, indent=1)
     return report

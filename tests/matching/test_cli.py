@@ -7,12 +7,25 @@ import json
 import pytest
 from typer.testing import CliRunner
 
+from geoqc.config import load_config
+from geoqc.matching import cli as matching_cli
 from geoqc.matching.cli import app
 
 from .conftest import METRIC_SRID, sq
 
 pytestmark = pytest.mark.db
 runner = CliRunner()
+
+
+@pytest.fixture(autouse=True)
+def _no_real_aoi(monkeypatch):
+    # synthetic squares lie outside the real config/aoi.geojson; keep the CLI hermetic
+    def _load():
+        cfg = load_config()
+        cfg["matching"]["aoi_path"] = None
+        return cfg
+
+    monkeypatch.setattr(matching_cli, "load_config", _load)
 
 
 def test_init_db_applies_sql(db_conn):

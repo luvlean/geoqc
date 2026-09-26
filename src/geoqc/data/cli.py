@@ -71,9 +71,11 @@ def _image_meta(cfg: dict[str, Any], aoi_props: dict[str, Any]) -> dict[str, Any
 def _raw_path(cfg: dict[str, Any], meta: dict[str, Any], user_input: Path | None) -> Path:
     if user_input is not None:
         return user_input
-    return resolve_path(
-        cfg["data"]["image"].get("raw_path") or f"data/raw/{meta['source']}_{meta['id']}.tif"
-    )
+    # config raw_path applies only to the image it was written for; aoi.geojson may point elsewhere
+    image_cfg = cfg["data"]["image"]
+    if image_cfg.get("raw_path") and str(image_cfg.get("id")) == str(meta.get("id")):
+        return resolve_path(image_cfg["raw_path"])
+    return resolve_path(f"data/raw/{meta['source']}_{meta['id']}.tif")
 
 
 # --------------------------------------------------------------------------- search-aoi
