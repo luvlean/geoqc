@@ -1,0 +1,48 @@
+# CV module settings (owned by CV Agent). Loaded via geoqc.config.load_config()["cv"].
+# `weights.sha256`, `model_version` and `conf_threshold` are rewritten by
+# `geoqc cv fetch-weights` / `geoqc cv threshold-sweep`; everything else is edited by hand.
+backend: ultralytics              # ultralytics | smp_unet | mock
+model_name: yolov8m-building-seg  # prefix of model_version = "<model_name>-<sha256[:8]>"
+weights:
+  path: models/yolov8m-building-seg.pt
+  hf_repo: keremberke/yolov8m-building-segmentation
+  hf_filename: best.pt
+  fallback_asset: yolov8m-seg.pt  # Ultralytics COCO checkpoint: architecture only, no building class
+  sha256: 1996bc046edf98fe7f5f63c0df8e5c7b61968437252042fb1394c027f2f9c656 # filled by fetch-weights
+  is_fallback: false
+model_version: yolov8m-building-seg-1996bc04 # filled by fetch-weights: "<model_name>-<sha256[:8]>"
+conf_threshold: 0.25              # tuned on val by threshold-sweep (never on test)
+conf_threshold_split:             # split the threshold was tuned on (val) and when
+nms_iou: 0.5
+imgsz: 512
+batch: 8
+device: auto                      # auto | cuda | mps | cpu
+half_on_cuda: true
+max_det: 300
+seed: 42
+mask_threshold: 0.5               # probability cut for smp_unet masks
+vectorize:
+  simplify_tolerance_m: 0.5       # Douglas-Peucker tolerance in metres
+  min_area_m2: 12                 # drop polygons smaller than this (matches annotation.min_area_m2)
+  tile_overlap_merge_iou: 0.1     # merge polygons of neighbouring tiles when IoU >= this ...
+  min_overlap_ratio: 0.5          # ... or when intersection / min(area_a, area_b) >= this
+  score_mode: max                 # max | area_weighted
+  merge_same_tile: false
+  drop_nodata: true               # mask out pixels where all bands == 0 before vectorizing
+smp_unet:
+  encoder: resnet34
+  checkpoint: models/unet_resnet34.pt   # written by notebooks/train_finetune.ipynb
+  min_component_px: 16
+dataset:
+  out_dir: data/interim/dataset
+  holdout_fraction: 0.2
+  seed: 42
+  image_format: png
+sweep:
+  conf_floor: 0.05
+  thresholds: [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
+  iou_threshold: 0.5
+  report: reports/threshold_sweep_val.json
+bundle:
+  out: data/interim/bundle.zip
+  tiles: all                      # all | val
