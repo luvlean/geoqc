@@ -1,0 +1,100 @@
+# Data module settings (owned by Data Agent). Merged as cfg["data"] by geoqc.config.load_config().
+aoi:
+  geojson: config/aoi.geojson
+  min_area_km2: 5.0
+  max_area_km2: 10.0
+  # Inward buffer (m) and simplification tolerance (m) applied to the valid-data footprint
+  # of the chosen image when search-aoi derives the AOI polygon.
+  erode_m: 30.0
+  simplify_m: 15.0
+
+search:
+  oam_api: "https://api.openaerialmap.org/meta"
+  # Coarse bbox used for the "Russia first" pass (the API caps this query; the global
+  # harvest is filtered client-side with the same box, see README).
+  russia_bbox: [27.3, 43.5, 180.0, 82.0]
+  gsd_max_m: 0.5
+  min_image_area_km2: 5.0
+  max_image_area_km2: 60.0          # bigger mosaics are usually satellite strips over disasters
+  min_year: 2015
+  licenses_ok: ["CC-BY 4.0", "CC BY 4.0", "CC-BY-4.0", "CC0", "CC0-1.0", "CC BY-SA 4.0", "CC-BY-SA 4.0"]
+  exclude_title_regex: "(?i)\\b(DEM|DSM|DTM|NDVI|thermal|IR)\\b"
+  page_size: 1000
+  min_osm_buildings_per_5km2: 300
+  overpass_check_top_n: 6
+  header_check_top_n: 12
+
+overpass:
+  endpoints:
+    - "https://overpass.kumi.systems/api/interpreter"
+    - "https://overpass.private.coffee/api/interpreter"
+    - "https://overpass-api.de/api/interpreter"
+  timeout_s: 240
+  retries: 3
+  backoff_s: 10
+  user_agent: "geoqc/0.1 (student project; building QC)"
+
+image:
+  # Chosen by `geoqc data search-aoi` (see reports/aoi_candidates.json and DECISIONS D-001a).
+  source: openaerialmap
+  id: "5f3f96b8a646430007b2ac90"
+  url: "https://oin-hotosm-temp.s3.amazonaws.com/5f3f96b8a646430007b2ac8f/0/5f3f96b8a646430007b2ac90.tif"
+  meta_url: "https://api.openaerialmap.org/meta/5f3f96b8a646430007b2ac90"
+  acquired: "2020-08-17"
+  license: "CC-BY 4.0"
+  attribution: "Sergey Astakhov via OpenAerialMap, CC BY 4.0"
+  native_gsd_m: 0.069
+  raw_path: data/raw/openaerialmap_5f3f96b8a646430007b2ac90.tif
+  # Above this size the download step reads only the AOI window through /vsicurl/ instead of
+  # fetching the whole file (raw then holds the clipped window + the URL in the manifest).
+  windowed_over_mb: 1500
+
+preprocess:
+  output: data/interim/aoi_cog.tif
+  target_gsd_m: 0.3          # resample from native GSD; <= 0.5 by contract, matches INRIA/SpaceNet-scale models
+  resampling: average        # for downsampling; 'cubic' when upsampling a coarser source
+  nodata: 0
+  block_px: 2048
+  cog_profile: deflate
+
+tiles:
+  dir: data/tiles
+  index: data/tiles/tiles.gpkg
+  layer: tiles
+  size_px: 512
+  overlap_px: 64
+  # Keep a tile only when it intersects the AOI polygon (guarantees full coverage, drops
+  # tiles that lie entirely outside the AOI bbox corners).
+  keep_only_intersecting_aoi: true
+
+osm:
+  cache_dir: data/raw
+  output: data/interim/osm_buildings.geojson
+  query: '[out:json][timeout:180]; (way["building"]({bbox}); relation["building"]({bbox});); out geom;'
+  bbox_buffer_m: 50          # fetch a little beyond the AOI so edge buildings are complete
+  min_area_m2: 4.0
+
+secondary:
+  output: data/interim/secondary_buildings.geojson
+  microsoft_links_csv: "https://minedbuildings.z5.web.core.windows.net/global-buildings/dataset-links.csv"
+  microsoft_quadkey_level: 9
+  google_open_buildings_tiles: "https://sites.research.google/open-buildings/tiles.geojson"
+  google_open_buildings_base: "https://storage.googleapis.com/open-buildings-data/v3/polygons_s2_level_4_gzip"
+
+load_ref:
+  batch_size: 1000
+
+georef:
+  output: reports/georef.json
+  n_control_min: 10
+  n_control_target: 40
+  min_area_m2: 250.0
+  max_area_m2: 6000.0
+  min_rectangularity: 0.70     # area / area(min_rotated_rectangle)
+  isolation_m: 12.0            # no other OSM building within this distance
+  max_levels: 3                # skip tall buildings (roof lean) when building:levels is tagged
+  search_radius_m: 10.0
+  min_peak_ratio: 1.6          # correlation peak / mean; weaker responses are discarded
+  apply_shift_over_m: 2.0      # G1 threshold: apply shift when median offset exceeds it
+  min_systematic_shift_m: 0.6  # ...and the median vector is at least this long
+  random_seed: 42

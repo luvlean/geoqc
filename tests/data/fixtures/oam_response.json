@@ -1,0 +1,339 @@
+{
+ "meta": {
+  "provided_by": "OpenAerialMap",
+  "license": "CC-BY 4.0",
+  "page": 1,
+  "limit": 1000,
+  "found": 6
+ },
+ "results": [
+  {
+   "_id": "5f3f9ac2a646430007b2ac94",
+   "title": "СПб, Невский район, Большой Смоленский - Цимбалина, Epoch 2010.0",
+   "provider": "Sergey Astakhov",
+   "platform": "uav",
+   "uuid": "https://oin-hotosm-temp.s3.amazonaws.com/5f3f96b8a646430007b2ac8f/0/5f3f96b8a646430007b2ac90.tif",
+   "gsd": 0.0690845930324,
+   "acquisition_start": "2020-08-17T12:08:00.000Z",
+   "bbox": [
+    30.376103,
+    59.875688,
+    30.448341,
+    59.901548
+   ],
+   "geojson": {
+    "bbox": [
+     30.376103,
+     59.875688,
+     30.448341,
+     59.901548
+    ],
+    "coordinates": [
+     [
+      [
+       [
+        30.376103,
+        59.900166
+       ],
+       [
+        30.378033,
+        59.875688
+       ],
+       [
+        30.448341,
+        59.877069
+       ],
+       [
+        30.446462,
+        59.901548
+       ],
+       [
+        30.376103,
+        59.900166
+       ]
+      ]
+     ]
+    ],
+    "type": "MultiPolygon"
+   },
+   "file_size": 357871436,
+   "properties": {
+    "license": "CC-BY 4.0"
+   },
+   "projection": "PROJCS[\"WGS 84 / UTM zone 36N\",GEOGCS[\"W"
+  },
+  {
+   "_id": "5f75ef3a458b56000772bd5f",
+   "title": "СПб, район Волково",
+   "provider": "Sergey Astakhov",
+   "platform": "uav",
+   "uuid": "https://oin-hotosm-temp.s3.amazonaws.com/5f75ec1d458b56000772bd58/0/5f75ec1d458b56000772bd59.tif",
+   "gsd": 0.0936767165051,
+   "acquisition_start": "2020-09-23T11:55:00.000Z",
+   "bbox": [
+    30.312341,
+    59.892159,
+    30.383866,
+    59.919488
+   ],
+   "geojson": {
+    "bbox": [
+     30.312341,
+     59.892159,
+     30.383866,
+     59.919488
+    ],
+    "coordinates": [
+     [
+      [
+       [
+        30.312341,
+        59.918089
+       ],
+       [
+        30.314437,
+        59.892159
+       ],
+       [
+        30.383866,
+        59.893556
+       ],
+       [
+        30.381824,
+        59.919488
+       ],
+       [
+        30.312341,
+        59.918089
+       ]
+      ]
+     ]
+    ],
+    "type": "MultiPolygon"
+   },
+   "file_size": 232536235,
+   "properties": {
+    "license": "CC-BY 4.0"
+   },
+   "projection": "PROJCS[\"WGS 84 / UTM zone 36N\",GEOGCS[\"W"
+  },
+  {
+   "_id": "5f3f9933a646430007b2ac93",
+   "title": "СПб, Невский район, Большой Смоленский - Цимбалина, DEM, Epoch 2010.0",
+   "provider": "Sergey Astakhov",
+   "platform": "uav",
+   "uuid": "https://oin-hotosm-temp.s3.amazonaws.com/5f3f96e7a646430007b2ac91/0/5f3f96e7a646430007b2ac92.tif",
+   "gsd": 0.138169123162,
+   "acquisition_start": "2020-08-17T12:08:00.000Z",
+   "bbox": [
+    30.372113,
+    59.873835,
+    30.456824,
+    59.904498
+   ],
+   "geojson": {
+    "bbox": [
+     30.372113,
+     59.873835,
+     30.456824,
+     59.904498
+    ],
+    "coordinates": [
+     [
+      [
+       [
+        30.372113,
+        59.902879
+       ],
+       [
+        30.374406,
+        59.873835
+       ],
+       [
+        30.456824,
+        59.875453
+       ],
+       [
+        30.454602,
+        59.904498
+       ],
+       [
+        30.372113,
+        59.902879
+       ]
+      ]
+     ]
+    ],
+    "type": "MultiPolygon"
+   },
+   "file_size": 107758701,
+   "properties": {
+    "license": "CC-BY 4.0"
+   },
+   "projection": "PROJCS[\"WGS 84 / UTM zone 36N\",GEOGCS[\"W"
+  },
+  {
+   "_id": "661574d7e89cf30001e0c3c2",
+   "title": "Brouwersdam Oyster Riff",
+   "provider": "Lobster Robotics",
+   "platform": "uav",
+   "uuid": "https://oin-hotosm-temp.s3.us-east-1.amazonaws.com/661571a9e89cf30001e0c3bf/0/661571a9e89cf30001e0c3c0.tif",
+   "gsd": 0.0009246271223709259,
+   "acquisition_start": "2023-04-05T16:00:00.000Z",
+   "bbox": [
+    3.860129,
+    51.779896,
+    3.860482,
+    51.780118
+   ],
+   "geojson": {
+    "bbox": [
+     3.860129,
+     51.779896,
+     3.860482,
+     51.780118
+    ],
+    "coordinates": [
+     [
+      [
+       [
+        3.860129,
+        51.780118
+       ],
+       [
+        3.860129,
+        51.779896
+       ],
+       [
+        3.860482,
+        51.779896
+       ],
+       [
+        3.860482,
+        51.780118
+       ],
+       [
+        3.860129,
+        51.780118
+       ]
+      ]
+     ]
+    ],
+    "type": "MultiPolygon"
+   },
+   "file_size": 162510556,
+   "properties": {
+    "license": "CC BY-NC 4.0"
+   },
+   "projection": "\nGEOGCRS[\"WGS 84\",\n    ENSEMBLE[\"World G"
+  },
+  {
+   "_id": "59e62b8f3d6412ef72209fdf",
+   "title": "L4133G - National Land Survey of Finland",
+   "provider": "National Land Survey of Finland",
+   "platform": "aircraft",
+   "uuid": "https://oin-hotosm-temp.s3.amazonaws.com/58df8d07cfbcc90010aca422/0/072a1b0f-9e7c-4a0e-8b83-6d803b75650c.tif",
+   "gsd": 0.5,
+   "acquisition_start": "2009-07-27T23:30:00.000Z",
+   "bbox": [
+    25.161595202944074,
+    60.11827466592984,
+    25.272504541763105,
+    60.173576663019716
+   ],
+   "geojson": {
+    "bbox": [
+     25.161595202944074,
+     60.11827466592984,
+     25.272504541763105,
+     60.173576663019716
+    ],
+    "coordinates": [
+     [
+      [
+       25.161595202944074,
+       60.172121352329114
+      ],
+      [
+       25.269677235397946,
+       60.173576663019716
+      ],
+      [
+       25.272504541763105,
+       60.11972682789615
+      ],
+      [
+       25.164598878014544,
+       60.11827466592984
+      ],
+      [
+       25.161595202944074,
+       60.172121352329114
+      ]
+     ]
+    ],
+    "type": "Polygon"
+   },
+   "file_size": 27123985,
+   "properties": {
+    "license": "CC-BY 4.0"
+   },
+   "projection": "PROJCS[\"ETRS89 / TM35FIN(E,N)\",GEOGCS[\"E"
+  },
+  {
+   "_id": "6634a08f6049ef00013b82b5",
+   "title": "Mulchaich Distillery & Cairn (DSM)",
+   "provider": "Andy's Aerial Archaeology",
+   "platform": "uav",
+   "uuid": "https://oin-hotosm-temp.s3.us-east-1.amazonaws.com/66349e886049ef00013b82ae/1/66349e886049ef00013b82b0.tif",
+   "gsd": 0.010000000000004708,
+   "acquisition_start": "2024-05-02T23:00:00.000Z",
+   "bbox": [
+    -4.383537,
+    57.578321,
+    -4.380769,
+    57.580482
+   ],
+   "geojson": {
+    "bbox": [
+     -4.383537,
+     57.578321,
+     -4.380769,
+     57.580482
+    ],
+    "coordinates": [
+     [
+      [
+       [
+        -4.383537,
+        57.580453
+       ],
+       [
+        -4.383456,
+        57.578321
+       ],
+       [
+        -4.380769,
+        57.578351
+       ],
+       [
+        -4.38085,
+        57.580482
+       ],
+       [
+        -4.383537,
+        57.580453
+       ]
+      ]
+     ]
+    ],
+    "type": "MultiPolygon"
+   },
+   "file_size": 41849119,
+   "properties": {
+    "license": "CC-BY 4.0"
+   },
+   "projection": "\nPROJCRS[\"WGS 84 / UTM zone 30N\",\n    BA"
+  }
+ ]
+}
