@@ -137,8 +137,8 @@ discrepancies_geom_gist` (2.5 ms). Индексы `001_schema.sql` (`geom` GiST,
   CV (`buildings_det`). Ничего не пишет, кроме `discrepancies.status/updated_at`.
 - Пакеты: fastapi, uvicorn, pydantic 2, psycopg[pool], rio-tiler, rasterio, shapely, pyyaml, requests
   (прокси Esri; httpx есть только в dev). Всё уже в `requirements.txt`.
-- `ref_osm_id` — ссылка вида `openstreetmap.org/way/<id>`: в `buildings_ref` нет типа объекта OSM
-  (way/relation), для мультиполигонов-relation ссылка будет неверной.
+- `ref_osm_id` — ссылка на OSM: положительный id → `way/<id>`, отрицательный → `relation/<-id>`
+  (Data хранит мультиполигоны-relation с отрицательным `osm_id`, см. `data/osm.py`).
 - MVT-тайлы кэшируются 60 с; после `PATCH` клиент обновляет стиль объекта локально
   (`setFeatureStyle`), полная перезагрузка тайлов — по кнопке «Обновить» или при смене фильтров.
 - Docker-сервис `app` и `make demo` — у Orchestrator; нужен только `geoqc api serve` и

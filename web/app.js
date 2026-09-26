@@ -162,9 +162,11 @@
 
   // ---------------------------------------------------------------- card
   function osmLink(osmId) {
-    // buildings_ref.osm_id has no type column; buildings are ways in the vast majority of cases.
-    var url = "https://www.openstreetmap.org/way/" + osmId;
-    return '<a href="' + url + '" target="_blank" rel="noopener">' + osmId + "</a>";
+    // Data stores multipolygon relations as -id (data/osm.py), ways as +id.
+    var id = Number(osmId);
+    var path = id < 0 ? "relation/" + -id : "way/" + id;
+    var url = "https://www.openstreetmap.org/" + path;
+    return '<a href="' + url + '" target="_blank" rel="noopener">' + path + "</a>";
   }
 
   // Scoring inputs from discrepancy_features (DECISIONS D-012), present only on GET /discrepancies/{id}.
