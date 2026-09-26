@@ -24,7 +24,7 @@ jupyter lab notebooks/train_finetune.ipynb
 ```
 
 Run all. Параметры — в ячейке «6. Параметры обучения» (`TRAINER`, `EPOCHS`, `BATCH`, `RESUME`, `SMOKE_TEST`).
-`SMOKE_TEST = True` (1 эпоха) проверяет весь путь до экспорта весов за несколько минут.
+`SMOKE_TEST = True` (2 эпохи: при одной Ultralytics не делает прогрев lr) проверяет весь путь до экспорта весов за несколько минут.
 Источник данных — `DATA_SOURCE` в ячейке «4. Данные»: `"val"` (наша проверенная разметка), `"spacenet"` (только SpaceNet 2:
 прогон, пока разметки нет; `config/cv.yaml` и карточка не меняются, веса — `models/<name>-spacenet.pt`) или
 `"val+spacenet"`. SpaceNet скачивается и готовится при первом запуске (`make external-data`, `docs/datasets/spacenet2.md`).
