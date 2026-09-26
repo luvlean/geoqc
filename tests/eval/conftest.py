@@ -202,6 +202,14 @@ def synthetic_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> SyntheticE
     cfg_dir = root / "config"
     pipeline = yaml.safe_load((REPO_ROOT / "config" / "pipeline.yaml").read_text(encoding="utf-8"))
     pipeline["crs"]["metric"] = METRIC_CRS
+    # never fall back to the real data/ (manifest.json, interim) of the working copy
+    pipeline["paths"].update(
+        data_dir=str(root),
+        interim=str(root / "interim"),
+        labels=str(root / "labels"),
+        tiles=str(root / "tiles"),
+        reports=str(root / "reports"),
+    )
     (cfg_dir / "pipeline.yaml").write_text(yaml.safe_dump(pipeline), encoding="utf-8")
     shutil.copy(REPO_ROOT / "config" / "eval.yaml", cfg_dir / "eval.yaml")
     shutil.copy(REPO_ROOT / "config" / "quality_gates.yaml", cfg_dir / "quality_gates.yaml")
