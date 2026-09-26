@@ -1,0 +1,30 @@
+# Matching / classification / scoring parameters (owned by Geo Agent, docs/CONTRACTS.md §4).
+# Formulas: src/geoqc/matching/README.md. Thresholds are tuned on `val` only.
+
+iou_match: 0.5            # pair counted as a match (-> matches table)
+iou_mismatch_min: 0.1     # best unmatched pair with IoU in [iou_mismatch_min, iou_match) -> geometry_mismatch
+dedup_iou: 0.7            # detections overlapping each other above this IoU are de-duplicated (NMS)
+algorithm: greedy         # greedy | hungarian (scipy linear_sum_assignment per intersection cluster)
+
+# Pre-matching edge-case handling (src/geoqc/matching/edge_cases.py)
+dedup_detections: true              # NMS into det_suppressed (buildings_det rows are kept)
+split_multipart_detections: true    # one buildings_det row per polygon part before matching
+aoi_path: config/aoi.geojson        # AOI polygon (Data Agent); absent -> no edge handling
+aoi_edge_buffer_m: 10               # subject not covered by AOI shrunk by this buffer -> aoi_edge flag
+aoi_edge_factor: 0.5                # confidence multiplier for aoi_edge discrepancies
+
+# Area normalisation: area_norm = clip(log(area / min_area_m2) / log(max_area_m2 / min_area_m2), 0, 1)
+min_area_m2: 20
+max_area_m2: 5000
+
+# Confidence weights per class. Each block is normalised to sum 1; when no secondary source
+# (buildings_ref.source in microsoft/google) is loaded, the `secondary` term is dropped and the
+# remaining weights are renormalised.
+weights:
+  missing_in_map:    {score: 0.5, area: 0.2, secondary: 0.3}
+  missing_on_image:  {area: 0.3, secondary: 0.4, context: 0.3}
+  geometry_mismatch: {score: 0.4, iou: 0.4, area: 0.2}
+
+export:
+  path: reports/discrepancies.geojson
+  precision: 7              # decimal places for coordinates
