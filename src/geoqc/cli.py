@@ -31,6 +31,11 @@ for _name, _module in _SUBAPPS.items():
     app.add_typer(_mod.app, name=_name)
 
 
+@app.callback()
+def main() -> None:
+    """geoqc command group; use `geoqc <module> --help` for module commands."""
+
+
 @app.command()
 def version() -> None:
     """Print package version."""

@@ -23,7 +23,9 @@ def get_dsn(test: bool = False) -> str:
 
 
 @contextmanager
-def connect(dsn: str | None = None, *, test: bool = False, autocommit: bool = False) -> Iterator[psycopg.Connection]:
+def connect(
+    dsn: str | None = None, *, test: bool = False, autocommit: bool = False
+) -> Iterator[psycopg.Connection]:
     """Yield a connection with dict rows; commits on success, rolls back on error."""
     conn = psycopg.connect(dsn or get_dsn(test=test), row_factory=dict_row, autocommit=autocommit)
     try:

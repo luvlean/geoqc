@@ -53,5 +53,7 @@ def db_conn():
         conn.commit()
         yield conn
         with conn.cursor() as cur:
-            cur.execute("TRUNCATE discrepancies, matches, buildings_det, buildings_ref RESTART IDENTITY CASCADE")
+            cur.execute(
+                "TRUNCATE discrepancies, matches, buildings_det, buildings_ref RESTART IDENTITY CASCADE"
+            )
         conn.commit()
