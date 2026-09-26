@@ -132,6 +132,46 @@ def export_dataset_cmd(
     _echo(summary.to_dict())
 
 
+@app.command("fetch-external")
+def fetch_external_cmd(
+    cities: Annotated[
+        list[str] | None, typer.Option("--city", help="SpaceNet AOI, repeatable (AOI_3_Paris)")
+    ] = None,
+    per_city: Annotated[
+        int | None, typer.Option("--per-city", help="Tiles per city, 0 = all")
+    ] = None,
+) -> None:
+    """Download a labelled SpaceNet 2 sample (CC BY-SA 4.0) -> data/raw/external/spacenet2."""
+    from geoqc.cv.external import fetch_spacenet
+
+    cfg = load_config()
+    _echo(fetch_spacenet(cfg["cv"], cities=cities, per_city=per_city))
+
+
+@app.command("prepare-external")
+def prepare_external_cmd(
+    cities: Annotated[list[str] | None, typer.Option("--city", help="Repeatable")] = None,
+    out: Annotated[Path | None, typer.Option("--out")] = None,
+) -> None:
+    """SpaceNet tiles -> 0.3 m UTM chips, YOLO-seg labels and masks (train/holdout)."""
+    from geoqc.cv.external import prepare_spacenet
+
+    cfg = load_config()
+    _echo(prepare_spacenet(cfg["cv"], cities=cities, out_dir=out))
+
+
+@app.command("report-external")
+def report_external_cmd(
+    per_city: Annotated[int, typer.Option("--per-city", help="Sample chips per city")] = 4,
+) -> None:
+    """Stats + figures of the SpaceNet sample vs our AOI -> reports/, docs/datasets/figures/."""
+    from geoqc.cv.external_report import build_report
+
+    cfg = load_config()
+    report = build_report(cfg["cv"], cfg, per_city=per_city)
+    _echo({"figures": report["figures"], "spacenet": report["spacenet"]})
+
+
 @app.command("threshold-sweep")
 def threshold_sweep_cmd(
     split: Annotated[str, typer.Option("--split", help="Only 'val' is allowed")] = "val",

@@ -27,7 +27,7 @@ MODEL_VERSION  ?= $(shell $(PY) -c "from geoqc.config import load_config; print(
 
 .DEFAULT_GOAL := help
 .PHONY: help install up down db-init db-init-test data labels-prep labels-validate detect match eval \
-        demo demo-docker all test test-all test-cov lint format bundle ci compose-config docker-build \
+        demo demo-docker all test test-all test-cov lint format bundle external-data ci compose-config docker-build \
         notebooks-check pre-commit clean
 
 help: ## Show this help
@@ -114,6 +114,11 @@ all: up db-init data detect match eval ## Full pipeline: up db-init data detect 
 
 bundle: ## Zip tiles + val labels + config for Colab fine-tuning -> data/interim/bundle.zip
 	$(GEOQC) cv bundle
+
+external-data: ## SpaceNet 2 sample (CC BY-SA 4.0) -> data/interim/external/spacenet2 + dataset report
+	$(GEOQC) cv fetch-external
+	$(GEOQC) cv prepare-external
+	$(GEOQC) cv report-external
 
 # ---------------------------------------------------------------- quality
 
