@@ -1,0 +1,26 @@
+# Global pipeline settings (owned by Orchestrator). Module-specific settings live in
+# config/<module>.yaml and are merged by geoqc.config.load_config().
+project: geoqc
+version: "0.1.0"
+crs:
+  storage: "EPSG:4326"
+  metric: null            # UTM EPSG code, set by Data Agent after AOI is fixed (e.g. "EPSG:32604")
+paths:
+  data_dir: data
+  raw: data/raw
+  interim: data/interim
+  tiles: data/tiles
+  labels: data/labels
+  models: models
+  reports: reports
+tiles:
+  size_px: 512
+  overlap_px: 64
+  name_pattern: "{row}_{col}.tif"
+  index: data/tiles/tiles.gpkg
+image:
+  format: COG
+  bands: RGB
+  dtype: uint8
+  max_gsd_m: 0.5
+random_seed: 42

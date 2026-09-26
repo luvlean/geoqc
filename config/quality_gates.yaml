@@ -1,0 +1,12 @@
+# Quality gates (plan §6). Fixed in Phase 0; never changed after test-set results exist.
+# `op` is applied as: actual <op> target  ->  passed
+gates:
+  G1: {phase: 1, metric: georeference.median_offset_m,        op: "<=", target: 2.0,  description: "Median image-vs-vector offset after correction, m"}
+  G2: {phase: 2, metric: annotation.agreement_iou,            op: ">=", target: 0.80, description: "Label agreement IoU on 10% re-annotated sample"}
+  G3: {phase: 3, metric: detection.val.f1,                    op: ">=", target: 0.70, description: "Building detection F1 @ IoU>=0.5 on val"}
+  G4: {phase: 5, metric: detection.test.f1,                   op: ">=", target: 0.70, description: "Building detection F1 @ IoU>=0.5 on test"}
+  G5: {phase: 5, metric: detection.test.mean_iou_matched,     op: ">=", target: 0.60, description: "Mean IoU of matched buildings on test"}
+  G6: {phase: 5, metric: discrepancies.precision_overall,     op: ">=", target: 0.70, description: "Precision of discrepancies by manual verification"}
+  G7: {phase: 5, metric: discrepancies.precision_at_n.value,  op: ">=", target: 0.75, description: "Precision@20 of the review queue"}
+  G8: {phase: 6, metric: reproducibility.make_all_passed,     op: "==", target: true, description: "`make all` in a clean environment"}
+  G9: {phase: 6, metric: tests.passed,                        op: "==", target: true, description: "pytest passes; matching and classification covered"}

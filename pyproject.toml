@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "geoqc"
+version = "0.1.0"
+description = "Verification and quality control of geospatial building data with computer vision"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+license = {text = "MIT"}
+authors = [{name = "Zhukov D.A."}]
+dynamic = ["dependencies"]
+
+[project.scripts]
+geoqc = "geoqc.cli:app"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+extend-exclude = ["notebooks", "data", "models", "web"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "W", "N", "SIM"]
+ignore = ["E501", "B008", "N806", "N803"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "db: requires PostGIS (TEST_DATABASE_URL); skipped automatically when unavailable",
+  "network: performs real network downloads; skipped in CI unless GEOQC_NETWORK=1",
+  "slow: long-running test (model inference, large rasters)",
+  "gpu: requires CUDA or MPS",
+]
+addopts = "-ra --strict-markers --timeout=600"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.coverage.run]
+source = ["geoqc"]
+branch = true
+omit = ["*/__main__.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

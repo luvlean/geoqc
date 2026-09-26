@@ -1,0 +1,34 @@
+# python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+.ipynb_checkpoints/
+# env
+.env
+# data: keep manifests, labels and small indexes; ignore rasters and big artifacts
+data/raw/*
+data/interim/*
+data/tiles/*
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/tiles/.gitkeep
+!data/manifest.json
+!data/tiles/tiles.gpkg
+data/labels/**/*.tif
+# models
+models/*
+!models/.gitkeep
+!models/MODEL_CARD.md
+# reports: keep json/md/png, ignore heavy dumps
+reports/**/*.gpkg
+reports/**/*.parquet
+# os
+.DS_Store

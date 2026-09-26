@@ -1,0 +1,22 @@
+# Initial version (Phase 0). Orchestrator Agent extends it with the `app` service.
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: geoqc-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-geoqc}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-geoqc}
+      POSTGRES_DB: ${POSTGRES_DB:-geoqc}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-geoqc} -d ${POSTGRES_DB:-geoqc}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  pgdata:
