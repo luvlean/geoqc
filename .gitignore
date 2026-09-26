@@ -32,3 +32,6 @@ reports/**/*.gpkg
 reports/**/*.parquet
 # os
 .DS_Store
+
+# runtime logs
+logs/

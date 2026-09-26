@@ -87,6 +87,7 @@ Usage:
 Placeholders: {{metrics.detection.test.f1}}, {{metrics.gates.G3.actual}}, {{manifest.image.acquired}}.
 Missing keys are rendered as "n/a" and listed on stderr; the script never invents values.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -131,7 +132,10 @@ def gates_table(m: dict[str, Any]) -> str:
 
 
 def detection_table(m: dict[str, Any]) -> str:
-    rows = ["| Сплит | TP | FP | FN | Precision | Recall | F1 | mean IoU |", "|---|---|---|---|---|---|---|---|"]
+    rows = [
+        "| Сплит | TP | FP | FN | Precision | Recall | F1 | mean IoU |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
     for split in ("val", "test"):
         d = get_path(m, f"detection.{split}") or {}
         rows.append(
@@ -167,7 +171,9 @@ def main() -> int:
     args = ap.parse_args()
     m = load_json(args.metrics)
     if args.mode == "table":
-        print(f"Источник: `{args.metrics}`, commit `{m.get('git_commit', 'n/a')}`, {m.get('generated_at', 'n/a')}\n")
+        print(
+            f"Источник: `{args.metrics}`, commit `{m.get('git_commit', 'n/a')}`, {m.get('generated_at', 'n/a')}\n"
+        )
         print(detection_table(m), "\n")
         print(gates_table(m))
         return 0

@@ -19,15 +19,15 @@
 | Задача | Агент | Статус |
 |---|---|---|
 | T0 Инициализация | Координатор | done |
-| T1 Инфраструктура и CI | Orchestrator | pending |
-| T2 Данные | Data | pending |
-| T3 Разметка (инструменты + инструкция) | Annotation | pending |
-| T4 Детекция | CV | pending |
-| T5 Сопоставление | Geo | pending |
-| T6 Оценка | Eval | pending |
-| T7 API и карта | App | pending |
-| T8 Ревью и тесты | QA | pending |
-| T9 Документация | Docs | pending |
+| T1 Инфраструктура и CI | Orchestrator | done |
+| T2 Данные | Data | done (AOI Пушкин, D-001a) |
+| T3 Разметка (инструменты + инструкция) | Annotation | done; правка разметки — за студентом |
+| T4 Детекция | CV | done; дообучение — за студентом |
+| T5 Сопоставление | Geo | done |
+| T6 Оценка | Eval | done; метрики — после разметки и верификации |
+| T7 API и карта | App | done |
+| T8 Ревью и тесты | QA | done, `docs/qa/review_round1.md` |
+| T9 Документация | Docs | done; цифры — плейсхолдеры до финальных `reports/` |
 
 ## Контрольные точки студента (human-in-the-loop)
 1. После T3: правка предразметки в QGIS по `docs/annotation/INSTRUCTION_QGIS.md`, повторная разметка 10 % тайлов (G2).

@@ -155,14 +155,14 @@ $\mathrm{FP} = |G'| - \mathrm{TP}$, $\mathrm{FN} = |G| - \mathrm{TP}$, `iou_matc
 
 ## 10. Смещение геопривязки (G1)
 
-Команда `geoqc data check-georef`, параметры `config/data.yaml → georef` (реализация на момент написания не сдана — сверить с `src/geoqc/data/README.md`, §13). Контрольные объекты — здания OSM площадью `min_area_m2`…`max_area_m2` (250…6000 м²), прямоугольностью $\ge$ `min_rectangularity` (0.70 — площадь / площадь минимального описанного прямоугольника), без соседей ближе `isolation_m` (12 м), не выше `max_levels` этажей (3, если тег есть); цель — `n_control_target` (40) объектов, минимум `n_control_min` (10). Для объекта $k$ в окне радиуса `search_radius_m` (10 м) ищется сдвиг $\delta_k \in \mathbb{R}^2$ с максимальным откликом корреляции между снимком и растеризованной маской OSM; отклики с отношением пик/среднее $<$ `min_peak_ratio` (1.6) отбрасываются.
+Команда `geoqc data check-georef` (`data/georef.py`), параметры `config/data.yaml → georef`. Контрольные объекты — здания OSM площадью `min_area_m2`…`max_area_m2` (250…6000 м²), прямоугольностью $\ge$ `min_rectangularity` (0.70 — площадь / площадь минимального описанного прямоугольника), без соседей ближе `isolation_m` (12 м), не выше `max_levels` этажей (3, если тег есть); цель — `n_control_target` (40) объектов, минимум `n_control_min` (10). Для объекта $k$ в окне радиуса `search_radius_m` (10 м) ищется сдвиг $\delta_k = (dx_k, dy_k) \in \mathbb{R}^2$ (м, восток/север; положение содержимого снимка относительно контура OSM) — argmax FFT-корреляции модуля градиента Собеля по серому каналу с растеризованным контуром OSM (1 px, дилатация 1 px), с субпиксельным уточнением параболой; отклики с отношением пик/среднее $<$ `min_peak_ratio` (1.6) отбрасываются.
 
 $$
 \mathrm{median\_offset\_m} = \operatorname{median}_k \|\delta_k\|_2,\qquad
 (\Delta x,\Delta y) = \operatorname{median}_k \delta_k\ \text{(покомпонентно)}.
 $$
 
-Сдвиг применяется (`preprocess --shift`, `manifest.georef.shift_applied_m`), если медиана $>$ `apply_shift_over_m` (2.0 м — порог G1) **и** $\|(\Delta x,\Delta y)\|_2 \ge$ `min_systematic_shift_m` (0.6 м; иначе смещение не систематическое), после чего измерение повторяется. Пример: расстояния $1.2, 0.8, 3.1, 1.5, 0.9$ м → медиана $1.2$ м → G1 пройден, сдвиг не нужен. Ключи: `georeference.{median_offset_m, n_control_points}`; G1: $\le 2.0$ м после коррекции.
+Сдвиг $(-\Delta x,-\Delta y)$ (снимок двигается к вектору; `preprocess --shift`, `manifest.georef.shift_applied_m`) применяется, если контрольных объектов $\ge$ `n_control_min`, медиана $>$ `apply_shift_over_m` (2.0 м — порог G1) **и** $\|(\Delta x,\Delta y)\|_2 \ge$ `min_systematic_shift_m` (0.6 м; иначе смещение не систематическое), после чего тайлинг и измерение повторяются. G1 пройден, если контрольных объектов $\ge$ `n_control_min` и медиана $\le$ 2.0 м. Знаки проверяются тестом `tests/data/test_georef_preprocess.py`. Пример: расстояния $1.2, 0.8, 3.1, 1.5, 0.9$ м → медиана $1.2$ м → G1 пройден, сдвиг не нужен. Ключи: `georeference.{median_offset_m, n_control_points}`; G1: $\le 2.0$ м после коррекции.
 
 ## 11. Векторизация: склейка, упрощение, min_area
 
@@ -196,8 +196,4 @@ $$
 
 ## 13. Статус синхронизации с кодом (2026-09-26)
 
-Сверено с реализацией и конфигами: §5–§6 (`matching/scoring.py`, `matching/edge_cases.py`, `matching/README.md`, `config/matching.yaml`), §8 (`eval/discrepancy_metrics.py`, `config/eval.yaml`), §9 (`annotation/validate.py`, `config/annotation.yaml`), §11 (`cv/vectorize.py`, `config/cv.yaml`). После интеграции сверить:
-
-- §10 — реализацию `geoqc data check-georef` (на момент написания не сдана) и `src/geoqc/data/README.md`;
-- §2–§4 — соглашения о крайних случаях (пустые множества, деление на 0) в `src/geoqc/eval/README.md` и `eval/detection_metrics.py`;
-- §12 — фактические значения появятся в `reports/metrics.json` после `geoqc eval gates`.
+Сверено с реализацией и конфигами: §5–§6 (`matching/scoring.py`, `matching/edge_cases.py`, `matching/README.md`, `config/matching.yaml`), §8 (`eval/discrepancy_metrics.py`, `config/eval.yaml`), §9 (`annotation/validate.py`, `config/annotation.yaml`), §10 (`data/georef.py`, `data/preprocess.py`, `config/data.yaml`), §11 (`cv/vectorize.py`, `config/cv.yaml`). §12 — фактические значения появятся в `reports/metrics.json` после `geoqc eval gates`.
