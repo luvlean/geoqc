@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 from rasterio.transform import from_origin
-from shapely.geometry import box
+from shapely.geometry import MultiPolygon, box
 
 from geoqc.cv.dataset import (
     FORBIDDEN_SPLIT,
@@ -65,6 +65,15 @@ def test_yolo_lines_are_normalised_and_masks_binary():
     assert set(np.unique(mask).tolist()) == {0, 255}
     assert int((mask == 255).sum()) == 20 * 30
     assert rasterize_mask([], t, (8, 8)).sum() == 0
+
+
+def test_yolo_lines_drop_subpixel_slivers():
+    """Осколок обрезанного мультиполигона уже пикселя не попадает в YOLO-разметку."""
+    t = from_origin(0, 64, 1, 1)
+    building = box(10, 10, 30, 30)
+    sliver = box(40, 10, 40.3, 30)  # 0.3 px wide
+    lines = polygon_to_yolo_lines(MultiPolygon([building, sliver]), t, 64, 64)
+    assert len(lines) == 1
 
 
 def test_export_dataset_end_to_end(synthetic_aoi: dict):

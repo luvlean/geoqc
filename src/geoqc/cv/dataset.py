@@ -120,6 +120,9 @@ def load_labels(
     return gdf.reset_index(drop=True)
 
 
+MIN_PART_PX = 1.0  # min width/height of a YOLO-seg part, px
+
+
 def _pixel_ring(coords: np.ndarray, inv: Affine, width: int, height: int) -> np.ndarray:
     xs, ys = coords[:, 0], coords[:, 1]
     cols, rows = inv @ (xs, ys)
@@ -147,6 +150,9 @@ def polygon_to_yolo_lines(
         keep[1:] = np.any(np.abs(np.diff(pts, axis=0)) > 1e-9, axis=1)
         pts = pts[keep]
         if len(pts) < 3:
+            continue
+        # clipping leaves sub-pixel slivers of multipart buildings: no box for YOLO to learn
+        if np.ptp(pts[:, 0]) * width < MIN_PART_PX or np.ptp(pts[:, 1]) * height < MIN_PART_PX:
             continue
         lines.append(" ".join([str(class_id), *(f"{v:.6f}" for v in pts.ravel())]))
     return lines
