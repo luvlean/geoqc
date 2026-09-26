@@ -52,7 +52,7 @@ make up db-init                 # docker compose up -d db; geoqc matching init-d
 # 3. Пайплайн
 make data                       # geoqc data all: AOI, снимок, COG, тайлы, OSM, buildings_ref, геопривязка
 make labels-prep                # geoqc annotation select-tiles + pre-annotate (val, test) + qgis-project → правка в QGIS (см. ниже)
-make labels-validate            # geoqc annotation validate --split val|test → reports/annotation.json (G2)
+make labels-validate            # geoqc annotation finalize + validate --split val|test → reports/annotation.json (G2)
 make detect                     # geoqc cv fetch-weights + predict --split all --to-db        (SPLIT=val|test)
 make match                      # geoqc matching run --model-version <config/cv.yaml> + export + stats   (MODEL_VERSION=<v>)
 make eval                       # geoqc eval detection val+test, verification-sample, discrepancies (если есть reports/verification.csv),

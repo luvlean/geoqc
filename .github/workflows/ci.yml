@@ -1,0 +1,129 @@
+# geoqc CI: lint -> tests with PostGIS -> docker build + compose validation -> notebook hygiene.
+# Mirrors `make ci` (docs/CONTRACTS.md §7, DECISIONS.md D-003). PostGIS tag matches docker-compose.yml.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.11"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  TORCH_INDEX_URL: https://download.pytorch.org/whl/cpu
+
+jobs:
+  lint:
+    name: ruff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - name: Install ruff (version from requirements-dev.txt)
+        run: pip install "$(grep -E '^ruff' requirements-dev.txt)"
+      - run: ruff format --check .
+      - run: ruff check .
+
+  test:
+    name: pytest (PostGIS)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      postgis:
+        image: postgis/postgis:17-3.6-alpine
+        env:
+          POSTGRES_USER: geoqc
+          POSTGRES_PASSWORD: geoqc
+          POSTGRES_DB: geoqc
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U geoqc -d geoqc"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://geoqc:geoqc@localhost:5432/geoqc
+      TEST_DATABASE_URL: postgresql://geoqc:geoqc@localhost:5432/geoqc_test
+      GEOQC_DATA_DIR: data
+      PY: python
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - name: System libraries for opencv / rasterio
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends libgl1 libglib2.0-0 libexpat1
+      - name: Install dependencies (CPU torch) and geoqc
+        run: |
+          pip install --index-url "$TORCH_INDEX_URL" torch torchvision
+          pip install -r requirements-dev.txt
+          pip install -e .
+      - name: Wait for PostGIS
+        run: scripts/ci/wait_for_db.sh
+      - name: Create geoqc_test database
+        run: scripts/ci/create_test_db.sh
+      - name: Apply schema to geoqc_test
+        run: python scripts/db_init.py --test
+      - name: Run tests
+        run: pytest -m "not network and not slow and not gpu" --cov=geoqc --cov-report=xml --cov-report=term
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-xml
+          path: coverage.xml
+          if-no-files-found: ignore
+
+  docker:
+    name: docker build + compose config
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build app image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: geoqc-app:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Validate docker-compose.yml
+        run: docker compose config -q
+      - name: Validate docker-compose.yml (jupyter profile)
+        run: docker compose --profile jupyter config -q
+
+  notebooks:
+    name: notebooks (nbqa ruff, nbstripout --verify)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - name: Install nbqa, ruff, nbstripout (versions from requirements-dev.txt)
+        run: pip install $(grep -E '^(ruff|nbqa|nbstripout)' requirements-dev.txt)
+      - name: Check notebooks
+        env:
+          NBQA: nbqa
+          NBSTRIPOUT: nbstripout
+        run: scripts/ci/check_notebooks.sh

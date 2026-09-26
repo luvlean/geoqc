@@ -1,4 +1,8 @@
-# Initial version (Phase 0). Orchestrator Agent extends it with the `app` service.
+# geoqc services. `db` is the Phase-0 contract (do not change); `app` and the optional
+# `jupyter` profile are maintained by the Orchestrator Agent.
+#   docker compose up -d --wait db            PostGIS only (make up)
+#   docker compose up -d --build --wait app   API + web map on :8000 (make demo-docker)
+#   docker compose --profile jupyter up -d    JupyterLab on :8888 (token: JUPYTER_TOKEN, default "geoqc")
 services:
   db:
     image: postgis/postgis:17-3.6-alpine
@@ -17,6 +21,63 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: geoqc-app:local
+    container_name: geoqc-app
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # Inside the compose network the database is reachable as db:5432, not localhost:5433.
+      DATABASE_URL: postgresql://${POSTGRES_USER:-geoqc}:${POSTGRES_PASSWORD:-geoqc}@db:5432/${POSTGRES_DB:-geoqc}
+      TEST_DATABASE_URL: postgresql://${POSTGRES_USER:-geoqc}:${POSTGRES_PASSWORD:-geoqc}@db:5432/geoqc_test
+      GEOQC_DATA_DIR: /app/data
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - ./data:/app/data:ro
+      - ./web:/app/web:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
+
+  jupyter:
+    profiles: ["jupyter"]
+    image: geoqc-app:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: geoqc-jupyter
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-geoqc}:${POSTGRES_PASSWORD:-geoqc}@db:5432/${POSTGRES_DB:-geoqc}
+      GEOQC_DATA_DIR: /app/data
+    command: >
+      jupyter lab --ip=0.0.0.0 --port=8888 --no-browser
+      --ServerApp.root_dir=/app --IdentityProvider.token=${JUPYTER_TOKEN:-geoqc}
+    ports:
+      - "${JUPYTER_PORT:-8888}:8888"
+    volumes:
+      - ./notebooks:/app/notebooks
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./config:/app/config
+      - ./reports:/app/reports
 
 volumes:
   pgdata:
