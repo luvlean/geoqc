@@ -1,0 +1,74 @@
+{
+  "candidates_by_stratum": {
+    "dense_multistorey": 41,
+    "industrial": 5,
+    "low_rise_private": 63,
+    "mixed": 61
+  },
+  "excluded_aoi_coverage": 47,
+  "excluded_few_buildings": 137,
+  "metric_crs": "EPSG:32636",
+  "n_candidates": 170,
+  "n_osm_buildings": 2492,
+  "n_tiles_total": 354,
+  "outputs": {
+    "recheck_tiles": "data/labels/recheck_tiles.csv",
+    "tiles_features": "data/labels/tiles_features.csv",
+    "tiles_split": "data/labels/tiles_split.csv"
+  },
+  "params": {
+    "aoi_used": true,
+    "min_aoi_coverage": 0.9,
+    "min_buildings_per_tile": 3,
+    "n_tiles": 24,
+    "seed": 42,
+    "strata": {
+      "dense_density": 0.15,
+      "dominant_share": 0.4,
+      "large_footprint_m2": 400,
+      "small_footprint_m2": 150,
+      "tags": {
+        "dense_multistorey": [
+          "apartments",
+          "dormitory"
+        ],
+        "industrial": [
+          "industrial",
+          "warehouse",
+          "factory",
+          "manufacture",
+          "hangar",
+          "depot"
+        ],
+        "low_rise_private": [
+          "house",
+          "detached",
+          "semidetached_house",
+          "terrace",
+          "bungalow",
+          "cabin",
+          "hut",
+          "farm",
+          "allotment_house"
+        ]
+      }
+    },
+    "test_fraction": 0.5
+  },
+  "recheck_tiles": [
+    "12_7",
+    "1_13",
+    "4_15"
+  ],
+  "selected": 24,
+  "selected_by_split": {
+    "test": 13,
+    "val": 11
+  },
+  "selected_by_stratum": {
+    "dense_multistorey": 6,
+    "industrial": 3,
+    "low_rise_private": 8,
+    "mixed": 7
+  }
+}
