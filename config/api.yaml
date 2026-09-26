@@ -1,0 +1,51 @@
+# API / web map settings (owned by App Agent). Loaded by geoqc.api.deps.load_api_config()
+# directly from this file (not through load_config()) so a broken config of another module
+# can never prevent the API from starting. Secrets stay in .env (ARCGIS_API_KEY, DATABASE_URL).
+server:
+  host: "0.0.0.0"
+  port: 8000
+  cors_origins: ["*"]
+
+pagination:
+  default_limit: 500     # GET /discrepancies when ?limit is omitted
+  max_limit: 5000        # larger values -> 422
+
+pool:
+  min_size: 1
+  max_size: 8
+  timeout_s: 5           # wait for a free connection before 503
+
+cache_seconds:
+  tiles: 60              # /tiles/{z}/{x}/{y}.mvt  (short: statuses change while reviewing)
+  imagery: 86400         # /imagery/{z}/{x}/{y}.png (COG is immutable)
+  basemap: 3600          # /basemap/esri/{z}/{y}/{x}
+
+mvt:
+  extent: 4096
+  buffer: 64
+  max_zoom: 22
+  layers:                # name -> {table, min_zoom}; layer is omitted below min_zoom
+    discrepancies: {table: discrepancies, min_zoom: 8}
+    buildings_ref: {table: buildings_ref, min_zoom: 13}
+    buildings_det: {table: buildings_det, min_zoom: 13}
+
+imagery:
+  tile_size: 256
+  resampling: bilinear
+
+paths:                   # repo-relative (see geoqc.config.resolve_path)
+  aoi: config/aoi.geojson
+  manifest: data/manifest.json
+  cog: data/interim/aoi_cog.tif
+  web: web
+
+basemaps:
+  osm:
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ODbL'
+    max_zoom: 19
+  esri:                  # used only when ARCGIS_API_KEY is set (DECISIONS.md D-002); token added server-side
+    upstream: "https://ibasemaps-api.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+    attribution: "Esri, Maxar, Earthstar Geographics, and the GIS User Community"
+    max_zoom: 19
+    timeout_s: 10

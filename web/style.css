@@ -1,0 +1,68 @@
+:root {
+  --bg: #f7f7f8; --panel: #ffffff; --line: #e3e5e8; --text: #1f2328; --muted: #6b7280;
+  --ref: #1d4ed8; --det: #16a34a;
+  --missing_in_map: #e63946; --missing_on_image: #f4a261; --geometry_mismatch: #9b5de5;
+  --ok: #15803d; --bad: #b91c1c; --sidebar-w: 380px;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--text); background: var(--bg); }
+body { display: flex; }
+#sidebar { width: var(--sidebar-w); height: 100vh; overflow: hidden; display: flex; flex-direction: column; border-right: 1px solid var(--line); background: var(--panel); }
+#map { flex: 1; height: 100vh; }
+.panel { padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.panel.grow { flex: 1; min-height: 120px; display: flex; flex-direction: column; overflow: hidden; }
+.panel h1 { margin: 0 0 4px; font-size: 20px; }
+.panel h1 small { font-size: 13px; color: var(--muted); font-weight: normal; margin-left: 6px; }
+.panel h2 { margin: 0 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.panel h2 select { margin-left: auto; font-size: 12px; }
+.panel label { display: flex; align-items: center; gap: 6px; padding: 2px 0; cursor: pointer; }
+.group { margin-bottom: 6px; }
+.group.row { display: flex; align-items: center; gap: 8px; }
+.group.row input[type=range] { flex: 1; }
+.swatch { display: inline-block; width: 14px; height: 14px; border-radius: 3px; border: 2px solid; }
+.swatch.ref { border-color: var(--ref); background: transparent; }
+.swatch.det { border-color: var(--det); background: transparent; }
+.swatch.disc { border-color: var(--missing_in_map); background: rgba(230,57,70,.35); }
+.swatch.c-missing_in_map { border-color: var(--missing_in_map); background: rgba(230,57,70,.35); }
+.swatch.c-missing_on_image { border-color: var(--missing_on_image); background: rgba(244,162,97,.35); }
+.swatch.c-geometry_mismatch { border-color: var(--geometry_mismatch); background: rgba(155,93,229,.35); }
+.stats { font-variant-numeric: tabular-nums; color: var(--muted); }
+.note { margin-top: 6px; padding: 6px 8px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 4px; font-size: 12px; }
+.hidden { display: none; }
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+.btn { padding: 6px 10px; border: 1px solid var(--line); border-radius: 4px; background: #fff; cursor: pointer; }
+.btn:hover { background: #f3f4f6; }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn.ok { border-color: var(--ok); color: var(--ok); }
+.btn.bad { border-color: var(--bad); color: var(--bad); }
+.btn.ghost { color: var(--muted); }
+.list { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; }
+.list li { display: grid; grid-template-columns: 10px 1fr auto; gap: 8px; align-items: center; padding: 5px 6px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.list li:hover { background: #f3f4f6; }
+.list li.active { background: #e8f0fe; }
+.list li .bar { width: 10px; height: 26px; border-radius: 2px; }
+.list li .title { font-weight: 500; }
+.list li .sub { color: var(--muted); font-size: 12px; }
+.list li .conf { font-variant-numeric: tabular-nums; font-weight: 600; }
+.list li.status-confirmed .title::after { content: " ✓"; color: var(--ok); }
+.list li.status-rejected { opacity: .55; }
+.list li.status-rejected .title::after { content: " ✗"; color: var(--bad); }
+#card-body dl { display: grid; grid-template-columns: 110px 1fr; gap: 2px 8px; margin: 0; }
+#card-body dt { color: var(--muted); }
+#card-body dd { margin: 0; overflow-wrap: anywhere; }
+.badge { display: inline-block; padding: 1px 6px; border-radius: 10px; font-size: 12px; color: #fff; }
+.badge.missing_in_map { background: var(--missing_in_map); }
+.badge.missing_on_image { background: var(--missing_on_image); }
+.badge.geometry_mismatch { background: var(--geometry_mismatch); }
+.badge.new { background: #64748b; }
+.badge.confirmed { background: var(--ok); }
+.badge.rejected { background: var(--bad); }
+.actions { display: flex; gap: 6px; margin-top: 8px; }
+.leaflet-container { font: inherit; }
+.leaflet-control-attribution { max-width: 60vw; }
+@media (max-width: 800px) {
+  body { flex-direction: column; }
+  #sidebar { width: 100%; height: 45vh; }
+  #map { height: 55vh; }
+}
