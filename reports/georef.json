@@ -1,0 +1,521 @@
+{
+  "cog": "data/interim/aoi_cog.tif",
+  "controls": [
+    {
+      "area_m2": 479.1,
+      "centroid_utm": [
+        356237.67,
+        6621732.18
+      ],
+      "dist_m": 1.002,
+      "dx_m": 0.038,
+      "dy_m": -1.001,
+      "osm_id": 802186129,
+      "peak_ratio": 2.219
+    },
+    {
+      "area_m2": 1101.9,
+      "centroid_utm": [
+        356542.38,
+        6621715.16
+      ],
+      "dist_m": 0.177,
+      "dx_m": -0.12,
+      "dy_m": 0.131,
+      "osm_id": 129120461,
+      "peak_ratio": 2.269
+    },
+    {
+      "area_m2": 274.6,
+      "centroid_utm": [
+        355899.54,
+        6620905.05
+      ],
+      "dist_m": 0.071,
+      "dx_m": 0.026,
+      "dy_m": 0.066,
+      "osm_id": 123377121,
+      "peak_ratio": 3.315
+    },
+    {
+      "area_m2": 1767.0,
+      "centroid_utm": [
+        356003.53,
+        6620975.72
+      ],
+      "dist_m": 1.401,
+      "dx_m": -0.945,
+      "dy_m": -1.034,
+      "osm_id": 123377098,
+      "peak_ratio": 2.959
+    },
+    {
+      "area_m2": 564.0,
+      "centroid_utm": [
+        354626.66,
+        6621380.42
+      ],
+      "dist_m": 0.149,
+      "dx_m": -0.11,
+      "dy_m": -0.101,
+      "osm_id": 87692218,
+      "peak_ratio": 2.222
+    },
+    {
+      "area_m2": 1453.1,
+      "centroid_utm": [
+        356620.81,
+        6621793.91
+      ],
+      "dist_m": 0.097,
+      "dx_m": -0.052,
+      "dy_m": 0.082,
+      "osm_id": 129120457,
+      "peak_ratio": 2.364
+    },
+    {
+      "area_m2": 282.3,
+      "centroid_utm": [
+        355276.72,
+        6620155.67
+      ],
+      "dist_m": 11.978,
+      "dx_m": -7.022,
+      "dy_m": 9.704,
+      "osm_id": 499096701,
+      "peak_ratio": 1.817
+    },
+    {
+      "area_m2": 812.2,
+      "centroid_utm": [
+        356529.71,
+        6620708.72
+      ],
+      "dist_m": 0.185,
+      "dx_m": -0.047,
+      "dy_m": 0.179,
+      "osm_id": 123594262,
+      "peak_ratio": 2.264
+    },
+    {
+      "area_m2": 365.7,
+      "centroid_utm": [
+        354969.61,
+        6620784.34
+      ],
+      "dist_m": 1.025,
+      "dx_m": -1.024,
+      "dy_m": 0.041,
+      "osm_id": 98906663,
+      "peak_ratio": 2.271
+    },
+    {
+      "area_m2": 794.9,
+      "centroid_utm": [
+        356739.82,
+        6621734.57
+      ],
+      "dist_m": 0.469,
+      "dx_m": -0.419,
+      "dy_m": 0.211,
+      "osm_id": 129120463,
+      "peak_ratio": 2.328
+    },
+    {
+      "area_m2": 682.6,
+      "centroid_utm": [
+        354435.42,
+        6621655.45
+      ],
+      "dist_m": 0.572,
+      "dx_m": -0.433,
+      "dy_m": 0.373,
+      "osm_id": 87692259,
+      "peak_ratio": 2.698
+    },
+    {
+      "area_m2": 711.8,
+      "centroid_utm": [
+        356636.82,
+        6620980.12
+      ],
+      "dist_m": 0.579,
+      "dx_m": -0.449,
+      "dy_m": 0.365,
+      "osm_id": 123594252,
+      "peak_ratio": 3.132
+    },
+    {
+      "area_m2": 358.4,
+      "centroid_utm": [
+        356446.09,
+        6621666.54
+      ],
+      "dist_m": 0.505,
+      "dx_m": -0.262,
+      "dy_m": 0.431,
+      "osm_id": 107945187,
+      "peak_ratio": 4.364
+    },
+    {
+      "area_m2": 489.6,
+      "centroid_utm": [
+        354661.81,
+        6620984.29
+      ],
+      "dist_m": 3.67,
+      "dx_m": -1.828,
+      "dy_m": 3.182,
+      "osm_id": 103553964,
+      "peak_ratio": 1.701
+    },
+    {
+      "area_m2": 326.5,
+      "centroid_utm": [
+        356459.42,
+        6621765.88
+      ],
+      "dist_m": 0.448,
+      "dx_m": -0.039,
+      "dy_m": -0.446,
+      "osm_id": 107945210,
+      "peak_ratio": 2.553
+    },
+    {
+      "area_m2": 862.3,
+      "centroid_utm": [
+        356729.52,
+        6621902.95
+      ],
+      "dist_m": 0.387,
+      "dx_m": -0.128,
+      "dy_m": 0.366,
+      "osm_id": 129120454,
+      "peak_ratio": 2.626
+    },
+    {
+      "area_m2": 311.4,
+      "centroid_utm": [
+        356704.52,
+        6621837.06
+      ],
+      "dist_m": 0.629,
+      "dx_m": 0.006,
+      "dy_m": 0.629,
+      "osm_id": 129120453,
+      "peak_ratio": 1.733
+    },
+    {
+      "area_m2": 905.3,
+      "centroid_utm": [
+        356097.29,
+        6621788.75
+      ],
+      "dist_m": 2.613,
+      "dx_m": 0.121,
+      "dy_m": 2.61,
+      "osm_id": 107945183,
+      "peak_ratio": 2.984
+    },
+    {
+      "area_m2": 1336.7,
+      "centroid_utm": [
+        356125.41,
+        6621815.16
+      ],
+      "dist_m": 1.393,
+      "dx_m": 1.11,
+      "dy_m": -0.841,
+      "osm_id": 107945203,
+      "peak_ratio": 2.366
+    },
+    {
+      "area_m2": 461.7,
+      "centroid_utm": [
+        354551.12,
+        6621728.53
+      ],
+      "dist_m": 0.766,
+      "dx_m": -0.5,
+      "dy_m": 0.58,
+      "osm_id": 87692262,
+      "peak_ratio": 2.517
+    },
+    {
+      "area_m2": 276.1,
+      "centroid_utm": [
+        355038.96,
+        6620565.34
+      ],
+      "dist_m": 0.184,
+      "dx_m": -0.175,
+      "dy_m": 0.059,
+      "osm_id": 125792220,
+      "peak_ratio": 2.969
+    },
+    {
+      "area_m2": 893.8,
+      "centroid_utm": [
+        354847.74,
+        6621295.41
+      ],
+      "dist_m": 0.034,
+      "dx_m": 0.034,
+      "dy_m": 0.0,
+      "osm_id": 125859103,
+      "peak_ratio": 1.944
+    },
+    {
+      "area_m2": 1643.9,
+      "centroid_utm": [
+        356664.4,
+        6621726.58
+      ],
+      "dist_m": 0.097,
+      "dx_m": 0.027,
+      "dy_m": 0.094,
+      "osm_id": 129135650,
+      "peak_ratio": 5.09
+    },
+    {
+      "area_m2": 773.3,
+      "centroid_utm": [
+        354728.37,
+        6621854.96
+      ],
+      "dist_m": 0.805,
+      "dx_m": -0.399,
+      "dy_m": 0.699,
+      "osm_id": -8144641,
+      "peak_ratio": 2.615
+    },
+    {
+      "area_m2": 342.1,
+      "centroid_utm": [
+        354796.42,
+        6621349.92
+      ],
+      "dist_m": 0.168,
+      "dx_m": 0.126,
+      "dy_m": -0.111,
+      "osm_id": 125859101,
+      "peak_ratio": 2.029
+    },
+    {
+      "area_m2": 621.0,
+      "centroid_utm": [
+        356181.37,
+        6621567.53
+      ],
+      "dist_m": 0.568,
+      "dx_m": 0.527,
+      "dy_m": 0.212,
+      "osm_id": 107945218,
+      "peak_ratio": 2.57
+    },
+    {
+      "area_m2": 673.5,
+      "centroid_utm": [
+        354122.14,
+        6621530.64
+      ],
+      "dist_m": 0.684,
+      "dx_m": -0.678,
+      "dy_m": -0.09,
+      "osm_id": 87617470,
+      "peak_ratio": 2.451
+    },
+    {
+      "area_m2": 671.1,
+      "centroid_utm": [
+        355070.3,
+        6620760.33
+      ],
+      "dist_m": 0.331,
+      "dx_m": -0.259,
+      "dy_m": 0.206,
+      "osm_id": 125792199,
+      "peak_ratio": 2.047
+    },
+    {
+      "area_m2": 453.2,
+      "centroid_utm": [
+        356397.64,
+        6621661.0
+      ],
+      "dist_m": 0.264,
+      "dx_m": -0.165,
+      "dy_m": 0.206,
+      "osm_id": 107945202,
+      "peak_ratio": 2.863
+    },
+    {
+      "area_m2": 743.2,
+      "centroid_utm": [
+        354339.66,
+        6621415.58
+      ],
+      "dist_m": 0.863,
+      "dx_m": -0.826,
+      "dy_m": 0.251,
+      "osm_id": 87692261,
+      "peak_ratio": 2.355
+    },
+    {
+      "area_m2": 716.8,
+      "centroid_utm": [
+        354195.5,
+        6621306.9
+      ],
+      "dist_m": 0.418,
+      "dx_m": -0.128,
+      "dy_m": -0.398,
+      "osm_id": 87617445,
+      "peak_ratio": 2.885
+    },
+    {
+      "area_m2": 743.1,
+      "centroid_utm": [
+        356376.12,
+        6621789.6
+      ],
+      "dist_m": 0.992,
+      "dx_m": -0.421,
+      "dy_m": -0.898,
+      "osm_id": 103383878,
+      "peak_ratio": 4.004
+    },
+    {
+      "area_m2": 271.4,
+      "centroid_utm": [
+        355899.57,
+        6620943.54
+      ],
+      "dist_m": 0.082,
+      "dx_m": 0.018,
+      "dy_m": 0.08,
+      "osm_id": 123377120,
+      "peak_ratio": 2.69
+    },
+    {
+      "area_m2": 281.6,
+      "centroid_utm": [
+        355899.23,
+        6621018.95
+      ],
+      "dist_m": 0.211,
+      "dx_m": -0.019,
+      "dy_m": 0.21,
+      "osm_id": 123377115,
+      "peak_ratio": 2.958
+    },
+    {
+      "area_m2": 259.0,
+      "centroid_utm": [
+        354802.13,
+        6621428.55
+      ],
+      "dist_m": 0.113,
+      "dx_m": -0.112,
+      "dy_m": -0.016,
+      "osm_id": 367003075,
+      "peak_ratio": 2.037
+    },
+    {
+      "area_m2": 1101.8,
+      "centroid_utm": [
+        354721.18,
+        6621549.82
+      ],
+      "dist_m": 0.092,
+      "dx_m": -0.016,
+      "dy_m": -0.091,
+      "osm_id": 125859102,
+      "peak_ratio": 2.585
+    },
+    {
+      "area_m2": 561.3,
+      "centroid_utm": [
+        354601.63,
+        6621441.2
+      ],
+      "dist_m": 1.332,
+      "dx_m": 0.615,
+      "dy_m": -1.182,
+      "osm_id": 87692270,
+      "peak_ratio": 2.332
+    },
+    {
+      "area_m2": 261.0,
+      "centroid_utm": [
+        354377.13,
+        6620917.51
+      ],
+      "dist_m": 7.347,
+      "dx_m": -3.655,
+      "dy_m": 6.374,
+      "osm_id": 837161293,
+      "peak_ratio": 1.817
+    },
+    {
+      "area_m2": 637.0,
+      "centroid_utm": [
+        356590.27,
+        6621715.94
+      ],
+      "dist_m": 1.751,
+      "dx_m": -1.738,
+      "dy_m": 0.213,
+      "osm_id": 129120464,
+      "peak_ratio": 2.165
+    },
+    {
+      "area_m2": 254.3,
+      "centroid_utm": [
+        355130.01,
+        6620694.01
+      ],
+      "dist_m": 0.44,
+      "dx_m": -0.101,
+      "dy_m": 0.428,
+      "osm_id": 125792216,
+      "peak_ratio": 2.253
+    }
+  ],
+  "enough_controls": true,
+  "gate_G1": {
+    "passed": true,
+    "target_m": 2.0
+  },
+  "generated_at": "2026-09-26T19:40:04+00:00",
+  "mad_around_systematic_m": 0.383,
+  "median_offset_m": 0.487,
+  "method": "FFT cross-correlation of Sobel gradient magnitude with the rasterized OSM outline, per control building; median of offset lengths",
+  "metric_epsg": 32636,
+  "n_candidates": 66,
+  "n_control_points": 40,
+  "n_rejected_weak_peak": 6,
+  "n_unusable_window": 0,
+  "osm": "data/interim/osm_buildings.geojson",
+  "p90_offset_m": 1.837,
+  "params": {
+    "apply_shift_over_m": 2.0,
+    "isolation_m": 12.0,
+    "max_area_m2": 6000.0,
+    "max_levels": 3,
+    "min_area_m2": 250.0,
+    "min_peak_ratio": 1.6,
+    "min_rectangularity": 0.7,
+    "min_systematic_shift_m": 0.6,
+    "n_control_min": 10,
+    "n_control_target": 40,
+    "random_seed": 42,
+    "search_radius_m": 10.0
+  },
+  "recommend_shift": false,
+  "systematic_shift_len_m": 0.198,
+  "systematic_shift_m": [
+    -0.124,
+    0.155
+  ]
+}

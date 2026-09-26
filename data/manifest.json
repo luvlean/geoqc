@@ -1,0 +1,79 @@
+{
+  "aoi": {
+    "name": "Пушкин, Отдельный парк, Тярлево",
+    "area_km2": 5.55,
+    "utm_epsg": 32636,
+    "bbox_wgs84": [
+      30.4034037,
+      59.689943,
+      30.4616795,
+      59.7152711
+    ]
+  },
+  "image": {
+    "source": "openaerialmap",
+    "id": "6101142e5a90f10006fd3038",
+    "url": "https://oin-hotosm-temp.s3.amazonaws.com/6101115d5a90f10006fd3033/0/6101115d5a90f10006fd3034.tif",
+    "acquired": "2021-07-26",
+    "license": "CC-BY 4.0",
+    "attribution": "Sergey Astakhov via OpenAerialMap, CC-BY 4.0",
+    "sha256": "0de29d4db8b3e33c521f95d959259623a42912771bc66c98ccb9b577f2d3ea4a",
+    "gsd_m": 0.0728,
+    "crs": "EPSG:32636",
+    "raw_path": "data/raw/openaerialmap_6101142e5a90f10006fd3038.tif",
+    "raw_size_bytes": 349158737,
+    "download_mode": "full"
+  },
+  "osm": {
+    "snapshot_date": "2026-07-24",
+    "query": "[out:json][timeout:180]; (way[\"building\"](59.6894938,30.4025134,59.7157203,30.4625698); relation[\"building\"](59.6894938,30.4025134,59.7157203,30.4625698);); out geom;",
+    "count": 2492,
+    "license": "ODbL",
+    "cache": "data/raw/osm_2026-07-24.json"
+  },
+  "secondary": {
+    "source": "microsoft",
+    "url": "https://minedbuildings.z5.web.core.windows.net/global-buildings/2026-02-03/global-buildings.geojsonl/RegionName=Russia/quadkey=120121213/part-00123-4feead82-d499-422b-94cb-c036c212127a.c000.csv.gz",
+    "count": 4024,
+    "license": "ODbL"
+  },
+  "georef": {
+    "n_control_points": 40,
+    "median_offset_m": 0.487,
+    "shift_applied_m": [
+      0.0,
+      0.0
+    ],
+    "systematic_shift_m": [
+      -0.124,
+      0.155
+    ],
+    "gate_G1_passed": true
+  },
+  "created_at": "2026-09-26T19:43:16+00:00",
+  "interim": {
+    "aoi_cog": "data/interim/aoi_cog.tif",
+    "target_gsd_m": 0.3,
+    "crs": "EPSG:32636"
+  },
+  "tiles": {
+    "n_tiles": 354,
+    "n_written": 354,
+    "n_skipped_outside_aoi": 171,
+    "n_skipped_empty": 0,
+    "n_rows": 21,
+    "n_cols": 25,
+    "aoi_coverage": 1.0000000000000004,
+    "index": "data/tiles/tiles.gpkg"
+  },
+  "buildings_ref": {
+    "loaded": {
+      "osm": 2492,
+      "microsoft": 4024
+    },
+    "count_by_source": {
+      "microsoft": 4024,
+      "osm": 2492
+    }
+  }
+}

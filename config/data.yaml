@@ -37,14 +37,14 @@ overpass:
 image:
   # Chosen by `geoqc data search-aoi` (see reports/aoi_candidates.json and DECISIONS D-001a).
   source: openaerialmap
-  id: "5f3f96b8a646430007b2ac90"
-  url: "https://oin-hotosm-temp.s3.amazonaws.com/5f3f96b8a646430007b2ac8f/0/5f3f96b8a646430007b2ac90.tif"
-  meta_url: "https://api.openaerialmap.org/meta/5f3f96b8a646430007b2ac90"
-  acquired: "2020-08-17"
+  id: "6101142e5a90f10006fd3038"
+  url: "https://oin-hotosm-temp.s3.amazonaws.com/6101115d5a90f10006fd3033/0/6101115d5a90f10006fd3034.tif"
+  meta_url: "https://api.openaerialmap.org/meta/6101142e5a90f10006fd3038"
+  acquired: "2021-07-26"
   license: "CC-BY 4.0"
-  attribution: "Sergey Astakhov via OpenAerialMap, CC BY 4.0"
-  native_gsd_m: 0.069
-  raw_path: data/raw/openaerialmap_5f3f96b8a646430007b2ac90.tif
+  attribution: "Sergey Astakhov via OpenAerialMap, CC-BY 4.0"
+  native_gsd_m: 0.0728
+  raw_path: data/raw/openaerialmap_6101142e5a90f10006fd3038.tif
   # Above this size the download step reads only the AOI window through /vsicurl/ instead of
   # fetching the whole file (raw then holds the clipped window + the URL in the manifest).
   windowed_over_mb: 1500

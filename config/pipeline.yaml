@@ -4,7 +4,7 @@ project: geoqc
 version: "0.1.0"
 crs:
   storage: "EPSG:4326"
-  metric: null            # UTM EPSG code, set by Data Agent after AOI is fixed (e.g. "EPSG:32604")
+  metric: EPSG:32636      # UTM EPSG code, set by Data Agent after AOI is fixed (e.g. "EPSG:32604")
 paths:
   data_dir: data
   raw: data/raw
