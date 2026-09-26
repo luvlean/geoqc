@@ -48,7 +48,7 @@ ImageNet-инициализация) с разбиением семантиче�
   и `holdout`; holdout используется для ранней остановки и подбора порога, в обучение не идёт.
 - Разметка тестового сплита в модуле `cv` и ноутбуке **не читается и не используется ни на одном этапе** (запрет абсолютный;
   см. `tests/cv/test_no_test_labels.py`).
-- Опционально (выключено по умолчанию, ячейка в ноутбуке): INRIA Aerial Image Labeling, SpaceNet — только из whitelist плана §9.
+- Опционально: SpaceNet 2 (CC BY-SA 4.0, `DATA_SOURCE` в ноутбуке, `docs/datasets/spacenet2.md`), INRIA Aerial Image Labeling (ячейка в ноутбуке, выключена) — только из whitelist плана §9.
 
 ## Гиперпараметры инференса (`config/cv.yaml`)
 

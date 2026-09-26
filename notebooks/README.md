@@ -25,6 +25,9 @@ jupyter lab notebooks/train_finetune.ipynb
 
 Run all. Параметры — в ячейке «6. Параметры обучения» (`TRAINER`, `EPOCHS`, `BATCH`, `RESUME`, `SMOKE_TEST`).
 `SMOKE_TEST = True` (1 эпоха) проверяет весь путь до экспорта весов за несколько минут.
+Источник данных — `DATA_SOURCE` в ячейке «4. Данные»: `"val"` (наша проверенная разметка), `"spacenet"` (только SpaceNet 2:
+прогон, пока разметки нет; `config/cv.yaml` и карточка не меняются, веса — `models/<name>-spacenet.pt`) или
+`"val+spacenet"`. SpaceNet скачивается и готовится при первом запуске (`make external-data`, `docs/datasets/spacenet2.md`).
 
 ### Google Colab
 
@@ -61,7 +64,7 @@ U-Net (`resnet34`) на тех же данных примерно в 1,5–2 р�
 2. `geoqc cv predict --split all --to-db` — детекции новой версией модели (`detections.geojson`, `buildings_det`).
 3. `geoqc matching run --model-version <model_version>` → расхождения; `geoqc eval detection --split val` → гейт G3 (F1 ≥ 0,70).
 4. Оценку на test-сплите проводит Eval Agent один раз после фиксации весов и порога; ноутбук её не выполняет.
-5. Если G3 не пройден: увеличить `EPOCHS`/`PATIENCE`, попробовать `TRAINER="unet"`, подмешать INRIA/SpaceNet
+5. Если G3 не пройден: увеличить `EPOCHS`/`PATIENCE`, попробовать `TRAINER="unet"`, подмешать SpaceNet (`DATA_SOURCE="val+spacenet"`) или INRIA
    (ячейка 5, выключена по умолчанию) или использовать fallback плана §8 (Microsoft/Google footprints как «детектор»).
 
 ### Проверки
