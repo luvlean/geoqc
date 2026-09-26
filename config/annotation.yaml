@@ -1,0 +1,46 @@
+# Annotation module settings (owned by Annotation Agent). Merged into load_config()["annotation"].
+# Details and formulas: src/geoqc/annotation/README.md, protocol: docs/annotation/PROTOCOL.md.
+
+n_tiles: 24               # total selected tiles (val + test); plan §5 phase 2 asks for 20–30
+test_fraction: 0.5        # share of the selected tiles that goes to `test` (per stratum, rounded)
+seed: 42                  # RNG seed for tile sampling, split and recheck subset
+min_area_m2: 12.0         # minimal footprint area of a labelled building (metric CRS)
+recheck_fraction: 0.1     # share of selected tiles re-annotated blind for G2 (ceil, at least `recheck_min_tiles`)
+recheck_min_tiles: 2
+
+select_tiles:
+  osm_path: data/interim/osm_buildings.geojson   # OSM buildings, used for stratification only (never as ground truth)
+  min_per_stratum: 3      # try to keep at least this many tiles in every non-empty stratum
+  avoid_adjacent: true    # never pick two tiles that are 8-neighbours (tiles overlap by 64 px)
+  min_buildings_per_tile: 3   # tiles with fewer intersecting OSM buildings are not candidates
+  min_aoi_coverage: 0.9   # skip border tiles with less than this share inside config/aoi.geojson (if it exists)
+  strata:
+    dominant_share: 0.4   # share of building area carrying a group's tags to assign the tile to that group
+    dense_density: 0.15   # built-up share (building area / tile area) considered "dense" (footprint fallback)
+    large_footprint_m2: 400   # mean footprint above this + dense  -> dense_multistorey (untagged buildings)
+    small_footprint_m2: 150   # mean footprint below this           -> low_rise_private  (untagged buildings)
+    tags:
+      dense_multistorey: [apartments, dormitory]
+      low_rise_private: [house, detached, semidetached_house, terrace, bungalow, cabin, hut, farm, allotment_house]
+      industrial: [industrial, warehouse, factory, manufacture, hangar, depot]
+
+pre_annotation:
+  source_priority: [secondary, detections]   # first existing, non-empty source wins when --source is not given
+  secondary_path: data/interim/secondary_buildings.geojson
+  detections_path: data/interim/detections.geojson
+  simplify_tolerance_m: 0.0                   # Douglas–Peucker tolerance for drafts, 0 = keep as is
+
+validate:
+  iou_match: 0.5            # IoU threshold for TP in the G2 F1 (CONTRACTS §4)
+  pair_min_iou: 0.0         # 1:1 pairs for the mean IoU are formed for any overlap above this
+  overlap_error_ratio: 0.5  # intersection / min(area_a, area_b) above this = duplicate -> error
+  overlap_warn_m2: 1.0      # smaller overlaps above this area are reported as warnings
+  tile_tolerance_m: 0.5     # a geometry may stick out of its tile by at most this much
+
+qgis:
+  cog_path: data/interim/aoi_cog.tif
+  osm_path: data/interim/osm_buildings.geojson
+  secondary_path: data/interim/secondary_buildings.geojson
+  esri_url: "https://ibasemaps-api.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}?token={key}"
+  esri_attribution: "Esri, Maxar, Earthstar Geographics, and the GIS User Community"
+  qgis_app: /Applications/QGIS.app     # macOS bundle used to run PyQGIS headless; other OS -> fallback (.qml + manual steps)
