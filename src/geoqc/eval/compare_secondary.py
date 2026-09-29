@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Any
 
 import geopandas as gpd
+import numpy as np
+import shapely
 
 from geoqc.eval.common import (
     EvalInputError,
@@ -32,6 +34,23 @@ from geoqc.eval.detection_metrics import (
 )
 
 SECONDARY_SOURCES: tuple[str, ...] = ("microsoft", "google")
+COPY_IOU = 0.98  # a GT polygon this close to a footprint is an unedited pre-annotation draft
+
+
+def count_copies(gt: gpd.GeoDataFrame, sec: gpd.GeoDataFrame, iou_min: float = COPY_IOU) -> int:
+    """Number of GT polygons with IoU >= ``iou_min`` to some secondary footprint (same CRS)."""
+    if not len(gt) or not len(sec):
+        return 0
+    g, f = gt.geometry.values, sec.geometry.values
+    gi, si = shapely.STRtree(f).query(g, predicate="intersects")
+    if not len(gi):
+        return 0
+    a, b = g[gi], f[si]
+    union = shapely.area(shapely.union(a, b))
+    iou = np.divide(
+        shapely.area(shapely.intersection(a, b)), union, where=union > 0, out=np.zeros(len(gi))
+    )
+    return len(set(gi[iou >= iou_min].tolist()))
 
 
 def load_secondary(
@@ -144,8 +163,17 @@ def compare(
     n_sec_in_tiles = None
     if gt is not None and det is not None:
         det_vs_gt = evaluate_geodataframes(gt, det, tiles, tile_ids, strata, **kwargs).summary()
+    n_gt_copied = None
     if gt is not None and sec is not None:
         sec_vs_gt = evaluate_geodataframes(gt, sec, tiles, tile_ids, strata, **kwargs).summary()
+        gt_poly = clean_polygons(gt)
+        sec_cut = clip_to_tiles(sec, tiles, min_area) if tiles is not None else sec
+        n_gt_copied = count_copies(gt_poly, sec_cut)
+        if n_gt_copied:
+            notes.append(
+                f"{n_gt_copied} of {len(gt_poly)} GT polygons coincide with the secondary footprints "
+                f"(IoU >= {COPY_IOU}, unedited drafts): secondary_vs_gt is biased upward"
+            )
     if det is not None and sec is not None:
         if tiles is not None:
             sec_ref = clip_to_tiles(sec, tiles, min_area).reset_index(drop=True)
@@ -171,6 +199,7 @@ def compare(
         "secondary_path": sec_from,
         "n_secondary_total": int(len(sec)) if sec is not None else None,
         "n_secondary_in_tiles": n_sec_in_tiles,
+        "n_gt_copied_from_secondary": n_gt_copied,
         "n_tiles": len(tile_ids),
         "iou_threshold": iou_thr,
         "match_method": method,

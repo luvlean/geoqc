@@ -19,6 +19,16 @@ def test_compare_secondary_all_three_blocks(synthetic_env):
     dvs = res["detection_vs_secondary"]
     assert (dvs["tp"], dvs["fp"], dvs["fn"]) == (1, 0, 1) and dvs["recall"] == pytest.approx(0.5)
     assert res["n_secondary_in_tiles"] == 2
+    assert res["n_gt_copied_from_secondary"] == 0 and not any("biased" in n for n in res["notes"])
+
+
+def test_compare_secondary_flags_unedited_drafts(synthetic_env):
+    """Разметка совпадает со вторым источником (черновики не правились) -> счётчик копий и предупреждение."""
+    labels = synthetic_env.paths.labels("test")
+    res = compare("test", synthetic_env.paths, synthetic_env.cfg, secondary_path=labels)
+    assert res["secondary_vs_gt"]["f1"] == pytest.approx(1.0)
+    assert res["n_gt_copied_from_secondary"] == res["secondary_vs_gt"]["tp"] > 0
+    assert any("biased upward" in n for n in res["notes"])
 
 
 def test_compare_secondary_missing_inputs_are_null_with_notes(synthetic_env):
