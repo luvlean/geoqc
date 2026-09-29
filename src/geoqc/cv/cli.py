@@ -69,7 +69,8 @@ def predict_cmd(
     replace: Annotated[
         bool,
         typer.Option(
-            "--replace/--append", help="Delete rows of the same model_version before loading"
+            "--replace/--append",
+            help="Delete all previous detections and discrepancies before loading",
         ),
     ] = True,
     progress: Annotated[bool, typer.Option("--progress/--no-progress")] = True,

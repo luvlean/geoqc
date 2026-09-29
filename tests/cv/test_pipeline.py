@@ -131,17 +131,30 @@ def test_cli_predict_with_mock_backend(env_config: dict):
 
 
 @pytest.mark.db
-def test_load_to_db_replaces_rows_of_same_model_version(synthetic_aoi: dict, db_conn):
-    """--to-db: строки buildings_det с тем же model_version заменяются, геометрия MultiPolygon 4326."""
+def test_load_to_db_replaces_previous_detections(synthetic_aoi: dict, db_conn):
+    """--to-db: прежние детекции любых версий и очередь удаляются, геометрия MultiPolygon 4326."""
     res = run_predict(
         synthetic_aoi["cv"],
         synthetic_aoi["pipeline"],
         split="val",
         predictor=MockPredictor(min_component_px=1),
     )
+    load_to_db(res.detections, "older-00000000", conn=db_conn)
+    with db_conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO discrepancies (class, confidence, geom, model_version) "
+            "VALUES ('missing_on_image', 0.5, ST_Multi(ST_Buffer(ST_GeomFromText('POINT(30 60)', 4326), 0.0001)), 'older-00000000')"
+        )
     n1 = load_to_db(res.detections, res.model_version, conn=db_conn)
     n2 = load_to_db(res.detections, res.model_version, conn=db_conn)
     assert n1 == n2 == 3
+    with db_conn.cursor() as cur:
+        cur.execute(
+            "SELECT count(*) AS n FROM buildings_det WHERE model_version = 'older-00000000'"
+        )
+        assert cur.fetchone()["n"] == 0
+        cur.execute("SELECT count(*) AS n FROM discrepancies")
+        assert cur.fetchone()["n"] == 0
     with db_conn.cursor() as cur:
         cur.execute(
             "SELECT count(*) AS n, min(ST_SRID(geom)) AS srid, min(GeometryType(geom)) AS gt FROM buildings_det WHERE model_version = %s",

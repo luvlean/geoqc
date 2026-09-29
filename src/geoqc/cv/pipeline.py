@@ -203,8 +203,8 @@ def load_to_db(
     replace: bool = True,
     dsn: str | None = None,
 ) -> int:
-    """Insert detections into ``buildings_det``; with ``replace`` old rows of the same
-    model_version are deleted first (cascades to matches/discrepancies of that version)."""
+    """Insert detections into ``buildings_det``; with ``replace`` all previous detections (any
+    model_version) and the whole review queue are deleted first, so the DB holds one model."""
     from geoqc.db import connect
 
     if gdf.crs is not None and gdf.crs.to_epsg() != 4326:
@@ -218,7 +218,9 @@ def load_to_db(
     def _run(c: Any) -> int:
         with c.cursor() as cur:
             if replace:
-                cur.execute("DELETE FROM buildings_det WHERE model_version = %s", (model_version,))
+                # queue rows without a det (missing_on_image) do not cascade
+                cur.execute("DELETE FROM discrepancies")
+                cur.execute("DELETE FROM buildings_det")
             if rows:
                 cur.executemany(
                     "INSERT INTO buildings_det (geom, score, model_version, tile_id) "

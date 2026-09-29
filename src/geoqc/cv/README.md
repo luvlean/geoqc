@@ -21,7 +21,7 @@
 | Выход | Команда |
 |---|---|
 | `data/interim/detections.geojson` (`detections_<split>.geojson` для val/test): EPSG:4326, MultiPolygon, `score, model_version, tile_id` | `predict` |
-| строки `buildings_det` (замена строк с тем же `model_version`; каскадно удаляются их `matches`/`discrepancies`) | `predict --to-db` |
+| строки `buildings_det` (замена всего слоя: прежние детекции любых версий, `matches` и `discrepancies` удаляются) | `predict --to-db` |
 | `data/interim/dataset/` — YOLO-seg + маски, `data.yaml`, `split.csv`, `meta.json` | `export-dataset` |
 | `reports/threshold_sweep_val.json`, `config/cv.yaml → conf_threshold` | `threshold-sweep` |
 | `data/interim/bundle.zip` | `bundle` |
@@ -160,8 +160,10 @@ geoqc cv report-external [--per-city 4]
   дообучение в ноутбуке. Fallback `yolov8m-seg.pt` (COCO) зданий не детектирует вовсе.
 - Объекты, попавшие на перекрытие, но не задетектированные в одном из тайлов, склейке не подлежат (не с чем);
   дубликаты внутри тайла не объединяются (`merge_same_tile: false`).
-- `--to-db` удаляет строки `buildings_det` с тем же `model_version` вместе с зависимыми `matches`/`discrepancies`
-  (это ожидаемо при перепрогоне; `--append` отключает).
+- `--to-db` удаляет все прежние `buildings_det` (любой `model_version`) вместе с `matches`/`discrepancies`: в БД одна
+  модель, и очередь, экспорт и карта не смешивают версии. Статусы проверки старой очереди теряются — после новой
+  детекции очередь строится заново (`make match`). `--append` дописывает тайлы к текущему слою (например, `--split test`
+  после `--split val`).
 - Тайлы читаются целиком в память батчами (`batch`); при 18 ГБ RAM и MPS `batch: 8` безопасен.
 - `sweep --detections <file>` считает метрики по уже склеенным полигонам (фильтр по score без повторной склейки) —
   приближение; точный sweep — без `--detections`.
