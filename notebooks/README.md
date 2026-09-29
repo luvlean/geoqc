@@ -11,7 +11,7 @@ Colab-ячейки помечены `# COLAB ONLY` и завёрнуты в `if 
 
 ### Предварительные условия
 
-1. Реальные тайлы `data/tiles/*.tif` + `tiles.gpkg` (Data Agent) и `data/labels/tiles_split.csv` (Annotation Agent).
+1. Реальные тайлы `data/tiles/*.tif` + `tiles.gpkg` (`make data`) и `data/labels/tiles_split.csv` (`make labels-prep`).
 2. Проверенная разметка `data/labels/val/buildings.geojson` (все объекты `verified=true`; `geoqc annotation validate --split val`).
 3. Стартовые веса: `geoqc cv fetch-weights` (ноутбук скачает их сам, если файла нет).
 
@@ -63,7 +63,8 @@ U-Net (`resnet34`) на тех же данных примерно в 1,5–2 р�
    `conf_threshold` (записано ноутбуком), а `models/MODEL_CARD.md` — обновлённый автоблок.
 2. `geoqc cv predict --split all --to-db` — детекции новой версией модели (`detections.geojson`, `buildings_det`).
 3. `geoqc matching run --model-version <model_version>` → расхождения; `geoqc eval detection --split val` → гейт G3 (F1 ≥ 0,70).
-4. Оценку на test-сплите проводит Eval Agent один раз после фиксации весов и порога; ноутбук её не выполняет.
+4. Test-сплит оценивается один раз после фиксации весов и порога (`geoqc eval detection --split test`, `make eval`);
+   ноутбук его не читает.
 5. Если G3 не пройден: увеличить `EPOCHS`/`PATIENCE`, попробовать `TRAINER="unet"`, подмешать SpaceNet (`DATA_SOURCE="val+spacenet"`) или INRIA
    (ячейка 5, выключена по умолчанию) или использовать fallback плана §8 (Microsoft/Google footprints как «детектор»).
 

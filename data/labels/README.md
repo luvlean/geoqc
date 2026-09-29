@@ -25,5 +25,5 @@ data/labels/
 | выгружен | есть `buildings.geojson` |
 | принят | `reports/annotation.json` → `splits.<split>.status = accepted` |
 
-`test` оценивается один раз финальной моделью. CV Agent и ноутбук обучения этот каталог не читают.
+`test` оценивается один раз финальной моделью. Модуль `geoqc.cv` и ноутбук обучения каталог `test` не читают.
 Проекты `.qgz` в git не попадают: в них может оказаться ключ `ARCGIS_API_KEY`.
