@@ -282,7 +282,7 @@ def resolve_metric_crs(
         code = utm_epsg_for((minx + maxx) / 2.0, (miny + maxy) / 2.0)
         return f"EPSG:{code}", "derived from data centroid (UTM zone)"
     raise EvalInputError(
-        "metric CRS is unknown: set config/pipeline.yaml crs.metric (Data Agent) or provide data"
+        "metric CRS is unknown: set config/pipeline.yaml crs.metric (`make data` fills it) or provide data"
     )
 
 

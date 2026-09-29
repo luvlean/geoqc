@@ -69,7 +69,7 @@ ImageNet-инициализация) с разбиением семантиче�
 
 ## Метрики
 
-Метрики детекции считает Eval Agent (`geoqc eval detection --split val|test` → `reports/metrics_*.json`). Здесь цифры не
+Метрики детекции считает `geoqc eval detection` (`--split val|test` → `reports/metrics_*.json`). Здесь цифры не
 приводятся до появления реальной разметки и прогона; sweep порога — `reports/threshold_sweep_val.json`.
 
 ## Окружение
