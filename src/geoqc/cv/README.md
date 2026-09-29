@@ -134,7 +134,7 @@ geoqc cv report-external [--per-city 4]
    `geoqc cv fetch-weights` (файл уже есть — сеть не нужна; пересчитает sha256 → `model_version`, обновит карточку).
    Если sha256 и `model_version` в конфиге уже совпадают с файлом (экспорт из ноутбука), конфиг и карточка не меняются.
 2. U-Net: `backend: smp_unet`, `smp_unet.checkpoint` — файл формата `{"state_dict", "arch", "encoder", "classes", "mean", "std"}`
-   (его пишет ноутбук); `model_version` = `unet-<encoder>-<sha[:8]>` (ноутбук записывает в конфиг); `fetch-weights` при этом бэкенде ничего не делает).
+   (его пишет ноутбук); `model_version` = `unet-<encoder>-<sha[:8]>` (ноутбук записывает в конфиг; `fetch-weights` при этом бэкенде ничего не делает).
 3. Новый бэкенд: класс-наследник `Predictor` в `predictor.py` + ветка в `build_predictor()`; всё остальное (векторизация,
    склейка, БД) не меняется.
 4. После смены весов — `threshold-sweep --split val` (порог привязан к модели), затем `predict --to-db`.
