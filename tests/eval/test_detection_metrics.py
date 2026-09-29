@@ -17,6 +17,7 @@ from geoqc.eval.detection_metrics import (
     match_one_to_one,
     mean_iou,
     precision_recall_f1,
+    val_training_note,
 )
 
 
@@ -202,3 +203,16 @@ def test_per_tile_dataframe_columns_on_empty_result():
     assert table.iloc[0].tolist()[:7] == ["0_0", "mixed", 0, 0, 0, 0, 0]
     assert ev.summary()["f1"] == 0.0
     assert np.all(ev.iou_matrix.shape == (0, 0))
+
+
+def test_val_training_note_counts_train_tiles(tmp_path):
+    """Тайлы val из train-части датасета дообучения помечаются: метрики val оптимистичны."""
+    pd.DataFrame(
+        {"tile_id": ["1_1", "1_2", "2_2"], "subset": ["train", "train", "holdout"]}
+    ).to_csv(tmp_path / "split.csv", index=False)
+    cfg = {"cv": {"dataset": {"out_dir": str(tmp_path)}}}
+    notes = val_training_note(cfg, ["1_1", "1_2", "2_2", "9_9"])
+    assert len(notes) == 1 and notes[0].startswith("2 of 4 val tiles")
+    assert (
+        val_training_note({"cv": {"dataset": {"out_dir": str(tmp_path / "nope")}}}, ["1_1"]) == []
+    )

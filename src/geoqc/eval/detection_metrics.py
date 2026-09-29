@@ -18,6 +18,7 @@ import pandas as pd
 from shapely import STRtree
 from shapely.geometry.base import BaseGeometry
 
+from geoqc.config import resolve_path
 from geoqc.eval.common import (
     EvalInputError,
     EvalPaths,
@@ -448,6 +449,22 @@ def load_split_tiles(
     return tile_ids, strata, tiles
 
 
+def val_training_note(cfg: dict[str, Any], tile_ids: Sequence[str]) -> list[str]:
+    """Flag val tiles exported as fine-tuning material: their metrics are optimistic."""
+    out_dir = ((cfg.get("cv") or {}).get("dataset") or {}).get("out_dir", "data/interim/dataset")
+    split_csv = Path(resolve_path(out_dir)) / "split.csv"
+    if not split_csv.exists():
+        return []
+    df = pd.read_csv(split_csv, dtype={"tile_id": str})
+    n = int(df.loc[df["subset"] == "train", "tile_id"].isin(set(tile_ids)).sum())
+    if not n:
+        return []
+    return [
+        f"{n} of {len(tile_ids)} val tiles are fine-tuning material (subset=train in "
+        f"{split_csv.name}): val metrics are optimistic, test is the unbiased estimate"
+    ]
+
+
 def evaluate_split(
     split: str,
     paths: EvalPaths,
@@ -469,7 +486,7 @@ def evaluate_split(
     tile_ids, strata, tiles4326 = load_split_tiles(paths, split)
     gt4326 = read_geojson(labels_path, f"{split} labels")
     det4326 = read_geojson(detections_path, "detections")
-    notes: list[str] = []
+    notes: list[str] = val_training_note(cfg, tile_ids) if split == "val" else []
 
     sample = gt4326 if len(gt4326) else det4326
     metric_crs, crs_source = resolve_metric_crs(cfg, sample, paths.manifest)

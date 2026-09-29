@@ -59,6 +59,9 @@ $$
 
 Ключи: `detection.<split>.{tp,fp,fn,precision,recall,f1}`; гейты G3 (`val`) и G4 (`test`): $F1 \ge 0.70$.
 
+После дообучения ~80 % тайлов `val` — обучающий материал (`data/interim/dataset/split.csv`, `subset=train`), поэтому G3 оптимистичен;
+`eval detection --split val` пишет об этом в `notes`. Несмещённая оценка — G4 на `test`.
+
 ## 4. Mean IoU сопоставленных
 
 $$
