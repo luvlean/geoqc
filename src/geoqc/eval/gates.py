@@ -248,6 +248,7 @@ def build_metrics(
     else:
         metrics["annotation"]["agreement_iou"] = pick(
             annotation,
+            "annotation.agreement_iou",  # geoqc annotation validate
             "agreement_iou",
             "g2.agreement_iou",
             "recheck.agreement_iou",
@@ -257,6 +258,7 @@ def build_metrics(
         )
         metrics["annotation"]["agreement_f1"] = pick(
             annotation,
+            "annotation.agreement_f1",  # geoqc annotation validate
             "agreement_f1",
             "g2.agreement_f1",
             "recheck.agreement_f1",
@@ -266,6 +268,7 @@ def build_metrics(
         )
         metrics["annotation"]["n_checked"] = pick(
             annotation,
+            "annotation.n_checked",  # geoqc annotation validate
             "n_checked",
             "g2.n_checked",
             "recheck.n_checked",

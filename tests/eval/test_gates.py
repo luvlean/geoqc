@@ -168,7 +168,10 @@ def test_build_metrics_merges_intermediate_reports(synthetic_env):
     write_json(rd / "georef.json", {"median_offset_m": 1.2, "n_control_points": 12})
     write_json(
         rd / "annotation.json",
-        {"recheck": {"agreement_iou": 0.85, "agreement_f1": 0.9, "n_checked": 3}},
+        {  # layout written by `geoqc annotation validate`
+            "splits": {"val": {"agreement": {"agreement_iou": 0.7, "n_checked": 1}}},
+            "annotation": {"agreement_iou": 0.85, "agreement_f1": 0.9, "n_checked": 3},
+        },
     )
     write_json(
         rd / "metrics_discrepancies.json",
