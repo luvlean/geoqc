@@ -94,7 +94,7 @@ def evaluate(
     if dm is not None:
         try:
             res = dm.match_one_to_one(list(gts), list(preds), iou_thr)
-            cand = [tuple(p) for p in res]
+            cand = [tuple(p) for p in getattr(res, "pairs", res)]  # MatchResult or plain pairs
             if all(len(p) == 3 for p in cand):
                 pairs = [(int(a), int(b), float(c)) for a, b, c in cand]
                 impl = "geoqc.eval.detection_metrics"

@@ -149,7 +149,7 @@ geoqc cv report-external [--per-city 4]
 - `geoqc.config` (`load_config`, `resolve_path`), `geoqc.db.connect` (только для `--to-db`).
 - `geoqc.data.crs.utm_epsg_for` — используется, если доступен, иначе локальная формула зоны UTM (`tiles.utm_epsg_for`).
 - `geoqc.eval.detection_metrics` — используется в sweep при наличии функций `match_one_to_one`/`precision_recall_f1`
-  с совместимым выходом (список троек `(gt_idx, pred_idx, iou)`); иначе локальная реализация, поле `metrics_impl` в отчёте.
+  (`MatchResult.pairs` — тройки `(gt_idx, pred_idx, iou)`); иначе локальная реализация, поле `metrics_impl` в отчёте.
 - Потребители: Geo (`buildings_det`, `model_version`), Annotation (`pre-annotate --source detections`), Eval, App.
 
 ## Ограничения и известные риски

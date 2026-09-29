@@ -40,7 +40,7 @@ def test_greedy_one_to_one_matching():
     m = evaluate(gts, preds, 0.5)
     assert (m["tp"], m["fp"], m["fn"]) == (1, 3, 1)
     assert m["precision"] == 0.25 and m["recall"] == 0.5 and m["mean_iou_matched"] == 1.0
-    assert m["metrics_impl"] in {"local", "geoqc.eval.detection_metrics"}
+    assert m["metrics_impl"] == "geoqc.eval.detection_metrics"
     assert evaluate([], [], 0.5)["f1"] == 0.0
     assert match_one_to_one([], preds) == []
 
