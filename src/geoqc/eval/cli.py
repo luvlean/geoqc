@@ -10,6 +10,7 @@ import typer
 
 from geoqc.config import load_config
 from geoqc.eval.common import (
+    VERDICTS,
     EvalInputError,
     EvalPaths,
     load_eval_config,
@@ -243,7 +244,8 @@ def verification_sample(
     if meta["short_classes"]:
         typer.echo(f"note: classes below per_class_min: {meta['short_classes']}")
     typer.echo(
-        f"written {rel(target, paths.repo_root)} — fill `verdict` and save as reports/verification.csv"
+        f"written {rel(target, paths.repo_root)} — fill `verdict` ({' | '.join(VERDICTS)}) "
+        "and save as reports/verification.csv"
     )
 
 
