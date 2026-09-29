@@ -114,6 +114,7 @@ def fetch_weights(
     fallback_asset = w.get("fallback_asset", "yolov8m-seg.pt")
 
     is_fallback = False
+    downloaded = False
     source = KNOWN_SOURCES.get(
         repo or "", {"url": f"https://huggingface.co/{repo}", "license": "unknown"}
     )
@@ -128,11 +129,13 @@ def fetch_weights(
             if not repo:
                 raise ValueError("weights.hf_repo is not set")
             _download_hf(repo, filename, dest)
+            downloaded = True
         except Exception as exc:
             if not allow_fallback:
                 raise
             asset_path = _download_ultralytics_asset(fallback_asset, models_dir)
             dest = asset_path
+            downloaded = True
             is_fallback = True
             model_name = Path(fallback_asset).stem + "-coco"
             source = KNOWN_SOURCES.get(
@@ -152,7 +155,9 @@ def fetch_weights(
         backend=str(cv_cfg.get("backend", "ultralytics")),
         fetched_at=dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
     )
-    if update_files:
+    # a fine-tune export already wrote config and card for this file: keep its provenance
+    recorded = w.get("sha256") == sha and cv_cfg.get("model_version") == info.model_version
+    if update_files and (downloaded or not recorded):
         update_cv_config(
             {
                 "model_name": info.model_name,

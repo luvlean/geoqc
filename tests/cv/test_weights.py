@@ -122,3 +122,34 @@ def test_current_model_version_from_config_or_file(tmp_path: Path):
         current_model_version(
             {"backend": "ultralytics", "weights": {"path": str(tmp_path / "nope.pt")}}
         )
+
+
+def test_fetch_weights_keeps_recorded_fine_tune(tmp_path: Path):
+    """Веса уже записаны в конфиг (экспорт дообучения): fetch-weights не трогает конфиг и карточку."""
+    w = tmp_path / "ft.pt"
+    w.write_bytes(b"ft" * 512)
+    sha = sha256_of(w)
+    cfg, card = tmp_path / "cv.yaml", tmp_path / "MODEL_CARD.md"
+    cfg.write_text("model_name: m-ft  # keep\n")
+    card.write_text(f"{CARD_BEGIN}\nfine-tuned in notebook\n{CARD_END}\n")
+    cv_cfg = {
+        "model_name": "m-ft",
+        "model_version": model_version_for("m-ft", sha),
+        "weights": {"path": str(w), "hf_repo": "r/x", "sha256": sha},
+    }
+    info = fetch_weights(cv_cfg, config_path=cfg, card_path=card, models_dir=tmp_path)
+    assert info.model_version == cv_cfg["model_version"]
+    assert cfg.read_text() == "model_name: m-ft  # keep\n"
+    assert "fine-tuned in notebook" in card.read_text()
+
+
+def test_fetch_weights_cli_skips_non_ultralytics_backend(monkeypatch: pytest.MonkeyPatch):
+    """При backend=smp_unet команда fetch-weights ничего не скачивает и не пересчитывает model_version."""
+    from typer.testing import CliRunner
+
+    from geoqc.cv import cli, weights
+
+    monkeypatch.setattr(cli, "load_config", lambda: {"cv": {"backend": "smp_unet"}})
+    monkeypatch.setattr(weights, "fetch_weights", lambda *a, **k: pytest.fail("fetch called"))
+    res = CliRunner().invoke(cli.app, ["fetch-weights"])
+    assert res.exit_code == 0 and "nothing to fetch" in res.output

@@ -32,6 +32,10 @@ def fetch_weights_cmd(
     from geoqc.cv.weights import fetch_weights
 
     cfg = load_config()
+    backend = cfg["cv"].get("backend", "ultralytics")
+    if backend != "ultralytics":
+        typer.echo(f"backend={backend}: weights come from the notebook export, nothing to fetch")
+        return
     info = fetch_weights(cfg["cv"], force=force, allow_fallback=fallback)
     _echo(info.to_dict())
     if info.is_fallback:
