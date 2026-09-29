@@ -229,3 +229,23 @@ def test_build_metrics_merges_intermediate_reports(synthetic_env):
     assert metrics["dataset"]["n_gt_val"] == 10 and metrics["model"]["model_version"] == "m-1"
     table = format_gates_table(gates)
     assert "PASS" in table and "FAIL" in table and "passed 7/9" in table
+
+
+def test_build_metrics_flags_metrics_of_another_model(synthetic_env):
+    """Метрики val посчитаны другой model_version, чем в cv.yaml -> пометка в note гейта G3."""
+    write_json(
+        synthetic_env.paths.reports_dir / "metrics_val.json",
+        {
+            "is_metric": True,
+            "labels_verified": True,
+            "model_version": "m-old",
+            "detection": {"f1": 0.8},
+        },
+    )
+    cfg = {
+        **synthetic_env.cfg,
+        "cv": {**(synthetic_env.cfg.get("cv") or {}), "model_version": "m-new"},
+    }
+    gates = build_metrics(synthetic_env.paths, cfg)["gates"]
+    assert "val metrics are for m-old, config/cv.yaml has m-new" in gates["G3"]["note"]
+    assert "m-old" not in (gates["G4"]["note"] or "")

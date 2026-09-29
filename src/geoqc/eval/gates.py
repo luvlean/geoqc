@@ -348,6 +348,15 @@ def build_metrics(
     metrics["tests"]["n_tests"] = int(n_tests)
 
     metrics["gates"] = evaluate_gates(metrics, cfg.get("gates") or {}, missing)
+    current = cv_cfg.get("model_version")
+    for split, report in (("val", val), ("test", test)):
+        used = pick(report, "model_version")
+        if not current or not used or used == current:
+            continue
+        stale = f"{split} metrics are for {used}, config/cv.yaml has {current}"
+        for g in metrics["gates"].values():
+            if str(g.get("metric", "")).startswith(f"detection.{split}."):
+                g["note"] = f"{g['note']}; {stale}" if g.get("note") else stale
     metrics["inputs"] = inputs
     return metrics
 

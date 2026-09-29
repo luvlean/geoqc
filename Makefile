@@ -92,7 +92,12 @@ match: ## Match det vs ref, classify discrepancies, export queue, print stats
 
 eval: ## Detection metrics (val/test), verification sample, error analysis, gates -> reports/metrics.json
 	$(GEOQC) eval detection --split val
-	$(GEOQC) eval detection --split test
+	@if [ -f reports/metrics_test.json ]; then \
+		echo "skip: reports/metrics_test.json exists (test is evaluated once; re-run: $(GEOQC) eval detection --split test --force --reason '<why>')"; \
+	else \
+		echo "$(GEOQC) eval detection --split test"; \
+		$(GEOQC) eval detection --split test; \
+	fi
 	$(GEOQC) eval verification-sample
 	if [ -f "$(VERIFICATION)" ]; then \
 		$(GEOQC) eval discrepancies --verification "$(VERIFICATION)"; \

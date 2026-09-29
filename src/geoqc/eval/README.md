@@ -22,7 +22,10 @@ geoqc eval gates [--make-all-passed] [--tests-passed --n-tests N]
                                                    # → reports/metrics.json
 ```
 
-Make-цель `eval` вызывает их по порядку. `discrepancies` запускается, только если есть `reports/verification.csv`.
+Make-цель `eval` вызывает их по порядку. `discrepancies` запускается, только если есть `reports/verification.csv`;
+`detection --split test` пропускается, если `reports/metrics_test.json` уже есть, поэтому `make eval` можно повторять
+(например, после заполнения `verification.csv`). Если метрики val/test посчитаны не той `model_version`, что в
+`config/cv.yaml`, `gates` пишет это в `note` гейтов G3–G5.
 
 ## Детекция
 
