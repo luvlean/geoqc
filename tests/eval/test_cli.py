@@ -141,7 +141,26 @@ def test_full_synthetic_pipeline_through_cli(synthetic_env):
         disc["precision_at_n"]["20"]["value"] == 1.0
         and disc["counts_by_class"]["missing_in_map"] == 45
     )
-    assert disc["n_checked"] == len(sample)
+    assert disc["n_checked"] == len(sample) and disc["n_not_in_queue"] == 0
+
+    stale = sample.assign(id=sample["id"] + 10_000)  # the queue was rebuilt after the sample
+    stale.to_csv(rd / "verification_stale.csv", index=False)
+    res = runner.invoke(
+        app,
+        [
+            "discrepancies",
+            "--verification",
+            str(rd / "verification_stale.csv"),
+            "--from-geojson",
+            str(env.discrepancies_geojson),
+            "--out",
+            str(rd / "stale.json"),
+            "--reports-dir",
+            str(rd),
+        ],
+    )
+    assert res.exit_code == 0 and "not in the current queue" in res.output
+    assert json.loads((rd / "stale.json").read_text())["n_not_in_queue"] == len(sample)
 
     res = _run(
         env, "compare-secondary", "--split", "test", "--secondary", str(env.secondary_geojson)

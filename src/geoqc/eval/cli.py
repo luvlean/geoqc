@@ -286,9 +286,18 @@ def discrepancies(
     counts: dict[str, int] | None = None
     counts_source: str | None = None
     notes: list[str] = []
+    n_not_in_queue: int | None = None
     try:
         rows, counts_source = _load_discrepancy_rows(paths, from_geojson, model_version)
         counts = counts_by_class(rows)
+        checked = df.loc[df["verdict"].notna(), "id"]
+        n_not_in_queue = int((~checked.isin(rows["id"])).sum())
+        if n_not_in_queue:
+            notes.append(
+                f"{n_not_in_queue} of {len(checked)} verified ids are not in the current queue "
+                f"({counts_source}): it was rebuilt after the sample; re-run `geoqc eval "
+                "verification-sample` and verify the new sample"
+            )
     except EvalInputError as exc:
         notes.append(f"counts_by_class unavailable: {exc}")
     if result["invalid_verdicts"]:
@@ -303,6 +312,7 @@ def discrepancies(
         "counts_by_class": counts,
         "counts_source": counts_source,
         "gate_precision_at_n": int(ecfg["gate_precision_at_n"]),
+        "n_not_in_queue": n_not_in_queue,
         **result,
         "notes": notes,
     }

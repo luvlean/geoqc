@@ -357,6 +357,11 @@ def build_metrics(
         for g in metrics["gates"].values():
             if str(g.get("metric", "")).startswith(f"detection.{split}."):
                 g["note"] = f"{g['note']}; {stale}" if g.get("note") else stale
+    if disc and disc.get("n_not_in_queue"):
+        stale = f"{disc['n_not_in_queue']} verified ids are not in the current queue"
+        for g in metrics["gates"].values():
+            if str(g.get("metric", "")).startswith("discrepancies."):
+                g["note"] = f"{g['note']}; {stale}" if g.get("note") else stale
     metrics["inputs"] = inputs
     return metrics
 
