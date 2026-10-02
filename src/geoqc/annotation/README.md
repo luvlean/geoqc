@@ -22,18 +22,44 @@ geoqc annotation validate --split val|test [--strict]  # → reports/annotation.
 
 Все команды принимают `--labels-dir` и `--tiles-index` для тестов. Make-цели: `labels-prep`, `labels-validate`.
 
-## Файлы
+## Логика модуля
 
-| Файл | Что делает |
-|---|---|
-| `common.py` | пути, чтение тайлов и сплита, метрическая CRS, поля меток `LABEL_PROPERTIES` |
-| `select_tiles.py` | стратифицированный отбор тайлов и сплит val/test, подмножество повтора |
-| `pre_annotate.py` | обрезка вторичных контуров или детекций по тайлам сплита |
-| `qgis_project.py` | рабочий GeoPackage, стили `.qml`, спецификация слоёв |
-| `_qgis_build_project.py` | запускается интерпретатором QGIS.app и собирает `.qgz` |
-| `finalize.py` | нормализация: `make_valid`, MultiPolygon, привязка к тайлу, обрезка, фильтр площади |
-| `validate.py` | проверки меток и G2 |
-| `cli.py` | Typer-команды |
+Порядок: `make labels-prep` → правка в QGIS → `make labels-validate`.
+
+1. **Отбор тайлов** — `select_tiles.select_tiles`. `tile_features` считает по OSM долю площади групп тегов, плотность
+   застройки и средний размер контура. `classify_tile` назначает страту (`None` — не кандидат). Затем `sample_tiles`:
+   квоты по `_allocate`, без соседей (`_is_adjacent`), деление на val/test внутри страты. `pick_recheck` выбирает тайлы
+   повторной разметки.
+2. **Предразметка** — `pre_annotate.pre_annotate`. `resolve_source` берёт `secondary` или `detections` (OSM запрещён),
+   `clip_to_tiles` режет контуры по тайлам сплита, `with_label_properties` ставит `source=pre_annotation, verified=false`.
+   Существующий `draft.geojson` без `--force` не перезаписывается.
+3. **Рабочее место QGIS** — `qgis_project.build_workspace`:
+   - `create_work_gpkg` создаёт `work.gpkg` со слоем `buildings` из черновика и пустым `recheck`; прежний файл копируется в `.bak`;
+   - `write_tiles_frame` и `write_styles` пишут рамки тайлов и стили `.qml`;
+   - `build_layer_spec` → `layers.json`;
+   - `find_qgis_python` находит Python из QGIS.app и запускает `_qgis_build_project.py` (без импортов `geoqc`), который собирает `.qgz`;
+   - без QGIS команда выводит `fallback_instructions`.
+4. **Человек** правит контуры и ставит `verified=true`.
+5. **Выгрузка** — `finalize.finalize_split` → `normalise_labels`:
+   - `make_valid` и приведение к MultiPolygon;
+   - тайл по наибольшему перекрытию и обрезка по нему;
+   - отсев объектов меньше `min_area_m2`, нормализация полей.
+
+   Результат — `buildings.geojson` и `recheck.geojson`, прежняя версия копируется в `.bak`.
+6. **Приёмка** — `validate.validate_split`:
+   - `check_labels` собирает ошибки и предупреждения;
+   - `compute_agreement` считает G2 на тайлах повтора (`match_pairs` — жадно по IoU, затем `agreement_metrics`);
+   - `_aggregate` сводит сплиты в `reports/annotation.json`.
+
+   Код выхода 1, если сплит `rejected`.
+
+`common.py` содержит общее: `Paths`, чтение тайлов и сплита, `metric_crs`, ввод-вывод GeoJSON, набор полей `LABEL_PROPERTIES`. `cli.py` — Typer-команды.
+
+Инварианты: OSM не попадает в эталон; метки — EPSG:4326, MultiPolygon, поля §3.5; отбор детерминирован (`seed`);
+`--split test` передаётся только явно.
+
+Где менять: правила страт — `classify_tile` и `config/annotation.yaml`; новые проверки — `check_labels` (новый код ошибки
+добавить в список ниже); стили QGIS — `write_styles`; формула G2 — `validate.agreement_metrics`.
 
 ## Отбор тайлов
 
@@ -77,7 +103,7 @@ G2 считается на тайлах повтора:
 
 ## Правила для агентов
 
-- Модуль не читает `data/labels/test/` вне команд, которым явно передан `--split test`. CV Agent эти файлы не читает никогда.
+- Модуль не читает `data/labels/test/` вне команд, которым явно передан `--split test`. Модуль `cv` эти файлы не читает никогда.
 - OSM не может быть источником предразметки: `pre-annotate` принимает только `secondary` и `detections`.
 - `work.gpkg` не перезаписывается без `--force`, прошлая версия сохраняется как `.bak`.
 - Тесты — `tests/annotation/`, синтетика. Сборка `.qgz` проверяется, только если установлен QGIS.app.

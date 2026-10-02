@@ -69,7 +69,7 @@ def parse_srid(value: Any) -> int | None:
 
 def utm_epsg_for(lon: float, lat: float) -> int:
     """UTM zone EPSG for a lon/lat (falls back to a local implementation of the standard rule)."""
-    try:  # Data Agent helper, docs/CONTRACTS.md §3.1
+    try:  # geoqc.data helper, docs/CONTRACTS.md §3.1
         from geoqc.data.crs import utm_epsg_for as _impl
 
         return int(_impl(lon, lat))

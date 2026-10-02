@@ -7,14 +7,41 @@
 **Запрет.** Модуль никогда не читает разметку сплита `test` (каталог `data/labels/<split>/` для `split=test`): нет ни одного
 пути к нему в коде и ноутбуках (`tests/cv/test_no_test_labels.py`), `assert_not_forbidden()` отклоняет такие пути в
 `export-dataset`, `bundle` проверяет каждое имя в архиве, `threshold-sweep` принимает только `--split val`.
-Инференс `predict --split test` по **тайлам** (растру) разрешён — это нужно Eval Agent.
+Инференс `predict --split test` по **тайлам** (растру) разрешён — это нужно модулю `eval`.
+
+## Логика модуля
+
+Общий слой: `tiles.py` (индекс и чтение тайлов) и `predictor.py` (модель за интерфейсом `Predictor`). Поверх него —
+независимые сценарии:
+
+| Сценарий | Команда | Цепочка |
+|---|---|---|
+| веса | `fetch-weights` | `weights.fetch_weights`: если файл есть, только считается хеш; если нет — скачивание с HF Hub, иначе (если разрешено) COCO-чекпоинт Ultralytics. Затем `model_version_for` → `update_cv_config` + `update_model_card` (уже записанные в автоблок сведения о дообучении сохраняются) |
+| детекция | `predict` | `pipeline.run_predict`: `load_tile_index` → `filter_by_split` → `predict_tiles_raw` (батчи `read_tile` → `Predictor.predict_batch` → `vectorize_masks`) → `vectorize.postprocess` (склейка на перекрытиях, Дуглас–Пекер, фильтр площади) → `write_detections`; с `--to-db` ещё `load_to_db` |
+| датасет | `export-dataset` | `dataset.export_dataset`, только `val`: `split_tiles` (train/holdout по стратам, seed) → `polygon_to_yolo_lines` + `rasterize_mask` → `data/interim/dataset/` |
+| внешний датасет | `fetch-external`, `prepare-external`, `report-external` | `external.fetch_spacenet` (листинг S3 → детерминированная выборка → загрузка с кэшем) → `prepare_spacenet` (`prepare_chip`: UTM 0,3 м, 512 px, растяжка p2–p98, обрезка полигонов) → тот же формат, что у `export-dataset`; `external_report.build_report` строит статистику и рисунки |
+| порог | `threshold-sweep` | `sweep.run_sweep`: один инференс при `conf_floor` → для каждого порога фильтр масок и тот же `postprocess` → `evaluate` (метрики из `eval.detection_metrics`) → `pick_best` → `conf_threshold` в `cv.yaml` |
+| Colab | `bundle` | `bundle.build_bundle`: тайлы, разметка val, конфиги, исходники, `data/interim/dataset/` → zip; каждое имя проверяется `is_forbidden_arcname`. SpaceNet в архив не входит, ноутбук скачивает его сам |
+
+Само обучение идёт не в модуле, а в `notebooks/train_finetune.ipynb`. Ноутбук импортирует `geoqc.cv`, всегда стартует с
+исходных весов `models/yolov8m-building-seg.pt` и записывает веса, `model_version`, `conf_threshold` и карточку модели.
+
+Инварианты:
+
+- разметка test недоступна (см. «Запрет» выше);
+- геометрия считается в UTM тайла, на выходе — EPSG:4326, MultiPolygon, поля `score, model_version, tile_id`;
+- инференс детерминирован (`seed_everything`), бэкенд меняется только через `build_predictor`;
+- `predict --to-db` заменяет весь слой `buildings_det`: в БД одна модель.
+
+Где менять: новый бэкенд — `predictor.py` + `build_predictor`; постобработка — `vectorize.py` и `config/cv.yaml →
+vectorize`; формат датасета — `dataset.py` (SpaceNet повторяет его в `external.py`); состав архива — `bundle.py`.
 
 ## Входы и выходы
 
 | Вход | Откуда |
 |---|---|
-| `data/tiles/{row}_{col}.tif` (512×512, overlap 64, UTM, nodata 0) + `data/tiles/tiles.gpkg` | Data Agent (`geoqc data tile`); без gpkg индекс восстанавливается по именам файлов |
-| `data/labels/tiles_split.csv` (`tile_id,split,stratum,row,col`) | Annotation Agent (`select-tiles`) |
+| `data/tiles/{row}_{col}.tif` (512×512, overlap 64, UTM, nodata 0) + `data/tiles/tiles.gpkg` | `geoqc data tile`; без gpkg индекс восстанавливается по именам файлов |
+| `data/labels/tiles_split.csv` (`tile_id,split,stratum,row,col`) | `geoqc annotation select-tiles` |
 | `data/labels/val/buildings.geojson` (`verified=true`) | студент в QGIS |
 | веса `models/*.pt` | `geoqc cv fetch-weights` или ноутбук |
 
@@ -151,7 +178,7 @@ geoqc cv report-external [--per-city 4]
 - `geoqc.data.crs.utm_epsg_for` — используется, если доступен, иначе локальная формула зоны UTM (`tiles.utm_epsg_for`).
 - `geoqc.eval.detection_metrics` — используется в sweep при наличии функций `match_one_to_one`/`precision_recall_f1`
   (`MatchResult.pairs` — тройки `(gt_idx, pred_idx, iou)`); иначе локальная реализация, поле `metrics_impl` в отчёте.
-- Потребители: Geo (`buildings_det`, `model_version`), Annotation (`pre-annotate --source detections`), Eval, App.
+- Потребители: `matching` (`buildings_det`, `model_version`), `annotation` (`pre-annotate --source detections`), `eval`, `api`.
 
 ## Ограничения и известные риски
 
@@ -170,8 +197,9 @@ geoqc cv report-external [--per-city 4]
 
 ## Тесты
 
-`pytest tests/cv -q` — 52 теста на синтетике (два перекрывающихся UTM-тайла с яркими квадратами, `MockPredictor`; без сети
-и весов). Маркеры: `db` (загрузка в `buildings_det`), `slow` (U-Net на случайных весах). Статическая проверка отсутствия
+`pytest tests/cv -q` — 64 теста на синтетике (два перекрывающихся UTM-тайла с яркими квадратами, `MockPredictor`; без сети
+и весов; SpaceNet — на поддельном HTTP-сеансе). Маркеры: `db` (загрузка в `buildings_det`), `slow` (U-Net на случайных
+весах), `network` (реальный бакет SpaceNet). Статическая проверка отсутствия
 ссылок на тестовую разметку — `test_no_test_labels.py`.
 
 ## Что нужно знать следующему агенту

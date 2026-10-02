@@ -6,6 +6,37 @@
 территории (AOI), приводит их к контракту `docs/CONTRACTS.md` §3.1–3.4 и загружает вектор в
 PostGIS (`buildings_ref`). Все числа ниже порождены кодом и лежат в `reports/` и `data/manifest.json`.
 
+## Логика модуля
+
+Цепочка `geoqc data all` (`cli.run_all`). Без `--force` каждый шаг пропускает готовый артефакт.
+
+| # | Шаг | Файл → функция | Что делает |
+|---|---|---|---|
+| 0 | `search-aoi` (разово, вне `all`) | `aoi.search_aoi` | OAM → `evaluate_item` (фильтры) → `score` → `header_check` и `valid_footprint_polygon` по COG → `overpass_density` → `config/aoi.geojson` |
+| 1 | `download` | `download.fetch_source_image` | файл целиком с докачкой по Range или только окно AOI через `/vsicurl/`; sha256 → манифест |
+| 2 | `preprocess` | `preprocess.build_aoi_cog` | перепроецирует в UTM с `target_gsd_m`, маскирует пиксели вне AOI, приводит к RGB uint8, пишет COG; `set_pipeline_metric_crs` заносит `crs.metric` |
+| 3 | `tile` | `tiling.tile_raster` | сетка `grid_positions` 512 px с перекрытием 64; тайлы вне AOI пропускаются; индекс `tiles.gpkg` |
+| 4 | `osm` | `osm.download_osm_buildings` | Overpass с ротацией зеркал и кэшем `data/raw/osm_<date>.json`; way → полигон, relation → `relation_polygon` с `osm_id = -id` |
+| 5 | `secondary` | `secondary.fetch_secondary` | сначала Microsoft (quadkey), иначе Google (S2); без покрытия `secondary.source = null` |
+| 6 | `load-ref` | `loadref.load_features` | `DELETE WHERE source=…` + вставка в `buildings_ref` |
+| 7 | `check-georef` | `georef.check_georef` | смещение снимка относительно OSM по контрольным зданиям → `reports/georef.json` (G1) |
+| 8 | коррекция | `cli.run_all` | при `recommend_shift` (медиана > `apply_shift_over_m` и длина систематического вектора ≥ `min_systematic_shift_m`): `preprocess --shift -dx,-dy`, `tile --force`, повторный `check-georef` |
+
+Состояние между шагами хранится в `data/manifest.json`: `manifest.update_manifest` дописывает секцию шага (`image`, `osm`,
+`secondary`, `georef`, `tiles` …). `crs.py` — единственная реализация выбора зоны UTM. Другие модули импортируют её
+опционально.
+
+Инварианты:
+
+- COG и тайлы — UTM, RGB uint8, nodata 0; `tiles.gpkg` — EPSG:4326, `tile_id = {row}_{col}`.
+- В `config/pipeline.yaml` модуль меняет только `crs.metric` (через ruamel, комментарии сохраняются).
+- `buildings_ref` для одного `source` заменяется целиком. `osm_id` уникален между way и relation.
+- В сеть ходят только `aoi`, `download`, `osm` и `secondary`; их тесты помечены маркером `network`.
+
+Где менять: критерии AOI — `aoi.evaluate_item`, `aoi.score` и `config/data.yaml → search`; размер тайла —
+`config/pipeline.yaml → tiles`; новый второй источник — функция `fetch_*` в `secondary.py` и ветка в
+`fetch_secondary`; метод G1 — `georef.py`.
+
 ## Выбор AOI (D-001 → предложение D-001a)
 
 Процедура — `geoqc data search-aoi` (`aoi.py`), отчёт — `reports/aoi_candidates.json`:
@@ -147,6 +178,12 @@ geoqc data preprocess --input /path/to/ortho.tif --force && geoqc data tile --fo
 6 реальных записей), идемпотентность `load-ref` (маркер `db`, тестовая БД), сетевые тесты —
 маркер `network` (`GEOQC_NETWORK=1`).
 
-## Известные проблемы и что должен знать следующий агент
+## Известные проблемы
 
-(см. раздел, заполняемый по итогам реального прогона ниже)
+- `overpass-api.de` часто отвечает по таймауту, поэтому он последний в `overpass.endpoints`. Ответ кэшируется, повторный
+  `osm` без `--force` в сеть не ходит.
+- Google Open Buildings почти не покрывает Россию, поэтому для российских AOI вторым источником обычно служит
+  Microsoft. Что выбрано на самом деле — в `manifest.secondary`.
+- Снимок и срез OSM разновременны (обе даты есть в манифесте): часть расхождений — реальные изменения застройки.
+- G1 сравнивает крышу на снимке с фундаментом в OSM (см. выше). Фактические значения — в `reports/georef.json`.
+- Нативные ортофото OAM весят сотни мегабайт; выше `windowed_over_mb` скачивается только окно AOI.

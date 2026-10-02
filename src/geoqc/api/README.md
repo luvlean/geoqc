@@ -1,9 +1,32 @@
 # geoqc.api — FastAPI-сервис и веб-карта очереди проверки
 
-Модуль T7 (App Agent). Отдаёт очередь расхождений из PostGIS как GeoJSON и MVT, тайлы снимка из COG,
+Модуль отдаёт очередь расхождений из PostGIS как GeoJSON и MVT, тайлы снимка из COG,
 статику Leaflet-карты (`web/`) и прокси подложки Esri без передачи ключа клиенту (DECISIONS D-002).
 Контракт API — `docs/CONTRACTS.md §8`, формат экспорта — §3.8, схема БД — `sql/001_schema.sql`
 (+ вспомогательные таблицы `sql/002_matching.sql`, D-012).
+
+## Логика модуля
+
+| Файл | Роль |
+|---|---|
+| `main.py` | `create_app()` собирает `AppContext` в `app.state.ctx`, открывает и закрывает пул в `lifespan`, подключает роутеры, статику `web/` монтирует последней на `/`. Модульный `app` нужен uvicorn; тесты вызывают `create_app` с тестовым DSN и временными путями |
+| `deps.py` | `load_api_config` (`config/api.yaml` поверх `DEFAULT_CONFIG`), `AppContext` (конфиг, DSN, пул psycopg, пути к AOI, манифесту, COG и `web/`), зависимость `get_ctx` |
+| `schemas.py` | Pydantic-модели ответов и разбор параметров (`BBox`, `parse_csv_enum`, `DiscrepancyFilter`); `ExportProperties` — ровно поля §3.8 |
+| `routes/discrepancies.py` | `parse_filters` → `build_where` (только связанные параметры) → список, карточка, `PATCH` статуса, экспорт |
+| `routes/tiles.py` | `build_mvt_query`: один SQL с `ST_AsMVT` по слоям `discrepancies`, `buildings_ref`, `buildings_det` (подавленные детекции исключены) |
+| `routes/imagery.py` | PNG-тайлы из `aoi_cog.tif` через rio-tiler; вне покрытия — прозрачный тайл |
+| `routes/meta.py` | `/health`, `/stats`, `/config/map` (центр AOI, атрибуции, подложки), прокси Esri с ключом на сервере |
+| `cli.py` | `serve` (uvicorn) и `bench` (синтетические строки в тестовой БД, замер `GET /discrepancies`) |
+| `web/` (в корне репозитория) | `index.html`, `app.js`, `style.css`: Leaflet + VectorGrid, список топ-N, карточка, кнопки статуса, экспорт |
+
+Путь запроса: роутер получает `AppContext` через `Depends(get_ctx)`, берёт соединение из пула, выполняет SQL с
+параметрами и возвращает pydantic-модель или GeoJSON. Если БД недоступна, все ручки, кроме `/health`, отвечают 503.
+
+Инварианты: API пишет только `discrepancies.status` и `updated_at`; ключ Esri клиенту не уходит; пользовательский ввод
+не подставляется в SQL строкой; сервис запускается без данных и отключает только то, чего нет.
+
+Где менять: новый эндпоинт — роутер в `routes/`, подключение в `main.create_app`, строка в §8 контрактов; новый
+фильтр — `schemas.DiscrepancyFilter` и `build_where`; поведение карты — `web/app.js`.
 
 ## Запуск
 
@@ -132,14 +155,14 @@ discrepancies_geom_gist` (2.5 ms). Индексы `001_schema.sql` (`geom` GiST,
 
 ## Зависимости и ограничения
 
-- Модули: читает таблицы Geo (`discrepancies`, `matches` не используется, `det_suppressed`,
-  `discrepancy_features`), Data (`config/aoi.geojson`, `data/manifest.json`, `data/interim/aoi_cog.tif`),
-  CV (`buildings_det`). Ничего не пишет, кроме `discrepancies.status/updated_at`.
+- Модули: читает таблицы `matching` (`discrepancies`, `matches` не используется, `det_suppressed`,
+  `discrepancy_features`), `data` (`config/aoi.geojson`, `data/manifest.json`, `data/interim/aoi_cog.tif`),
+  `cv` (`buildings_det`). Ничего не пишет, кроме `discrepancies.status/updated_at`.
 - Пакеты: fastapi, uvicorn, pydantic 2, psycopg[pool], rio-tiler, rasterio, shapely, pyyaml, requests
   (прокси Esri; httpx есть только в dev). Всё уже в `requirements.txt`.
 - `ref_osm_id` — ссылка на OSM: положительный id → `way/<id>`, отрицательный → `relation/<-id>`
-  (Data хранит мультиполигоны-relation с отрицательным `osm_id`, см. `data/osm.py`).
+  (`data` хранит мультиполигоны-relation с отрицательным `osm_id`, см. `data/osm.py`).
 - MVT-тайлы кэшируются 60 с; после `PATCH` клиент обновляет стиль объекта локально
   (`setFeatureStyle`), полная перезагрузка тайлов — по кнопке «Обновить» или при смене фильтров.
-- Docker-сервис `app` и `make demo` — у Orchestrator; нужен только `geoqc api serve` и
-  `geoqc.api.main:app`.
+- Docker-сервис `app` и `make demo` описаны в `docker-compose.yml` и `Makefile`; от модуля им нужны только
+  `geoqc api serve` и `geoqc.api.main:app`.

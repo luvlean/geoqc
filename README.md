@@ -37,6 +37,27 @@ flowchart LR
 
 Подробно: [docs/architecture.md](docs/architecture.md). Формулы: [docs/metrics_and_formulas.md](docs/metrics_and_formulas.md).
 
+## Модули и зачем они нужны
+
+| Модуль | Зачем нужен | Что даёт следующим шагам |
+|---|---|---|
+| `geoqc.data` | Готовит общую основу: открытый снимок и здания OSM в одной метрической системе координат, снимок нарезан на тайлы. Проверяет, совпадает ли привязка снимка с картой (G1): при сдвиге все расхождения были бы ложными | тайлы, `buildings_ref`, `manifest.json`, `crs.metric` |
+| `geoqc.annotation` | Создаёт ручной эталон зданий — единственную честную истину для метрик (OSM сам проверяется, поэтому эталоном быть не может) — и проверяет его согласованность (G2) | `tiles_split.csv`, `buildings.geojson` для val и test |
+| `geoqc.cv` | Находит здания на снимке и превращает маски в полигоны. Ведёт веса, `model_version`, подбор порога, датасеты для дообучения и архив для Colab | `detections.geojson`, `buildings_det` |
+| `geoqc.matching` | Превращает две карты в очередь работы: сопоставляет детекции с OSM 1:1, делит расхождения на три класса и ранжирует по уверенности | `matches`, `discrepancies`, `reports/discrepancies.geojson` |
+| `geoqc.eval` | Считает все числа отчёта: качество детекции (G3–G5), точность очереди по ручной проверке (G6, G7), анализ ошибок, сравнение со вторым источником, итоговые гейты | `reports/metrics*.json`, `error_analysis.md` |
+| `geoqc.api` + `web/` | Даёт валидатору работать с очередью: карта, фильтры, карточка, «Принять / Отклонить», экспорт для MapRoulette и JOSM | HTTP API, веб-карта |
+| ядро (`config.py`, `db.py`, `cli.py`) | Общий конфиг, доступ к PostGIS, единая команда `geoqc` | — |
+
+Вне пакета:
+
+- `sql/` — схема БД и SQL-функции сопоставления;
+- `notebooks/train_finetune.ipynb` — дообучение модели на основе `geoqc.cv`;
+- `config/` — параметры модулей и пороги гейтов.
+
+Для агентов: связи модулей и общие правила — [src/geoqc/README.md](src/geoqc/README.md); логика каждого модуля по файлам и
+функциям — раздел «Логика модуля» в его README.
+
 ## Быстрый старт
 
 Требования: Python 3.11, Docker (PostGIS), GNU make ≥ 3.81, QGIS (для правки разметки). Порт PostGIS — **5433** (D-010).
@@ -141,6 +162,7 @@ PLAN.md  DECISIONS.md  LOG.md  README.md
 - План ведения документации: [docs/DOCUMENTATION_PLAN.md](docs/DOCUMENTATION_PLAN.md)
 - Разметка: `docs/annotation/PROTOCOL.md`, `docs/annotation/INSTRUCTION_QGIS.md`, `data/labels/README.md`
 - Ноутбук обучения: `notebooks/README.md` · Карточка модели: `models/MODEL_CARD.md`
+- Пакет и связи модулей: [src/geoqc/README.md](src/geoqc/README.md)
 - README модулей: `src/geoqc/data/README.md`, `src/geoqc/annotation/README.md`, `src/geoqc/cv/README.md`, `src/geoqc/matching/README.md`, `src/geoqc/eval/README.md`, `src/geoqc/api/README.md`
 - Отчёт QA: `docs/qa/`
 - Пояснительная записка: [docs/thesis/00_outline.md](docs/thesis/00_outline.md) · Презентация: [docs/presentation/outline.md](docs/presentation/outline.md)

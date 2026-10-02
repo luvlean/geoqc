@@ -1,17 +1,42 @@
 # geoqc.matching — сопоставление, классификация расхождений, скоринг
 
-Модуль Geo Agent (ТЗ T5, `docs/tasks/05_geo.md`). Заполняет таблицы `matches` и `discrepancies`
+ТЗ — `docs/tasks/05_geo.md`. Модуль заполняет таблицы `matches` и `discrepancies`
 (`sql/001_schema.sql`) по детекциям `buildings_det` и эталону `buildings_ref`, считает `confidence`
 и экспортирует очередь проверки в `reports/discrepancies.geojson` (контракт §3.8).
+
+## Логика модуля
+
+Python управляет шагами, геометрию считает SQL (`sql/002_matching.sql`).
+
+| Файл | Роль |
+|---|---|
+| `cli.py` | `init-db` (`db.apply_schema`), `run` (одна транзакция `db.connect` → `matcher.run_matching`), `export`, `stats` |
+| `matcher.py` | `run_matching`: `resolve_model_version` (неизвестная версия — ошибка) → `resolve_metric_srid` → граничные случаи → назначение 1:1 (`match_greedy_sql` или `hungarian_assign` по кластерам + `write_matches`) → `classify` (SQL `geoqc_classify`) → `score_discrepancies` |
+| `edge_cases.py` | обёртки над SQL: `split_multipart_detections`, `dedup_detections` (NMS → `det_suppressed`), `load_aoi_geojson` |
+| `scoring.py` | чистые функции: `Features` → `confidence` по формуле класса. Веса из `config/matching.yaml` нормируются к 1; если второго источника нет, его член отбрасывается |
+| `export.py` | `fetch_features` → `reports/discrepancies.geojson` с сортировкой `confidence DESC` |
+
+Данные проходят так: `buildings_ref` + `buildings_det` нужной версии → `matches` → `discrepancies` + `discrepancy_features`. Признаки
+считает SQL (`geoqc_discrepancy_features`), формулу применяет Python. Поэтому скоринг тестируется на числах без БД.
+
+Инварианты:
+
+- `run` идемпотентен по `model_version`: строки этой версии пересоздаются, строки других версий не трогаются;
+- эталон — только `source='osm'`; `microsoft`/`google` служат лишь признаком для скоринга;
+- id расхождений — BIGSERIAL, поэтому после нового `run` они другие, а статусы и вердикты старой очереди не переносятся.
+
+Где менять: пороги и веса — `config/matching.yaml`; классификация и признаки — функции `sql/002_matching.sql`
+(`CREATE OR REPLACE`, применяются через `make db-init`); формулы `confidence` — `scoring.py` и тесты на числах в
+`tests/matching/test_scoring.py`.
 
 ## Входы и выходы
 
 | Вход | Откуда |
 |---|---|
-| `buildings_ref` (`source='osm'` — эталон; `microsoft`/`google` — только для скоринга) | Data Agent, `geoqc data load-ref` |
-| `buildings_det` (`model_version`, `score`) | CV Agent, `geoqc cv predict --to-db` |
-| `config/pipeline.yaml → crs.metric` (UTM EPSG) | Data Agent; fallback: `data/manifest.json → aoi.utm_epsg`, опция `--metric-srid`, центроид данных |
-| `config/aoi.geojson` (опционально) | Data Agent; без файла краевая обработка AOI выключена |
+| `buildings_ref` (`source='osm'` — эталон; `microsoft`/`google` — только для скоринга) | `geoqc data load-ref` |
+| `buildings_det` (`model_version`, `score`) | `geoqc cv predict --to-db` |
+| `config/pipeline.yaml → crs.metric` (UTM EPSG) | `geoqc data preprocess`; запасные варианты: `data/manifest.json → aoi.utm_epsg`, опция `--metric-srid`, центроид данных |
+| `config/aoi.geojson` (опционально) | `geoqc data search-aoi`; без файла краевая обработка AOI выключена |
 | `config/matching.yaml` | этот модуль |
 
 | Выход | Что |
@@ -176,4 +201,4 @@ ref без det, две детекции на один эталон (без де�
 - `geometry_mismatch` не обязан быть 1:1 — два det могут указывать на один ref (два предложения контура).
 - `has_secondary` — глобальный признак (есть ли вообще строки `microsoft`/`google`); частичное покрытие AOI вторым
   источником занижает `agree_secondary` там, где его нет.
-- Реальный прогон на данных AOI ещё не выполнялся (таблицы были пусты на момент сдачи) — см. `LOG.md`.
+- Актуальные числа прогона на AOI — `geoqc matching stats` и `reports/discrepancies.geojson`.

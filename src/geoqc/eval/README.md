@@ -8,6 +8,37 @@
 
 Формулы — в [docs/metrics_and_formulas.md](../../../docs/metrics_and_formulas.md): §1–4 детекция, §7–8 precision и Precision@N, §12 гейты.
 
+## Логика модуля
+
+| Файл | Роль |
+|---|---|
+| `common.py` | `EvalPaths` (все входы и выходы, переопределяются из CLI), настройки поверх `EVAL_DEFAULTS`, метрическая CRS, чтение сплита и тайлов, `write_json` (NaN → `null`) |
+| `detection_metrics.py` | Чистые формулы: `iou`, `match_one_to_one` (жадный или венгерский), `precision_recall_f1`, `mean_iou`. `evaluate_split`: эталон сплита → детекции обрезаются по тайлам (`clip_to_tiles`) → пары 1:1 → итог, разбивка по тайлам и стратам. `val_training_note` помечает тайлы val, ушедшие в обучение |
+| `discrepancy_metrics.py` | Очередь из БД (или из `discrepancies.geojson`) → `stratified_sample` → CSV для проверки. `verification_metrics` — precision по классам и Precision@N |
+| `error_analysis.py` | `analyse` (FP/FN по тайлам и стратам, край тайла, сложные крыши, плотность, яркость и ExG по растру) → рисунки → `build_markdown` |
+| `compare_secondary.py` | Детекции и футпринты второго источника против эталона test; `count_copies` находит неправленые черновики |
+| `georef.py` | Переносит `reports/georef.json` в блок G1 |
+| `gates.py` | `build_metrics` сводит промежуточные отчёты в схему §3.9 и вызывает `evaluate_gates` по `quality_gates.yaml`. Добавляет пометки: метрики от другой модели, вердикты не из текущей очереди |
+| `cli.py` | Команды. Test оценивается один раз: повтор — код 3, либо `--force --reason`; попытки пишутся в `metrics_test.runs.log` |
+
+Порядок работы:
+
+1. `detection val|test` → `metrics_<split>.json`.
+2. `verification-sample` → CSV → человек ставит вердикты → `discrepancies` → `metrics_discrepancies.json`.
+3. `error-analysis` и `compare-secondary`.
+4. `gates` читает всё вышеперечисленное и пишет `metrics.json`.
+
+Код других модулей не вызывается (кроме опционального `data.crs`); входы — только файлы `data/`, `reports/` и, если есть, БД.
+
+Инварианты: пропущенный вход даёт `actual: null, passed: false`, а не выдуманное число; test оценивается один раз;
+модуль ничего не обучает и не меняет данные.
+
+Где менять:
+
+- новая метрика детекции — `detection_metrics.py` + `detection_summary`;
+- новый гейт — `config/quality_gates.yaml` и сборка блока в `gates.build_metrics`;
+- параметры выборки и анализа — `config/eval.yaml`.
+
 ## Команды
 
 ```bash

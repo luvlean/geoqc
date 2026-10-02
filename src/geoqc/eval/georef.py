@@ -1,4 +1,4 @@
-"""Read ``reports/georef.json`` (Data Agent) into the ``georeference`` block of metrics.json (G1)."""
+"""Read ``reports/georef.json`` (``geoqc data check-georef``) into the ``georeference`` block of metrics.json (G1)."""
 
 from __future__ import annotations
 
