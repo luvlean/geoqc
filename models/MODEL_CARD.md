@@ -15,7 +15,7 @@
 | source | https://huggingface.co/keremberke/yolov8m-building-segmentation |
 | license | no licence tag on the model repo; derivative of Ultralytics yolov8m-seg (AGPL-3.0); training data Roboflow 'Buildings Instance Segmentation' (CC BY 4.0) |
 | fallback (COCO, no building class) | no |
-| fetched_at | 2026-09-26T16:46:22+00:00 |
+| fetched_at | 2026-10-03T07:50:01+00:00 |
 <!-- weights:end -->
 
 ## Источник весов
