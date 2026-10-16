@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 
+import click
 from typer.testing import CliRunner
 
 from geoqc.cli import app as root_app
@@ -13,8 +14,10 @@ def test_serve_help_lists_required_options():
     """`geoqc api serve --help` показывает --host, --port и --reload."""
     result = CliRunner().invoke(root_app, ["api", "serve", "--help"])
     assert result.exit_code == 0, result.output
+    # On GitHub Actions typer forces rich colors; ANSI codes split option names.
+    output = click.unstyle(result.output)
     for opt in ("--host", "--port", "--reload"):
-        assert opt in result.output
+        assert opt in output
 
 
 def test_asgi_app_importable():
