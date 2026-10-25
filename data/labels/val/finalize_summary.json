@@ -1,0 +1,21 @@
+{
+  "split": "val",
+  "metric_crs": "EPSG:32636",
+  "layers": {
+    "buildings": {
+      "n_input": 166,
+      "dropped_empty": 0,
+      "dropped_small": 40,
+      "clipped": 26,
+      "tile_reassigned": 0,
+      "n_output": 126,
+      "n_verified": 126,
+      "output": "data/labels/val/buildings.geojson"
+    },
+    "recheck": {
+      "n_input": 0,
+      "output": null
+    }
+  },
+  "input": "data/labels/val/work.gpkg"
+}

@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0",
+  "splits": {
+    "val": {
+      "labels": "data/labels/val/buildings.geojson",
+      "recheck": "data/labels/val/recheck.geojson",
+      "metric_crs": "EPSG:32636",
+      "stats": {
+        "n_features": 126,
+        "n_verified": 126,
+        "n_tiles": 11,
+        "n_tiles_with_labels": 11,
+        "tiles_without_labels": [],
+        "per_tile": {
+          "12_17": 46,
+          "13_20": 11,
+          "16_14": 1,
+          "16_9": 6,
+          "17_11": 10,
+          "3_19": 11,
+          "4_15": 2,
+          "6_19": 1,
+          "7_4": 8,
+          "7_7": 1,
+          "8_18": 29
+        },
+        "area_m2": {
+          "min": 12.25922442865536,
+          "median": 62.85292027514133,
+          "max": 6617.966726016541
+        },
+        "sources": {
+          "manual": 110,
+          "pre_annotation": 16
+        }
+      },
+      "agreement": null,
+      "status": "accepted",
+      "errors_by_code": {},
+      "warnings_by_code": {
+        "recheck_missing": 1
+      },
+      "errors": [],
+      "warnings": [
+        {
+          "code": "recheck_missing",
+          "message": "recheck.geojson not found: G2 not computed for val"
+        }
+      ],
+      "n_errors": 0,
+      "n_warnings": 1
+    }
+  },
+  "generated_at": "2026-10-24T11:02:03+00:00",
+  "config": {
+    "min_area_m2": 12.0,
+    "iou_match": 0.5,
+    "pair_min_iou": 0.0,
+    "overlap_error_ratio": 0.5,
+    "tile_tolerance_m": 0.5,
+    "recheck_fraction": 0.1
+  },
+  "annotation": {
+    "agreement_iou": null,
+    "agreement_f1": null,
+    "n_checked": 0
+  },
+  "gates": {
+    "G2": {
+      "target": 0.8,
+      "op": ">=",
+      "actual": null,
+      "passed": false,
+      "note": "recheck.geojson missing: G2 not computed"
+    }
+  }
+}

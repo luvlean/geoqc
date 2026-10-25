@@ -11,8 +11,8 @@ weights:
   sha256: 1996bc046edf98fe7f5f63c0df8e5c7b61968437252042fb1394c027f2f9c656 # filled by fetch-weights
   is_fallback: false
 model_version: yolov8m-building-seg-1996bc04 # filled by fetch-weights: "<model_name>-<sha256[:8]>"
-conf_threshold: 0.25              # tuned on val by threshold-sweep (never on test)
-conf_threshold_split:             # split the threshold was tuned on (val) and when
+conf_threshold: 0.2               # tuned on val by threshold-sweep (never on test)
+conf_threshold_split: val @ 2026-10-24T11:03:08+00:00 # split the threshold was tuned on (val) and when
 nms_iou: 0.5
 imgsz: 512
 batch: 8
