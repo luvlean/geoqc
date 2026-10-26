@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-10-26T22:12:45+00:00",
+  "git_commit": "da41577b9fcb56a126d6143a0b82d28e23e0cca5",
+  "verification_path": "reports/verification.csv",
+  "counts_by_class": {
+    "missing_in_map": 966,
+    "missing_on_image": 305,
+    "geometry_mismatch": 161
+  },
+  "counts_source": "db:discrepancies",
+  "gate_precision_at_n": 20,
+  "n_not_in_queue": 0,
+  "n_rows": 50,
+  "n_checked": 50,
+  "n_unchecked": 0,
+  "invalid_verdicts": [],
+  "verified_by_class": {
+    "missing_in_map": {
+      "n": 18,
+      "unsure": 0,
+      "true_error": 8,
+      "model_error": 10,
+      "image_issue": 0,
+      "precision": 0.4444444444444444
+    },
+    "missing_on_image": {
+      "n": 16,
+      "unsure": 0,
+      "true_error": 9,
+      "model_error": 7,
+      "image_issue": 0,
+      "precision": 0.5625
+    },
+    "geometry_mismatch": {
+      "n": 16,
+      "unsure": 0,
+      "true_error": 10,
+      "model_error": 6,
+      "image_issue": 0,
+      "precision": 0.625
+    }
+  },
+  "precision_overall": 0.54,
+  "overall": {
+    "n": 50,
+    "unsure": 0,
+    "true_error": 27,
+    "model_error": 23,
+    "image_issue": 0,
+    "precision": 0.54
+  },
+  "precision_at_n": {
+    "10": {
+      "n": 10,
+      "n_available": 10,
+      "complete": true,
+      "true_error": 6,
+      "unsure": 0,
+      "value": 0.6,
+      "value_incl_unsure": 0.6
+    },
+    "20": {
+      "n": 20,
+      "n_available": 20,
+      "complete": true,
+      "true_error": 11,
+      "unsure": 0,
+      "value": 0.55,
+      "value_incl_unsure": 0.55
+    },
+    "50": {
+      "n": 50,
+      "n_available": 50,
+      "complete": true,
+      "true_error": 27,
+      "unsure": 0,
+      "value": 0.54,
+      "value_incl_unsure": 0.54
+    }
+  },
+  "notes": []
+}

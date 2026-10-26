@@ -1,0 +1,29 @@
+{
+  "sample_size_target": 50,
+  "per_class_min": 15,
+  "top_k_global": 20,
+  "seed": 42,
+  "n_available": 1432,
+  "n_selected": 50,
+  "available_by_class": {
+    "missing_in_map": 966,
+    "missing_on_image": 305,
+    "geometry_mismatch": 161
+  },
+  "selected_by_class": {
+    "missing_in_map": 18,
+    "missing_on_image": 16,
+    "geometry_mismatch": 16
+  },
+  "selected_by_reason": {
+    "class_random": 12,
+    "class_top": 13,
+    "fill_random": 5,
+    "top_global": 20
+  },
+  "short_classes": [],
+  "generated_at": "2026-10-26T15:47:23+00:00",
+  "source": "db:discrepancies",
+  "model_version": null,
+  "output": "reports/verification_sample.csv"
+}
