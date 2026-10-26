@@ -49,9 +49,60 @@
       ],
       "n_errors": 0,
       "n_warnings": 1
+    },
+    "test": {
+      "labels": "data/labels/test/buildings.geojson",
+      "recheck": "data/labels/test/recheck.geojson",
+      "metric_crs": "EPSG:32636",
+      "stats": {
+        "n_features": 190,
+        "n_verified": 190,
+        "n_tiles": 13,
+        "n_tiles_with_labels": 13,
+        "tiles_without_labels": [],
+        "per_tile": {
+          "10_18": 49,
+          "10_2": 40,
+          "10_20": 16,
+          "10_4": 13,
+          "12_7": 9,
+          "13_15": 11,
+          "13_9": 3,
+          "19_11": 4,
+          "1_13": 14,
+          "1_18": 9,
+          "3_21": 10,
+          "5_4": 10,
+          "8_14": 2
+        },
+        "area_m2": {
+          "min": 12.004252702304926,
+          "median": 53.96303924978204,
+          "max": 4171.953570955519
+        },
+        "sources": {
+          "manual": 183,
+          "pre_annotation": 7
+        }
+      },
+      "agreement": null,
+      "status": "accepted",
+      "errors_by_code": {},
+      "warnings_by_code": {
+        "recheck_missing": 1
+      },
+      "errors": [],
+      "warnings": [
+        {
+          "code": "recheck_missing",
+          "message": "recheck.geojson not found: G2 not computed for test"
+        }
+      ],
+      "n_errors": 0,
+      "n_warnings": 1
     }
   },
-  "generated_at": "2026-10-24T11:02:03+00:00",
+  "generated_at": "2026-10-26T15:45:35+00:00",
   "config": {
     "min_area_m2": 12.0,
     "iou_match": 0.5,
