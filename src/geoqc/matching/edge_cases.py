@@ -27,6 +27,27 @@ def dedup_detections(
         return int(cur.fetchone()["n"])
 
 
+def suppress_small_detections(
+    conn: psycopg.Connection,
+    model_version: str,
+    metric_srid: int,
+    min_area_m2: float,
+    nested_cover: float,
+    nested_max_ratio: float,
+    iou_match: float,
+) -> int:
+    """Suppress detections below ``min_area_m2`` and small ones nested in a larger detection.
+
+    A nested detection that matches a reference building (IoU >= ``iou_match``) is kept.
+    """
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT geoqc_suppress_small_detections(%s, %s, %s, %s, %s, %s) AS n",
+            (model_version, metric_srid, min_area_m2, nested_cover, nested_max_ratio, iou_match),
+        )
+        return int(cur.fetchone()["n"])
+
+
 def split_multipart_detections(conn: psycopg.Connection, model_version: str) -> int:
     """Replace multipart detections by one row per part. Returns the number of rows split."""
     with conn.cursor() as cur:

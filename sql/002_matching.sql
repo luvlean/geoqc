@@ -16,6 +16,10 @@ CREATE TABLE IF NOT EXISTS det_suppressed (
     iou           DOUBLE PRECISION NOT NULL
 );
 CREATE INDEX IF NOT EXISTS det_suppressed_model_idx ON det_suppressed (model_version);
+-- Small detections (geoqc_suppress_small_detections) have no partner or IoU; reason tells them apart.
+ALTER TABLE det_suppressed ALTER COLUMN kept_det_id DROP NOT NULL;
+ALTER TABLE det_suppressed ALTER COLUMN iou DROP NOT NULL;
+ALTER TABLE det_suppressed ADD COLUMN IF NOT EXISTS reason TEXT NOT NULL DEFAULT 'nms';
 
 -- Scoring features behind discrepancies.confidence (for error analysis and reproducibility).
 CREATE TABLE IF NOT EXISTS discrepancy_features (
@@ -266,6 +270,69 @@ BEGIN
         n := n + k;
     END LOOP;
     RETURN n;
+END
+$$;
+
+-- Small detections that cannot be a building in the queue, after the multipart split and NMS:
+--   'small'  — area below p_min_area_m2 (the same minimum as cv.vectorize and the annotation;
+--              split parts and make_valid slivers bypass the vectorize filter);
+--   'nested' — at least p_nested_cover of the area lies inside one larger kept detection whose
+--              area is at least 1 / p_nested_max_ratio times bigger (a roof fragment detected on
+--              top of the whole building). A large nested detection stays: it may be a building,
+--              and so does any nested one that matches a reference building (IoU >= p_iou_match):
+--              then the larger one is a merged block around a correctly found building.
+-- Appends to det_suppressed (run after geoqc_dedup_detections). Returns the number suppressed.
+DROP FUNCTION IF EXISTS geoqc_suppress_small_detections(text, integer, double precision, double precision, double precision);
+CREATE OR REPLACE FUNCTION geoqc_suppress_small_detections(
+    p_model_version     text,
+    p_metric_srid       integer,
+    p_min_area_m2       double precision,
+    p_nested_cover      double precision,
+    p_nested_max_ratio  double precision,
+    p_iou_match         double precision
+)
+RETURNS integer
+LANGUAGE plpgsql AS $$
+DECLARE
+    n_small  integer;
+    n_nested integer;
+BEGIN
+    DROP TABLE IF EXISTS _geoqc_det_m;
+    CREATE TEMP TABLE _geoqc_det_m ON COMMIT DROP AS
+        SELECT d.id, d.geom AS geom_wgs, g.geom, ST_Area(g.geom) AS area
+        FROM buildings_det d,
+             LATERAL (SELECT ST_Transform(d.geom, p_metric_srid) AS geom) g
+        WHERE d.model_version = p_model_version
+          AND NOT EXISTS (SELECT 1 FROM det_suppressed s WHERE s.det_id = d.id);
+    CREATE INDEX ON _geoqc_det_m USING gist (geom);
+
+    INSERT INTO det_suppressed (det_id, model_version, kept_det_id, iou, reason)
+    SELECT id, p_model_version, NULL, NULL, 'small'
+    FROM _geoqc_det_m
+    WHERE area < p_min_area_m2
+    ON CONFLICT (det_id) DO NOTHING;
+    GET DIAGNOSTICS n_small = ROW_COUNT;
+
+    INSERT INTO det_suppressed (det_id, model_version, kept_det_id, iou, reason)
+    SELECT DISTINCT ON (x.id) x.id, p_model_version, y.id,
+           ST_Area(ST_Intersection(x.geom, y.geom)) / NULLIF(ST_Area(ST_Union(x.geom, y.geom)), 0), 'nested'
+    FROM _geoqc_det_m x
+    JOIN _geoqc_det_m y
+      ON y.id <> x.id
+     AND y.area >= p_min_area_m2
+     AND x.area <= p_nested_max_ratio * y.area
+     AND ST_Intersects(x.geom, y.geom)
+    WHERE x.area >= p_min_area_m2
+      AND ST_Area(ST_Intersection(x.geom, y.geom)) >= p_nested_cover * x.area
+      AND NOT EXISTS (
+          SELECT 1 FROM buildings_ref r
+          WHERE ST_Intersects(r.geom, x.geom_wgs)
+            AND geoqc_iou(r.geom, x.geom_wgs, p_metric_srid) >= p_iou_match
+      )
+    ORDER BY x.id, y.area DESC
+    ON CONFLICT (det_id) DO NOTHING;
+    GET DIAGNOSTICS n_nested = ROW_COUNT;
+    RETURN n_small + n_nested;
 END
 $$;
 

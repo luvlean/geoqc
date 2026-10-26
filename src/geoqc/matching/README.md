@@ -74,7 +74,11 @@ geoqc matching export
    нескольких частей заменяется строками по одной части (score/model_version/tile_id копируются). Эталонные
    мультиполигоны (OSM-relation) не режутся: IoU считается по всем частям.
 2. **Дедупликация** (`dedup_detections: true`) — `geoqc_dedup_detections`: NMS по убыванию `score`; сосед с
-   IoU > `dedup_iou` (0.7) подавляется и пишется в `det_suppressed`; подавленные не участвуют дальше.
+   IoU > `dedup_iou` (0.7) подавляется и пишется в `det_suppressed` (`reason='nms'`); подавленные не участвуют дальше.
+   **Мелкие детекции** (`suppress_small_detections: true`, D-018) — `geoqc_suppress_small_detections`: части меньше
+   `min_det_area_m2` (12 м², минимум CV и разметки; осколки после разбиения его обходят) → `reason='small'`; детекция,
+   которая на ≥ `nested_cover` лежит внутри другой и не больше `nested_max_area_ratio` её площади, → `reason='nested'`
+   (кусок крыши поверх здания). Вложенная детекция с IoU ≥ `iou_match` к эталону остаётся: тогда большая — склейка квартала.
 3. **Сопоставление 1:1** — кандидаты `geoqc_candidate_pairs`: все пары (osm-ref, det) с `ST_Intersects`
    через GiST, IoU ≥ порога.
    - `greedy` (по умолчанию, SQL `geoqc_match_greedy`): пары с IoU ≥ `iou_match` по убыванию IoU (при равенстве —
@@ -144,6 +148,8 @@ SQL-функции были самодостаточны; `geoqc matching run` �
 | `dedup_iou` | 0.7 | порог NMS между детекциями |
 | `algorithm` | `greedy` | `greedy` \| `hungarian` |
 | `dedup_detections`, `split_multipart_detections` | true | шаги 1–2 |
+| `suppress_small_detections` | true (в коде по умолчанию false) | подавление осколков и вложенных кусков, D-018 |
+| `min_det_area_m2`, `nested_cover`, `nested_max_area_ratio` | 12, 0.8, 0.25 | пороги подавления |
 | `aoi_path`, `aoi_edge_buffer_m`, `aoi_edge_factor` | `config/aoi.geojson`, 10, 0.5 | краевая обработка |
 | `min_area_m2`, `max_area_m2` | 20, 5000 | нормировка площади |
 | `weights.<class>` | см. выше | веса confidence |

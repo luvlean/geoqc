@@ -79,6 +79,46 @@ def test_dedup_chain_is_proper_nms(db, db_conn, cfg):
     assert db.one("SELECT count(*) AS n FROM det_suppressed")["n"] == 1
 
 
+def test_small_and_nested_fragments_are_suppressed(db, db_conn):
+    """Осколок < 12 м² и кусок крыши (≤ 25 % площади) подавляются; крупное вложенное и совпавшее с эталоном — нет."""
+    house = db.det(sq(0, 0, 20, 20), score=0.9)  # 400 m2
+    roof_piece = db.det(sq(2, 2, 8, 8), score=0.5)  # 36 m2 = 9 % of the house, fully inside
+    sliver = db.det(sq(100, 0, 103, 3), score=0.6)  # 9 m2 standalone
+    block = db.det(sq(200, 0, 240, 20), score=0.9)  # 800 m2, a merged block
+    # 320 m2 = 40 % of the block: may be a building
+    inner_house = db.det(sq(202, 2, 222, 18), score=0.8)
+    # 36 m2 inside the block, but it matches a mapped building: IoU = 36 / 39 = 0.92
+    shed = db.det(sq(230, 5, 236, 11), score=0.7)
+    db.ref(sq(230, 5, 236, 11.5), osm_id=7)
+    n = edge_cases.suppress_small_detections(db_conn, MV, METRIC_SRID, 12.0, 0.8, 0.25, 0.5)
+    assert n == 2
+    sup = {
+        r["det_id"]: r for r in db.rows("SELECT det_id, kept_det_id, reason FROM det_suppressed")
+    }
+    assert set(sup) == {roof_piece, sliver}
+    assert (sup[roof_piece]["reason"], sup[roof_piece]["kept_det_id"]) == ("nested", house)
+    assert (sup[sliver]["reason"], sup[sliver]["kept_det_id"]) == ("small", None)
+    assert {house, block, inner_house, shed}.isdisjoint(sup)
+
+
+def test_suppressed_fragments_do_not_reach_the_queue(db, db_conn, cfg):
+    """С suppress_small_detections осколки не становятся missing_in_map; без флага — становятся."""
+    db.det(sq(0, 0, 20, 20), score=0.9)
+    db.det(sq(2, 2, 8, 8), score=0.5)
+    db.det(sq(100, 0, 103, 3), score=0.6)
+    run_matching(db_conn, MV, cfg=cfg)
+    assert db.by_class()["missing_in_map"] == 3
+    cfg["matching"].update(
+        suppress_small_detections=True,
+        min_det_area_m2=12,
+        nested_cover=0.8,
+        nested_max_area_ratio=0.25,
+    )
+    res = run_matching(db_conn, MV, cfg=cfg)
+    assert db.by_class()["missing_in_map"] == 1
+    assert res.n_det_suppressed == 2
+
+
 def test_split_multipart_is_idempotent(db, db_conn):
     """Разбиение мультиполигонов: второй вызов ничего не меняет."""
     from .conftest import multi

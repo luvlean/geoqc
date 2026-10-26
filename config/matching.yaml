@@ -8,6 +8,10 @@ algorithm: greedy         # greedy | hungarian (scipy linear_sum_assignment per 
 
 # Pre-matching edge-case handling (src/geoqc/matching/edge_cases.py)
 dedup_detections: true              # NMS into det_suppressed (buildings_det rows are kept)
+suppress_small_detections: true     # after split + NMS: drop slivers and roof fragments (D-018)
+min_det_area_m2: 12                 # same minimum as cv.vectorize.min_area_m2 and annotation
+nested_cover: 0.8                   # share of a detection inside a larger one ...
+nested_max_area_ratio: 0.25         # ... that is at least 4x bigger -> nested fragment
 split_multipart_detections: true    # one buildings_det row per polygon part before matching
 aoi_path: config/aoi.geojson        # AOI polygon (Data Agent); absent -> no edge handling
 aoi_edge_buffer_m: 10               # subject not covered by AOI shrunk by this buffer -> aoi_edge flag

@@ -393,6 +393,16 @@ def run_matching(
     else:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM det_suppressed WHERE model_version = %s", (mv,))
+    if mcfg.get("suppress_small_detections", False):
+        res.n_det_suppressed += edge_cases.suppress_small_detections(
+            conn,
+            mv,
+            srid,
+            float(mcfg["min_det_area_m2"]),
+            float(mcfg["nested_cover"]),
+            float(mcfg["nested_max_area_ratio"]),
+            iou_match,
+        )
 
     if algo == "greedy":
         match_greedy_sql(conn, mv, srid, iou_match)
