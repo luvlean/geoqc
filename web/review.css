@@ -1,0 +1,14 @@
+/* Tester-only verification panel (web/review.js). */
+.review { background: #fbfbfd; }
+.review h2 .tag { font-size: 10px; padding: 1px 5px; border-radius: 8px; background: #fde68a; color: #92400e; letter-spacing: 0; text-transform: none; }
+#review-next { margin-left: auto; font-size: 12px; padding: 3px 8px; text-transform: none; letter-spacing: 0; }
+.review-list { flex: 1; min-height: 0; }
+.review-list li { grid-template-columns: 26px 10px 1fr auto; }
+.review-list li .n { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+.review-list li .v { font-size: 12px; font-weight: 600; }
+.review-list li .v.none { color: var(--muted); font-weight: normal; }
+.review-verdict { flex: none; margin-bottom: 8px; }
+#review-hint { margin-bottom: 6px; }
+.review-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
+.review-buttons .btn.selected { background: var(--text); border-color: var(--text); color: #fff; }
+#review-comment { width: 100%; padding: 5px 8px; border: 1px solid var(--line); border-radius: 4px; font: inherit; margin-bottom: 6px; }

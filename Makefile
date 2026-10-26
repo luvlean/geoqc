@@ -21,6 +21,7 @@ VERIFICATION   ?= reports/verification.csv
 PYTEST_MARKERS ?= not network and not slow and not gpu
 HOST           ?= 0.0.0.0
 PORT           ?= 8000
+REVIEW         ?=
 # model_version comes from config/cv.yaml (CV Agent). Override: `make match MODEL_VERSION=<v>`.
 # Recursive (?=) on purpose: the shell call runs only when a target references it.
 MODEL_VERSION  ?= $(shell $(PY) -c "from geoqc.config import load_config; print(load_config().get('cv', {}).get('model_version', '') or '')" 2>/dev/null)
@@ -108,8 +109,8 @@ eval: ## Detection metrics (val/test), verification sample, error analysis, gate
 	$(GEOQC) eval compare-secondary
 	$(GEOQC) eval gates
 
-demo: up db-init ## PostGIS + API + web map from the local venv (http://localhost:8000)
-	$(GEOQC) api serve --host $(HOST) --port $(PORT)
+demo: up db-init ## PostGIS + API + web map from the local venv (http://localhost:8000); REVIEW=1 adds the verification panel
+	$(GEOQC) api serve --host $(HOST) --port $(PORT) $(if $(REVIEW),--review)
 
 demo-docker: ## Same via docker compose (builds the app image; APP_PORT in .env, default 8000)
 	$(COMPOSE) up -d --build --wait db app

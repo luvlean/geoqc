@@ -4,6 +4,9 @@
 (function () {
   "use strict";
 
+  // "?v=..." from index.html (server-side cache busting), reused for files loaded below.
+  var ASSET_QUERY = (document.currentScript && document.currentScript.src.split("?")[1]) || "";
+
   var CLASS_COLORS = {
     missing_in_map: "#e63946",
     missing_on_image: "#f4a261",
@@ -27,7 +30,8 @@
     selectedId: null,
     map: null,
     vg: null,
-    highlight: null
+    highlight: null,
+    onSelect: []       // callbacks(feature) of optional tools (review.js)
   };
 
   var $ = function (sel) { return document.querySelector(sel); };
@@ -97,8 +101,12 @@
   }
 
   var tileStyles = {
-    buildings_ref: function () {
+    buildings_ref: function (props) {
       if (!state.layers.buildings_ref) return [];
+      // buildings_ref also holds the second source (Microsoft/Google): grey dots, so it is not read as OSM.
+      if (props.source && props.source !== "osm") {
+        return { fill: false, color: "#6b7280", weight: 1.2, opacity: 0.8, dashArray: "1 3" };
+      }
       return { fill: false, color: "#1d4ed8", weight: 1.5, opacity: 0.9 };
     },
     buildings_det: function () {
@@ -208,15 +216,47 @@
     $("#btn-accept").disabled = p.status === "confirmed";
     $("#btn-reject").disabled = p.status === "rejected";
     $("#btn-reset").disabled = p.status === "new";
+    state.onSelect.forEach(function (fn) { fn(feat); });
   }
 
   function setHighlight(feat) {
     if (state.highlight) { state.map.removeLayer(state.highlight); state.highlight = null; }
     if (!feat) return;
     state.highlight = L.geoJSON(feat, {
-      style: { color: "#111", weight: 4, opacity: 0.9, fill: false, dashArray: "6 3" },
+      style: { color: "#00e5ff", weight: 2, opacity: 1, fill: false },
       interactive: false
     }).addTo(state.map);
+  }
+
+  // ---------------------------------------------------------------- tabs
+  function showTab(name) {
+    $$("#tabs button").forEach(function (b) { b.classList.toggle("active", b.getAttribute("data-tab") === name); });
+    $$("#tab-body > .tab").forEach(function (t) { t.classList.toggle("active", t.id === "tab-" + name); });
+  }
+
+  // Optional tools (review.js) add their own tab; ``el`` is the tab content.
+  function addTab(name, title, el) {
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.setAttribute("data-tab", name);
+    btn.textContent = title;
+    $("#tabs").appendChild(btn);
+    el.id = "tab-" + name;
+    el.classList.add("tab");
+    $("#tab-body").appendChild(el);
+  }
+
+  $("#tabs").addEventListener("click", function (ev) {
+    var b = ev.target.closest("button[data-tab]");
+    if (b) showTab(b.getAttribute("data-tab"));
+  });
+
+
+  // Scroll only the list itself: scrollIntoView would also jump the whole sidebar.
+  function scrollWithin(list, li) {
+    var top = li.offsetTop, bottom = top + li.offsetHeight;
+    if (top < list.scrollTop) list.scrollTop = top;
+    else if (bottom > list.scrollTop + list.clientHeight) list.scrollTop = bottom - list.clientHeight;
   }
 
   function selectFeature(id, opts) {
@@ -236,7 +276,7 @@
         state.map.fitBounds(state.highlight.getBounds(), { maxZoom: 19, padding: [40, 40] });
       }
       var li = $('#list li[data-id="' + id + '"]');
-      if (li && opts.scrollList !== false) li.scrollIntoView({ block: "nearest" });
+      if (li && opts.scrollList !== false) scrollWithin($("#list"), li);
     }).catch(function (err) { showNote(err.message); });
   }
 
@@ -320,6 +360,13 @@
     loadList();
   });
 
+  // ---------------------------------------------------------------- search by id
+  $("#search").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var id = Number($("#search-id").value);
+    if (id > 0) selectFeature(id, { zoom: true });
+  });
+
   // ---------------------------------------------------------------- map bootstrap
   function initMap(cfg) {
     state.cfg = cfg;
@@ -339,6 +386,12 @@
       if (b.key === "imagery") imagery = layer;
     });
     (imagery || first).addTo(map);
+    // The drone image covers only the AOI: keep OSM underneath so the rest is not blank white.
+    var osm = cfg.basemaps.filter(function (b) { return b.key === "osm"; })[0];
+    if (imagery && osm) {
+      L.tileLayer(osm.url, { maxZoom: 22, maxNativeZoom: osm.max_zoom, opacity: 0.6, zIndex: 0 }).addTo(map);
+      imagery.setZIndex(1);
+    }
     L.control.layers(basemaps, null, { position: "topright", collapsed: false }).addTo(map);
     L.control.scale({ imperial: false }).addTo(map);
 
@@ -387,7 +440,36 @@
     map.on("moveend", scheduleList);
     loadList();
     loadStats();
+    if (cfg.review_tools) {
+      // Tester-only verification panel (config/api.yaml review.enabled, `serve --review`).
+      var script = document.createElement("script");
+      script.src = "/review.js" + (ASSET_QUERY ? "?" + ASSET_QUERY : "");
+      document.body.appendChild(script);
+    }
+
+    // "#2673" opens that discrepancy (shareable link to one queue item).
+    function selectFromHash() {
+      var id = Number(window.location.hash.replace(/^#/, ""));
+      if (id > 0) selectFeature(id, { zoom: true });
+    }
+    window.addEventListener("hashchange", selectFromHash);
+    selectFromHash();
   }
+
+  // Small surface for optional tools loaded after the map (review.js).
+  window.geoqc = {
+    selectFeature: selectFeature,
+    selectedId: function () { return state.selectedId; },
+    onSelect: function (fn) { state.onSelect.push(fn); },
+    addTab: addTab,
+    showTab: showTab,
+    fetchJSON: fetchJSON,
+    showNote: showNote,
+    escapeHtml: escapeHtml,
+    scrollWithin: scrollWithin,
+    CLASS_COLORS: CLASS_COLORS,
+    CLASS_LABELS: CLASS_LABELS
+  };
 
   fetchJSON("/config/map").then(initMap).catch(function (err) {
     showNote("Не удалось загрузить /config/map: " + err.message);

@@ -201,6 +201,7 @@ def build_map_config(ctx: AppContext) -> MapConfig:
         basemaps=basemaps,
         imagery_available=imagery_available,
         esri_enabled=ctx.esri_enabled,
+        review_tools=ctx.review_enabled,
         osm_snapshot_date=osm_snapshot,
         mvt_layers={n: int(v.get("min_zoom", 0)) for n, v in ctx.config["mvt"]["layers"].items()},
         default_limit=int(ctx.config["pagination"]["default_limit"]),

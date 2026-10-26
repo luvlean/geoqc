@@ -15,9 +15,10 @@
 | `routes/discrepancies.py` | `parse_filters` → `build_where` (только связанные параметры) → список, карточка, `PATCH` статуса, экспорт |
 | `routes/tiles.py` | `build_mvt_query`: один SQL с `ST_AsMVT` по слоям `discrepancies`, `buildings_ref`, `buildings_det` (подавленные детекции исключены) |
 | `routes/imagery.py` | PNG-тайлы из `aoi_cog.tif` через rio-tiler; вне покрытия — прозрачный тайл |
+| `routes/verification.py` | Режим тестировщика (`review.enabled` или `serve --review`, иначе роутер не подключается). Ручная проверка из веба: читает `reports/verification.csv` (до первого вердикта — `verification_sample.csv`), `PATCH` меняет только `verdict`/`comment` строк выборки, запись атомарная; выборка не перезаписывается |
 | `routes/meta.py` | `/health`, `/stats`, `/config/map` (центр AOI, атрибуции, подложки), прокси Esri с ключом на сервере |
 | `cli.py` | `serve` (uvicorn) и `bench` (синтетические строки в тестовой БД, замер `GET /discrepancies`) |
-| `web/` (в корне репозитория) | `index.html`, `app.js`, `style.css`: Leaflet + VectorGrid, список топ-N, карточка, кнопки статуса, экспорт |
+| `web/` (в корне репозитория) | `index.html`, `app.js`, `style.css`: Leaflet + VectorGrid, список топ-N, карточка, кнопки статуса, экспорт, поиск по id (`/#<id>`); под снимком — OSM, снимок покрывает только AOI. боковая панель из вкладок («Очередь», «Слои и фильтры»), прокручивается только активная вкладка, карточка закреплена внизу. `review.js`/`review.css` добавляют вкладку «Верификация» (клавиши 1–4), грузится только при `review_tools` из `/config/map` и работает через `window.geoqc` |
 
 Путь запроса: роутер получает `AppContext` через `Depends(get_ctx)`, берёт соединение из пула, выполняет SQL с
 параметрами и возвращает pydantic-модель или GeoJSON. Если БД недоступна, все ручки, кроме `/health`, отвечают 503.
@@ -51,6 +52,8 @@
 | `GET /export?class=&min_conf=&status=[&bbox=]` | вся отфильтрованная очередь, properties ровно §3.8, `Content-Disposition: attachment` (MapRoulette/JOSM) |
 | `GET /tiles/{z}/{x}/{y}.mvt[?layers=a,b]` | MVT: слои `discrepancies`, `buildings_ref`, `buildings_det` (`ST_AsMVT` + `ST_TileEnvelope`), `Cache-Control`; подавленные NMS детекции (`det_suppressed`) исключены |
 | `GET /imagery/{z}/{x}/{y}.png` | тайл COG через rio-tiler `Reader.tile`; прозрачный PNG вне покрытия; 404 без COG |
+| `GET /verification` (режим тестировщика) | выборка ручной проверки: `items` (`n`, `id`, `class`, `confidence`, `iou`, `verdict`, `comment`), `done`/`total`; 404 без выборки |
+| `PATCH /verification/{id}` body `{"verdict":"map_error\|model_error\|image_issue\|unsure\|null","comment":"…"}` | пишет вердикт в `reports/verification.csv`; 422 — неизвестный вердикт, 404 — id вне выборки |
 | `GET /stats` | счётчики по классам/статусам, `model_versions`, `buildings: {ref, det, det_suppressed}` |
 | `GET /config/map` | центр/bbox AOI, атрибуции (OSM ODbL, источник снимка, Esri), подложки, `esri_enabled`, `note` |
 | `GET /basemap/esri/{z}/{y}/{x}` | прокси Esri World Imagery, токен подставляется на сервере; 404 без `ARCGIS_API_KEY` |
@@ -113,6 +116,7 @@ OSM (ODbL) и источника снимка добавлена в угол к�
 | `server.host/port/cors_origins` | `0.0.0.0`, `8000`, `["*"]` | адрес по умолчанию для `serve`, CORS |
 | `pagination.default_limit/max_limit` | 500 / 5000 | `limit` по умолчанию и максимум (`> max` → 422) |
 | `pool.min_size/max_size/timeout_s` | 1 / 8 / 5 | `psycopg_pool.ConnectionPool` |
+| `review.enabled` | `false` | панель верификации и `/verification`; на один запуск — `geoqc api serve --review` / `make demo REVIEW=1` |
 | `cache_seconds.tiles/imagery/basemap` | 60 / 86400 / 3600 | `Cache-Control: public, max-age=` |
 | `mvt.extent/buffer/max_zoom` | 4096 / 64 / 22 | параметры `ST_AsMVTGeom`, верхний зум |
 | `mvt.layers.<name>.{table,min_zoom}` | discrepancies 8, buildings_* 13 | слой не отдаётся ниже `min_zoom` |

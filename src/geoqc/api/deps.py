@@ -26,6 +26,10 @@ log = logging.getLogger("geoqc.api")
 
 DISCREPANCY_CLASSES: tuple[str, ...] = ("missing_in_map", "missing_on_image", "geometry_mismatch")
 DISCREPANCY_STATUSES: tuple[str, ...] = ("new", "confirmed", "rejected")
+# Same values as geoqc.eval.common.VERDICTS; kept here so the API does not import eval.
+VERDICTS: tuple[str, ...] = ("map_error", "model_error", "image_issue", "unsure")
+# "1" turns on the verification tools; set by `geoqc api serve --review`.
+REVIEW_ENV = "GEOQC_API_REVIEW"
 
 # Fallback used when config/api.yaml is missing or a key is absent.
 DEFAULT_CONFIG: dict[str, Any] = {
@@ -44,11 +48,15 @@ DEFAULT_CONFIG: dict[str, Any] = {
         },
     },
     "imagery": {"tile_size": 256, "resampling": "bilinear"},
+    # Manual verification tools (GET/PATCH /verification, web panel): off in the product.
+    "review": {"enabled": False},
     "paths": {
         "aoi": "config/aoi.geojson",
         "manifest": "data/manifest.json",
         "cog": "data/interim/aoi_cog.tif",
         "web": "web",
+        "verification": "reports/verification.csv",
+        "verification_sample": "reports/verification_sample.csv",
     },
     "basemaps": {
         "osm": {
@@ -107,6 +115,7 @@ class AppContext:
     dsn: str
     arcgis_api_key: str = ""
     paths: dict[str, Path] = field(default_factory=dict)
+    review_enabled: bool = False
     pool: ConnectionPool | None = None
     _matching_tables: bool | None = field(default=None, repr=False)
 

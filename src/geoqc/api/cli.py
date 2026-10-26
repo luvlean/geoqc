@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import statistics
 import time
 from typing import Annotated
@@ -20,13 +21,19 @@ def serve(
     port: Annotated[int | None, typer.Option(help="port (default: config/api.yaml)")] = None,
     reload: Annotated[bool, typer.Option("--reload", help="auto-reload on code changes")] = False,
     log_level: Annotated[str, typer.Option(help="uvicorn log level")] = "info",
+    review: Annotated[
+        bool, typer.Option("--review", help="tester verification panel (/verification)")
+    ] = False,
 ) -> None:
     """Run the API + web map with uvicorn (ASGI app: geoqc.api.main:app)."""
     import uvicorn
 
-    from geoqc.api.deps import load_api_config
+    from geoqc.api.deps import REVIEW_ENV, load_api_config
 
     server = load_api_config()["server"]
+    if review:
+        # uvicorn imports the app by name (and re-imports on --reload): pass the switch via env.
+        os.environ[REVIEW_ENV] = "1"
     uvicorn.run(
         "geoqc.api.main:app",
         host=host or str(server["host"]),

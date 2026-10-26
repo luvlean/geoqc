@@ -5,12 +5,21 @@
   --ok: #15803d; --bad: #b91c1c; --sidebar-w: 380px;
 }
 * { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--text); background: var(--bg); }
-body { display: flex; }
-#sidebar { width: var(--sidebar-w); height: 100vh; overflow: hidden; display: flex; flex-direction: column; border-right: 1px solid var(--line); background: var(--panel); }
-#map { flex: 1; height: 100vh; }
+html, body { height: 100%; overflow: hidden; overscroll-behavior: none; margin: 0; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--text); background: var(--bg); }
+/* Pinned to the window edges. The sidebar itself never scrolls (Safari trackpad swipes did not
+   reach it): header, tabs and card keep their size, the active tab scrolls inside itself. */
+#sidebar { position: fixed; top: 0; bottom: 0; left: 0; width: var(--sidebar-w); display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--line); background: var(--panel); }
+#sidebar > header, #sidebar > .tabs, #card { flex: none; }
+.tabs { display: flex; border-bottom: 1px solid var(--line); }
+.tabs button { flex: 1; padding: 8px 6px; border: 0; border-bottom: 2px solid transparent; background: none; font: inherit; color: var(--muted); cursor: pointer; }
+.tabs button.active { color: var(--text); border-bottom-color: var(--text); font-weight: 600; }
+.tab-body { flex: 1; min-height: 0; position: relative; }
+.tab { position: absolute; top: 0; right: 0; bottom: 0; left: 0; overflow-y: auto; overscroll-behavior: contain; display: none; }
+.tab.active { display: block; }
+.tab.list-tab.active { display: flex; flex-direction: column; }
+#card { max-height: 30%; overflow-y: auto; overscroll-behavior: contain; border-top: 1px solid var(--line); border-bottom: 0; }
+#map { position: fixed; top: 0; bottom: 0; left: var(--sidebar-w); right: 0; }
 .panel { padding: 10px 14px; border-bottom: 1px solid var(--line); }
-.panel.grow { flex: 1; min-height: 120px; display: flex; flex-direction: column; overflow: hidden; }
 .panel h1 { margin: 0 0 4px; font-size: 20px; }
 .panel h1 small { font-size: 13px; color: var(--muted); font-weight: normal; margin-left: 6px; }
 .panel h2 { margin: 0 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); display: flex; align-items: center; gap: 8px; }
@@ -37,7 +46,7 @@ body { display: flex; }
 .btn.ok { border-color: var(--ok); color: var(--ok); }
 .btn.bad { border-color: var(--bad); color: var(--bad); }
 .btn.ghost { color: var(--muted); }
-.list { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; }
+.list { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; min-height: 0; position: relative; }
 .list li { display: grid; grid-template-columns: 10px 1fr auto; gap: 8px; align-items: center; padding: 5px 6px; border-bottom: 1px solid var(--line); cursor: pointer; }
 .list li:hover { background: #f3f4f6; }
 .list li.active { background: #e8f0fe; }
@@ -59,10 +68,11 @@ body { display: flex; }
 .badge.confirmed { background: var(--ok); }
 .badge.rejected { background: var(--bad); }
 .actions { display: flex; gap: 6px; margin-top: 8px; }
+.search { display: flex; gap: 6px; margin-top: 8px; }
+.search input { flex: 1; min-width: 0; padding: 5px 8px; border: 1px solid var(--line); border-radius: 4px; font: inherit; }
 .leaflet-container { font: inherit; }
 .leaflet-control-attribution { max-width: 60vw; }
 @media (max-width: 800px) {
-  body { flex-direction: column; }
-  #sidebar { width: 100%; height: 45vh; }
-  #map { height: 55vh; }
+  #sidebar { right: 0; bottom: 55%; width: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+  #map { top: 45%; left: 0; }
 }

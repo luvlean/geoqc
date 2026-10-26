@@ -14,47 +14,65 @@
       <h1>geoqc <small id="aoi-name"></small></h1>
       <div id="stats" class="stats" title="Всего / новых / подтверждено / отклонено">—</div>
       <div id="note" class="note hidden"></div>
+      <form id="search" class="search">
+        <input id="search-id" type="number" min="1" placeholder="Найти по id" aria-label="id расхождения">
+        <button class="btn" type="submit">Найти</button>
+      </form>
     </header>
 
-    <section class="panel">
-      <h2>Слои</h2>
-      <label><input type="checkbox" data-layer="buildings_ref" checked> <span class="swatch ref"></span> OSM (buildings_ref)</label>
-      <label><input type="checkbox" data-layer="buildings_det" checked> <span class="swatch det"></span> Детекции (buildings_det)</label>
-      <label><input type="checkbox" data-layer="discrepancies" checked> <span class="swatch disc"></span> Расхождения</label>
-    </section>
+    <nav class="tabs" id="tabs">
+      <button type="button" data-tab="queue" class="active">Очередь</button>
+      <button type="button" data-tab="layers">Слои и фильтры</button>
+    </nav>
+    <!-- Each tab scrolls inside itself; the sidebar never scrolls (Safari trackpad). -->
+    <div class="tab-body" id="tab-body">
+      <section class="tab active list-tab panel" id="tab-queue">
+        <h2>Топ по confidence
+          <select id="top-n">
+            <option>20</option><option selected>50</option><option>100</option><option>200</option>
+          </select>
+          <span id="list-count" class="muted"></span>
+        </h2>
+        <ol id="list" class="list"></ol>
+      </section>
+      <section class="tab" id="tab-layers">
+        <section class="panel">
+          <h2>Слои</h2>
+          <label><input type="checkbox" data-layer="buildings_ref" checked> <span class="swatch ref"></span> Эталон: OSM — синий, 2-й источник — серые точки</label>
+          <label><input type="checkbox" data-layer="buildings_det" checked> <span class="swatch det"></span> Детекции (buildings_det)</label>
+          <label><input type="checkbox" data-layer="discrepancies" checked> <span class="swatch disc"></span> Расхождения</label>
+        </section>
 
-    <section class="panel">
-      <h2>Фильтры</h2>
-      <div class="group" id="class-filters">
-        <label><input type="checkbox" data-class="missing_in_map" checked> <span class="swatch c-missing_in_map"></span> missing_in_map</label>
-        <label><input type="checkbox" data-class="missing_on_image" checked> <span class="swatch c-missing_on_image"></span> missing_on_image</label>
-        <label><input type="checkbox" data-class="geometry_mismatch" checked> <span class="swatch c-geometry_mismatch"></span> geometry_mismatch</label>
-      </div>
-      <div class="group row">
-        <label for="min-conf">min confidence</label>
-        <input type="range" id="min-conf" min="0" max="1" step="0.05" value="0">
-        <output id="min-conf-out">0.00</output>
-      </div>
-      <div class="group" id="status-filters">
-        <label><input type="checkbox" data-status="new" checked> new</label>
-        <label><input type="checkbox" data-status="confirmed" checked> confirmed</label>
-        <label><input type="checkbox" data-status="rejected"> rejected</label>
-      </div>
-      <div class="group row">
-        <button id="btn-export" class="btn" title="GeoJSON очереди с текущими фильтрами (MapRoulette / JOSM)">Экспорт GeoJSON</button>
-        <button id="btn-refresh" class="btn ghost" title="Перечитать тайлы и список">Обновить</button>
-      </div>
-    </section>
+        <section class="panel">
+          <h2>Фильтры</h2>
+          <div class="group" id="class-filters">
+            <label><input type="checkbox" data-class="missing_in_map" checked> <span class="swatch c-missing_in_map"></span> missing_in_map</label>
+            <label><input type="checkbox" data-class="missing_on_image" checked> <span class="swatch c-missing_on_image"></span> missing_on_image</label>
+            <label><input type="checkbox" data-class="geometry_mismatch" checked> <span class="swatch c-geometry_mismatch"></span> geometry_mismatch</label>
+          </div>
+          <div class="group row">
+            <label for="min-conf">min confidence</label>
+            <input type="range" id="min-conf" min="0" max="1" step="0.05" value="0">
+            <output id="min-conf-out">0.00</output>
+          </div>
+          <div class="group" id="status-filters">
+            <label><input type="checkbox" data-status="new" checked> new</label>
+            <label><input type="checkbox" data-status="confirmed" checked> confirmed</label>
+            <label><input type="checkbox" data-status="rejected"> rejected</label>
+          </div>
+          <div class="group row">
+            <button id="btn-export" class="btn" title="GeoJSON очереди с текущими фильтрами (MapRoulette / JOSM)">Экспорт GeoJSON</button>
+            <button id="btn-refresh" class="btn ghost" title="Перечитать тайлы и список">Обновить</button>
+          </div>
+        </section>
 
-    <section class="panel grow">
-      <h2>Топ по confidence
-        <select id="top-n">
-          <option>20</option><option selected>50</option><option>100</option><option>200</option>
-        </select>
-        <span id="list-count" class="muted"></span>
-      </h2>
-      <ol id="list" class="list"></ol>
-    </section>
+        <footer class="panel small muted" id="legal">
+          Данные карты © участники <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>, ODbL.
+          <span id="legal-image"></span> <span id="legal-esri"></span>
+          Автоматическая правка OSM не выполняется: результат — очередь ручной проверки.
+        </footer>
+      </section>
+    </div>
 
     <section class="panel" id="card">
       <h2>Объект <span id="card-id" class="muted"></span></h2>
@@ -65,12 +83,6 @@
         <button id="btn-reset" class="btn ghost" disabled>Сбросить</button>
       </div>
     </section>
-
-    <footer class="panel small muted" id="legal">
-      Данные карты © участники <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>, ODbL.
-      <span id="legal-image"></span> <span id="legal-esri"></span>
-      Автоматическая правка OSM не выполняется: результат — очередь ручной проверки.
-    </footer>
   </aside>
   <div id="map"></div>
 

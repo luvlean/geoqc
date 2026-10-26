@@ -33,11 +33,16 @@ imagery:
   tile_size: 256
   resampling: bilinear
 
+review:                  # tester-only verification panel and /verification endpoints
+  enabled: false         # one run: `geoqc api serve --review` or `make demo REVIEW=1`
+
 paths:                   # repo-relative (see geoqc.config.resolve_path)
   aoi: config/aoi.geojson
   manifest: data/manifest.json
   cog: data/interim/aoi_cog.tif
   web: web
+  verification: reports/verification.csv              # filled by PATCH /verification/{id}
+  verification_sample: reports/verification_sample.csv  # geoqc eval verification-sample
 
 basemaps:
   osm:

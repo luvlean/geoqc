@@ -161,6 +161,7 @@ DDL — `sql/001_schema.sql` (буквально контракт): `buildings_r
 - `GET /tiles/{z}/{x}/{y}.mvt` → слои `discrepancies`, `buildings_ref`, `buildings_det` через `ST_AsMVT`
 - `GET /imagery/{z}/{x}/{y}.png` → тайлы COG (rio-tiler), подложка «снимок»
 - `GET /export?class=&min_conf=&status=` → GeoJSON (контракт 3.8)
+- Режим тестировщика (`review.enabled` в `config/api.yaml` или `geoqc api serve --review`): `GET /verification` → выборка ручной проверки с вердиктами; `PATCH /verification/{id}` body `{"verdict": "map_error"|"model_error"|"image_issue"|"unsure"|null, "comment"}` → пишет только `verdict`/`comment` в `reports/verification.csv`, состав выборки не меняется
 - `GET /stats` → счётчики по классам/статусам; `GET /config/map` → центр/bbox AOI, атрибуции, `esri_enabled`
 - Статика `web/` по `/`. Ответ на AOI < 1 с.
 
