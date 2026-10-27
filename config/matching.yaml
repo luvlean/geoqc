@@ -18,7 +18,7 @@ aoi_edge_buffer_m: 10               # subject not covered by AOI shrunk by this 
 aoi_edge_factor: 0.5                # confidence multiplier for aoi_edge discrepancies
 
 # Area normalisation: area_norm = clip(log(area / min_area_m2) / log(max_area_m2 / min_area_m2), 0, 1)
-min_area_m2: 20
+min_area_m2: 20            # scoring bound only, not a filter (filter: min_det_area_m2)
 max_area_m2: 5000
 
 # Confidence weights per class. Each block is normalised to sum 1; when no secondary source
