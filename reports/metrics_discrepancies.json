@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-10-27T08:11:08+00:00",
+  "git_commit": "e5c1f14331ab701aaa976975388caa69e2b54350",
+  "verification_path": "reports/verification.csv",
+  "counts_by_class": {
+    "missing_in_map": 696,
+    "missing_on_image": 307,
+    "geometry_mismatch": 158
+  },
+  "counts_source": "db:discrepancies",
+  "gate_precision_at_n": 20,
+  "n_not_in_queue": 0,
+  "n_rows": 50,
+  "n_checked": 50,
+  "n_unchecked": 0,
+  "invalid_verdicts": [],
+  "verified_by_class": {
+    "missing_in_map": {
+      "n": 20,
+      "unsure": 0,
+      "true_error": 11,
+      "model_error": 9,
+      "image_issue": 0,
+      "precision": 0.55
+    },
+    "missing_on_image": {
+      "n": 15,
+      "unsure": 0,
+      "true_error": 12,
+      "model_error": 3,
+      "image_issue": 0,
+      "precision": 0.8
+    },
+    "geometry_mismatch": {
+      "n": 15,
+      "unsure": 0,
+      "true_error": 6,
+      "model_error": 9,
+      "image_issue": 0,
+      "precision": 0.4
+    }
+  },
+  "precision_overall": 0.58,
+  "overall": {
+    "n": 50,
+    "unsure": 0,
+    "true_error": 29,
+    "model_error": 21,
+    "image_issue": 0,
+    "precision": 0.58
+  },
+  "precision_at_n": {
+    "10": {
+      "n": 10,
+      "n_available": 10,
+      "complete": true,
+      "true_error": 5,
+      "unsure": 0,
+      "value": 0.5,
+      "value_incl_unsure": 0.5
+    },
+    "20": {
+      "n": 20,
+      "n_available": 20,
+      "complete": true,
+      "true_error": 12,
+      "unsure": 0,
+      "value": 0.6,
+      "value_incl_unsure": 0.6
+    },
+    "50": {
+      "n": 50,
+      "n_available": 50,
+      "complete": true,
+      "true_error": 29,
+      "unsure": 0,
+      "value": 0.58,
+      "value_incl_unsure": 0.58
+    }
+  },
+  "notes": []
+}
