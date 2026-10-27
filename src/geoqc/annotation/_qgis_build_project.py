@@ -176,14 +176,14 @@ def main(argv: list[str]) -> int:
         project.setSnappingConfig(snap)
         project.setTopologicalEditing(True)
 
-        targets = [by_name[n] for n in spec.get("avoid_intersections", []) if n in by_name]
-        if targets:
+        # "Current layer" mode: buildings avoid buildings, recheck avoids recheck. A layer list would
+        # clip a blind recheck polygon by the hidden buildings layer and reveal the first labeling.
+        if any(n in by_name for n in spec.get("avoid_intersections", [])):
             mode = _first(
-                lambda: Qgis.AvoidIntersectionsMode.AvoidIntersectionsLayers,
-                lambda: QgsProject.AvoidIntersectionsMode.AvoidIntersectionsLayers,
+                lambda: Qgis.AvoidIntersectionsMode.AvoidIntersectionsCurrentLayer,
+                lambda: QgsProject.AvoidIntersectionsMode.AvoidIntersectionsCurrentLayer,
             )
             project.setAvoidIntersectionsMode(mode)
-            project.setAvoidIntersectionsLayers(targets)
 
         extent = spec.get("extent_wgs84")
         if extent:
