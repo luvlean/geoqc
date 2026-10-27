@@ -1,0 +1,271 @@
+{
+  "split": "val",
+  "note": "val labels never used in training; same 11 tiles, IoU >= 0.5, detections at conf_floor 0.05 filtered by min score",
+  "generated_at": "2026-10-27T10:26:53+00:00",
+  "models": [
+    {
+      "name": "yolov8m-building-seg",
+      "model_version": "yolov8m-building-seg-1996bc04",
+      "description": "base, frozen (D-017)",
+      "run_dir": "—",
+      "best": {
+        "conf": 0.2,
+        "precision": 0.7868852459016393,
+        "recall": 0.7619047619047619,
+        "f1": 0.7741935483870968,
+        "mean_iou_matched": 0.7999912109215987,
+        "tp": 96,
+        "fp": 26,
+        "fn": 30
+      },
+      "thresholds": [
+        {
+          "conf": 0.1,
+          "precision": 0.6166666666666667,
+          "recall": 0.8809523809523809,
+          "f1": 0.7254901960784315,
+          "mean_iou_matched": 0.7879140146062363,
+          "tp": 111,
+          "fp": 69,
+          "fn": 15
+        },
+        {
+          "conf": 0.15,
+          "precision": 0.7027027027027027,
+          "recall": 0.8253968253968254,
+          "f1": 0.7591240875912408,
+          "mean_iou_matched": 0.7925264066409053,
+          "tp": 104,
+          "fp": 44,
+          "fn": 22
+        },
+        {
+          "conf": 0.2,
+          "precision": 0.7868852459016393,
+          "recall": 0.7619047619047619,
+          "f1": 0.7741935483870968,
+          "mean_iou_matched": 0.7999912109215987,
+          "tp": 96,
+          "fp": 26,
+          "fn": 30
+        },
+        {
+          "conf": 0.25,
+          "precision": 0.8173076923076923,
+          "recall": 0.6746031746031746,
+          "f1": 0.7391304347826088,
+          "mean_iou_matched": 0.8136605903201195,
+          "tp": 85,
+          "fp": 19,
+          "fn": 41
+        },
+        {
+          "conf": 0.3,
+          "precision": 0.8586956521739131,
+          "recall": 0.626984126984127,
+          "f1": 0.7247706422018348,
+          "mean_iou_matched": 0.8160996212192958,
+          "tp": 79,
+          "fp": 13,
+          "fn": 47
+        },
+        {
+          "conf": 0.4,
+          "precision": 0.8732394366197183,
+          "recall": 0.49206349206349204,
+          "f1": 0.6294416243654821,
+          "mean_iou_matched": 0.828765807595934,
+          "tp": 62,
+          "fp": 9,
+          "fn": 64
+        },
+        {
+          "conf": 0.5,
+          "precision": 0.8627450980392157,
+          "recall": 0.3492063492063492,
+          "f1": 0.4971751412429378,
+          "mean_iou_matched": 0.842771650060259,
+          "tp": 44,
+          "fp": 7,
+          "fn": 82
+        }
+      ]
+    },
+    {
+      "name": "yolov8m-building-seg-ft-spacenet",
+      "model_version": "yolov8m-building-seg-ft-spacenet-db0dc190",
+      "description": "fine-tuned on SpaceNet 2 only",
+      "run_dir": "models/runs/finetune_yolov8m_seg_spacenet",
+      "best": {
+        "conf": 0.1,
+        "precision": 0.7089552238805971,
+        "recall": 0.753968253968254,
+        "f1": 0.7307692307692307,
+        "mean_iou_matched": 0.7834736383888438,
+        "tp": 95,
+        "fp": 39,
+        "fn": 31
+      },
+      "thresholds": [
+        {
+          "conf": 0.1,
+          "precision": 0.7089552238805971,
+          "recall": 0.753968253968254,
+          "f1": 0.7307692307692307,
+          "mean_iou_matched": 0.7834736383888438,
+          "tp": 95,
+          "fp": 39,
+          "fn": 31
+        },
+        {
+          "conf": 0.15,
+          "precision": 0.7155172413793104,
+          "recall": 0.6587301587301587,
+          "f1": 0.6859504132231405,
+          "mean_iou_matched": 0.7874672204042797,
+          "tp": 83,
+          "fp": 33,
+          "fn": 43
+        },
+        {
+          "conf": 0.2,
+          "precision": 0.7222222222222222,
+          "recall": 0.6190476190476191,
+          "f1": 0.6666666666666666,
+          "mean_iou_matched": 0.7955957127040875,
+          "tp": 78,
+          "fp": 30,
+          "fn": 48
+        },
+        {
+          "conf": 0.25,
+          "precision": 0.7378640776699029,
+          "recall": 0.6031746031746031,
+          "f1": 0.6637554585152838,
+          "mean_iou_matched": 0.7960520031487754,
+          "tp": 76,
+          "fp": 27,
+          "fn": 50
+        },
+        {
+          "conf": 0.3,
+          "precision": 0.78125,
+          "recall": 0.5952380952380952,
+          "f1": 0.6756756756756757,
+          "mean_iou_matched": 0.7987518713783912,
+          "tp": 75,
+          "fp": 21,
+          "fn": 51
+        },
+        {
+          "conf": 0.4,
+          "precision": 0.7840909090909091,
+          "recall": 0.5476190476190477,
+          "f1": 0.6448598130841122,
+          "mean_iou_matched": 0.8023141394622317,
+          "tp": 69,
+          "fp": 19,
+          "fn": 57
+        },
+        {
+          "conf": 0.5,
+          "precision": 0.7777777777777778,
+          "recall": 0.5,
+          "f1": 0.6086956521739131,
+          "mean_iou_matched": 0.8070695371947575,
+          "tp": 63,
+          "fp": 18,
+          "fn": 63
+        }
+      ]
+    },
+    {
+      "name": "yolov8m-building-seg-ft-microsoft",
+      "model_version": "yolov8m-building-seg-ft-microsoft-b45d6cb6",
+      "description": "fine-tuned on Microsoft footprints (D-019)",
+      "run_dir": "models/runs/finetune_yolov8m_seg_microsoft",
+      "best": {
+        "conf": 0.25,
+        "precision": 0.6934306569343066,
+        "recall": 0.753968253968254,
+        "f1": 0.7224334600760456,
+        "mean_iou_matched": 0.7694689434349787,
+        "tp": 95,
+        "fp": 42,
+        "fn": 31
+      },
+      "thresholds": [
+        {
+          "conf": 0.1,
+          "precision": 0.5169082125603864,
+          "recall": 0.8492063492063492,
+          "f1": 0.6426426426426426,
+          "mean_iou_matched": 0.755937011681937,
+          "tp": 107,
+          "fp": 100,
+          "fn": 19
+        },
+        {
+          "conf": 0.15,
+          "precision": 0.5885714285714285,
+          "recall": 0.8174603174603174,
+          "f1": 0.6843853820598006,
+          "mean_iou_matched": 0.7578475914529383,
+          "tp": 103,
+          "fp": 72,
+          "fn": 23
+        },
+        {
+          "conf": 0.2,
+          "precision": 0.6282051282051282,
+          "recall": 0.7777777777777778,
+          "f1": 0.6950354609929079,
+          "mean_iou_matched": 0.7660770326918538,
+          "tp": 98,
+          "fp": 58,
+          "fn": 28
+        },
+        {
+          "conf": 0.25,
+          "precision": 0.6934306569343066,
+          "recall": 0.753968253968254,
+          "f1": 0.7224334600760456,
+          "mean_iou_matched": 0.7694689434349787,
+          "tp": 95,
+          "fp": 42,
+          "fn": 31
+        },
+        {
+          "conf": 0.3,
+          "precision": 0.7131782945736435,
+          "recall": 0.7301587301587301,
+          "f1": 0.7215686274509804,
+          "mean_iou_matched": 0.7741161574595061,
+          "tp": 92,
+          "fp": 37,
+          "fn": 34
+        },
+        {
+          "conf": 0.4,
+          "precision": 0.7619047619047619,
+          "recall": 0.6349206349206349,
+          "f1": 0.6926406926406926,
+          "mean_iou_matched": 0.7915583699511106,
+          "tp": 80,
+          "fp": 25,
+          "fn": 46
+        },
+        {
+          "conf": 0.5,
+          "precision": 0.8409090909090909,
+          "recall": 0.5873015873015873,
+          "f1": 0.6915887850467289,
+          "mean_iou_matched": 0.7959761534225519,
+          "tp": 74,
+          "fp": 14,
+          "fn": 52
+        }
+      ]
+    }
+  ]
+}
