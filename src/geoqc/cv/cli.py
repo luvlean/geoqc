@@ -1,4 +1,4 @@
-"""``geoqc cv`` commands: fetch-weights, predict, export-dataset, threshold-sweep, bundle."""
+"""``geoqc cv`` commands: fetch-weights, predict, export-dataset, prepare-microsoft, threshold-sweep, bundle."""
 
 from __future__ import annotations
 
@@ -74,6 +74,13 @@ def predict_cmd(
         ),
     ] = True,
     progress: Annotated[bool, typer.Option("--progress/--no-progress")] = True,
+    weights: Annotated[
+        Path | None,
+        typer.Option(
+            "--weights",
+            help="Try other weights without touching config/cv.yaml (no --to-db; use with --out)",
+        ),
+    ] = None,
 ) -> None:
     """Run detection on tiles -> detections.geojson (EPSG:4326, MultiPolygon) [-> buildings_det]."""
     from geoqc.cv.pipeline import (
@@ -85,6 +92,20 @@ def predict_cmd(
     )
 
     cfg = load_config()
+    model_version = None
+    if weights is not None:
+        from geoqc.cv.weights import model_version_for, sha256_of
+
+        if to_db:
+            # An experiment must not replace the review queue: promote the weights in config first.
+            raise typer.BadParameter("--weights cannot be combined with --to-db")
+        if not weights.exists():
+            raise typer.BadParameter(f"weights not found: {weights}")
+        cv = dict(cfg["cv"])
+        cv["weights"] = {**cv.get("weights", {}), "path": str(weights)}
+        cv["smp_unet"] = {**cv.get("smp_unet", {}), "checkpoint": str(weights)}
+        cfg["cv"] = cv
+        model_version = model_version_for(weights.stem, sha256_of(weights))
     result = run_predict(
         cfg["cv"],
         cfg,
@@ -94,6 +115,7 @@ def predict_cmd(
         conf=conf,
         backend=backend,
         progress=progress,
+        model_version=model_version,
     )
     out_path = write_detections(
         result.detections,
@@ -135,6 +157,20 @@ def export_dataset_cmd(
         require_verified=not allow_unverified,
     )
     _echo(summary.to_dict())
+
+
+@app.command("prepare-microsoft")
+def prepare_microsoft_cmd(
+    out: Annotated[
+        Path | None,
+        typer.Option("--out", help="Output directory (default cv.microsoft.out_dir)"),
+    ] = None,
+) -> None:
+    """Microsoft footprints on tiles away from val/test -> YOLO-seg training set (pseudo-labels)."""
+    from geoqc.cv.microsoft import export_microsoft_dataset
+
+    cfg = load_config()
+    _echo(export_microsoft_dataset(cfg["cv"], cfg, out_dir=out).to_dict())
 
 
 @app.command("fetch-external")

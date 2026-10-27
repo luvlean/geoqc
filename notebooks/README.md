@@ -27,7 +27,9 @@ Run all. Параметры — в ячейке «6. Параметры обуч
 `SMOKE_TEST = True` (2 эпохи: при одной Ultralytics не делает прогрев lr) проверяет весь путь до экспорта весов за несколько минут.
 Источник данных — `DATA_SOURCE` в ячейке «4. Данные»: `"val"` (наша проверенная разметка), `"spacenet"` (только SpaceNet 2:
 прогон, пока разметки нет; `config/cv.yaml` и карточка не меняются, веса — `models/<name>-spacenet.pt`) или
-`"val+spacenet"`. SpaceNet скачивается и готовится при первом запуске (`make external-data`, `docs/datasets/spacenet2.md`).
+`"val+spacenet"`, `"microsoft"` или `"microsoft+spacenet"` (footprints Microsoft на тайлах вне val/test, D-019). Режимы без
+`"val"` — эксперименты: конфиг и карточка не меняются, веса сравниваются с текущими через `geoqc cv predict --weights`.
+SpaceNet скачивается и готовится при первом запуске (`make external-data`, `docs/datasets/spacenet2.md`).
 
 ### Google Colab
 

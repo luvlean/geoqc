@@ -20,6 +20,7 @@
 | детекция | `predict` | `pipeline.run_predict`: `load_tile_index` → `filter_by_split` → `predict_tiles_raw` (батчи `read_tile` → `Predictor.predict_batch` → `vectorize_masks`) → `vectorize.postprocess` (склейка на перекрытиях, Дуглас–Пекер, фильтр площади) → `write_detections`; с `--to-db` ещё `load_to_db` |
 | датасет | `export-dataset` | `dataset.export_dataset`, только `val`: `split_tiles` (train/holdout по стратам, seed) → `polygon_to_yolo_lines` + `rasterize_mask` → `data/interim/dataset/` |
 | внешний датасет | `fetch-external`, `prepare-external`, `report-external` | `external.fetch_spacenet` (листинг S3 → детерминированная выборка → загрузка с кэшем) → `prepare_spacenet` (`prepare_chip`: UTM 0,3 м, 512 px, растяжка p2–p98, обрезка полигонов) → тот же формат, что у `export-dataset`; `external_report.build_report` строит статистику и рисунки |
+| псевдоразметка | `prepare-microsoft` | `microsoft.export_microsoft_dataset`: footprints Microsoft на тайлах вне val/test и их соседей (`excluded_tiles`), без тайлов с nodata > 10 % и без зданий → тот же формат, что у `export-dataset`, holdout — 20 % этих тайлов (D-019) |
 | порог | `threshold-sweep` | `sweep.run_sweep`: один инференс при `conf_floor` → для каждого порога фильтр масок и тот же `postprocess` → `evaluate` (метрики из `eval.detection_metrics`) → `pick_best` → `conf_threshold` в `cv.yaml` |
 | Colab | `bundle` | `bundle.build_bundle`: тайлы, разметка val, конфиги, исходники, `data/interim/dataset/` → zip; каждое имя проверяется `is_forbidden_arcname`. SpaceNet в архив не входит, ноутбук скачивает его сам |
 
@@ -50,6 +51,7 @@ vectorize`; формат датасета — `dataset.py` (SpaceNet повто�
 | `data/interim/detections.geojson` (`detections_<split>.geojson` для val/test): EPSG:4326, MultiPolygon, `score, model_version, tile_id` | `predict` |
 | строки `buildings_det` (замена всего слоя: прежние детекции любых версий, `matches` и `discrepancies` удаляются) | `predict --to-db` |
 | `data/interim/dataset/` — YOLO-seg + маски, `data.yaml`, `split.csv`, `meta.json` | `export-dataset` |
+| `data/interim/external/microsoft/` — тот же формат | `prepare-microsoft` |
 | `reports/threshold_sweep_val.json`, `config/cv.yaml → conf_threshold` | `threshold-sweep` |
 | `data/interim/bundle.zip` | `bundle` |
 | `config/cv.yaml → model_version, weights.sha256`, автоблок `models/MODEL_CARD.md` | `fetch-weights` |
@@ -125,6 +127,8 @@ IoU кусков мал (например, 0,16 при ширине 100 м и п
 geoqc cv fetch-weights [--force] [--no-fallback]
 geoqc cv predict --split all|val|test [--to-db] [--limit N] [--out path] [--device auto|cuda|mps|cpu] [--conf 0.3] [--backend mock] [--append]
 geoqc cv export-dataset [--labels data/labels/val/buildings.geojson] [--out data/interim/dataset] [--seed 42] [--holdout-fraction 0.2] [--allow-unverified]
+geoqc cv prepare-microsoft [--out data/interim/external/microsoft]
+geoqc cv predict --split val --weights models/<name>.pt --out data/interim/detections_<name>.geojson   # experiment: config and DB untouched
 geoqc cv threshold-sweep --split val [--holdout] [--detections data/interim/detections_val.geojson] [--limit N] [--no-update-config] [--allow-unverified]
 geoqc cv bundle [--tiles all|val] [--out data/interim/bundle.zip] [--no-dataset]
 geoqc cv fetch-external [--city AOI_3_Paris ...] [--per-city 100]
