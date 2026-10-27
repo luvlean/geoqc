@@ -22,6 +22,7 @@ PYTEST_MARKERS ?= not network and not slow and not gpu
 HOST           ?= 0.0.0.0
 PORT           ?= 8000
 REVIEW         ?=
+ANNOTATOR      ?= Жуков
 # model_version comes from config/cv.yaml (CV Agent). Override: `make match MODEL_VERSION=<v>`.
 # Recursive (?=) on purpose: the shell call runs only when a target references it.
 MODEL_VERSION  ?= $(shell $(PY) -c "from geoqc.config import load_config; print(load_config().get('cv', {}).get('model_version', '') or '')" 2>/dev/null)
@@ -71,8 +72,8 @@ labels-prep: ## Select tiles, pre-annotate val/test drafts, generate the QGIS pr
 	$(GEOQC) annotation qgis-project --split test
 
 labels-validate: ## Export QGIS work.gpkg (finalize) and validate labels -> reports/annotation.json
-	$(GEOQC) annotation finalize --split val
-	$(GEOQC) annotation finalize --split test
+	$(GEOQC) annotation finalize --split val --annotator "$(ANNOTATOR)"
+	$(GEOQC) annotation finalize --split test --annotator "$(ANNOTATOR)"
 	$(GEOQC) annotation validate --split val
 	$(GEOQC) annotation validate --split test
 

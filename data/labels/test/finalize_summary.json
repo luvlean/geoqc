@@ -13,8 +13,14 @@
       "output": "data/labels/test/buildings.geojson"
     },
     "recheck": {
-      "n_input": 0,
-      "output": null
+      "n_input": 28,
+      "dropped_empty": 0,
+      "dropped_small": 7,
+      "clipped": 3,
+      "tile_reassigned": 0,
+      "n_output": 21,
+      "n_verified": 21,
+      "output": "data/labels/test/recheck.geojson"
     }
   },
   "input": "data/labels/test/work.gpkg"

@@ -34,21 +34,47 @@
           "pre_annotation": 16
         }
       },
-      "agreement": null,
+      "agreement": {
+        "recheck_tiles": [
+          "4_15"
+        ],
+        "n_checked": 1,
+        "agreement_iou": 0.9366313838714466,
+        "agreement_f1": 1.0,
+        "overall": {
+          "n_first": 2,
+          "n_recheck": 2,
+          "n_pairs": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "mean_iou_pairs": 0.9366313838714466,
+          "mean_iou_matched": 0.9366313838714466,
+          "f1": 1.0
+        },
+        "per_tile": {
+          "4_15": {
+            "n_first": 2,
+            "n_recheck": 2,
+            "n_pairs": 2,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0,
+            "mean_iou_pairs": 0.9366313838714466,
+            "mean_iou_matched": 0.9366313838714466,
+            "f1": 1.0
+          }
+        },
+        "iou_match": 0.5,
+        "pair_min_iou": 0.0
+      },
       "status": "accepted",
       "errors_by_code": {},
-      "warnings_by_code": {
-        "recheck_missing": 1
-      },
+      "warnings_by_code": {},
       "errors": [],
-      "warnings": [
-        {
-          "code": "recheck_missing",
-          "message": "recheck.geojson not found: G2 not computed for val"
-        }
-      ],
+      "warnings": [],
       "n_errors": 0,
-      "n_warnings": 1
+      "n_warnings": 0
     },
     "test": {
       "labels": "data/labels/test/buildings.geojson",
@@ -85,24 +111,62 @@
           "pre_annotation": 7
         }
       },
-      "agreement": null,
+      "agreement": {
+        "recheck_tiles": [
+          "12_7",
+          "1_13"
+        ],
+        "n_checked": 2,
+        "agreement_iou": 0.882871916832651,
+        "agreement_f1": 0.9090909090909091,
+        "overall": {
+          "n_first": 23,
+          "n_recheck": 21,
+          "n_pairs": 21,
+          "tp": 20,
+          "fp": 1,
+          "fn": 3,
+          "mean_iou_pairs": 0.882871916832651,
+          "mean_iou_matched": 0.9141245554478479,
+          "f1": 0.9090909090909091
+        },
+        "per_tile": {
+          "12_7": {
+            "n_first": 9,
+            "n_recheck": 9,
+            "n_pairs": 9,
+            "tp": 8,
+            "fp": 1,
+            "fn": 1,
+            "mean_iou_pairs": 0.8631596040234775,
+            "mean_iou_matched": 0.9388271614603227,
+            "f1": 0.8888888888888888
+          },
+          "1_13": {
+            "n_first": 14,
+            "n_recheck": 12,
+            "n_pairs": 12,
+            "tp": 12,
+            "fp": 0,
+            "fn": 2,
+            "mean_iou_pairs": 0.8976561514395315,
+            "mean_iou_matched": 0.8976561514395315,
+            "f1": 0.9230769230769231
+          }
+        },
+        "iou_match": 0.5,
+        "pair_min_iou": 0.0
+      },
       "status": "accepted",
       "errors_by_code": {},
-      "warnings_by_code": {
-        "recheck_missing": 1
-      },
+      "warnings_by_code": {},
       "errors": [],
-      "warnings": [
-        {
-          "code": "recheck_missing",
-          "message": "recheck.geojson not found: G2 not computed for test"
-        }
-      ],
+      "warnings": [],
       "n_errors": 0,
-      "n_warnings": 1
+      "n_warnings": 0
     }
   },
-  "generated_at": "2026-10-26T15:45:35+00:00",
+  "generated_at": "2026-10-27T10:55:27+00:00",
   "config": {
     "min_area_m2": 12.0,
     "iou_match": 0.5,
@@ -112,17 +176,17 @@
     "recheck_fraction": 0.1
   },
   "annotation": {
-    "agreement_iou": null,
-    "agreement_f1": null,
-    "n_checked": 0
+    "agreement_iou": 0.8875466530968942,
+    "agreement_f1": 0.9166666666666666,
+    "n_checked": 3
   },
   "gates": {
     "G2": {
       "target": 0.8,
       "op": ">=",
-      "actual": null,
-      "passed": false,
-      "note": "recheck.geojson missing: G2 not computed"
+      "actual": 0.8875466530968942,
+      "passed": true,
+      "note": ""
     }
   }
 }
