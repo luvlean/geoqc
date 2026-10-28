@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-28T23:23:51+00:00",
-  "git_commit": "94a00f52f4f1e88ad8dc3d58913f9ef160d595d3",
-  "git_dirty": true,
+  "generated_at": "2026-10-28T23:28:03+00:00",
+  "git_commit": "ad4198438b90e69db5c4ba4afbd4e3c65858ffbb",
+  "git_dirty": false,
   "dataset": {
     "aoi": "Пушкин, Отдельный парк, Тярлево",
     "n_tiles_val": 13,
