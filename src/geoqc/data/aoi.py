@@ -507,6 +507,3 @@ def search_aoi(
 def aoi_bbox(aoi_wgs84: Polygon) -> tuple[float, float, float, float]:
     return tuple(round(v, 7) for v in aoi_wgs84.bounds)  # type: ignore[return-value]
 
-
-def rect_from_bbox(bbox: tuple[float, float, float, float]) -> Polygon:
-    return box(*bbox)

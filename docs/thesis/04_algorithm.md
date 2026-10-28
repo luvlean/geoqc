@@ -26,9 +26,9 @@ flowchart LR
 
 ## 4.2 Детекция зданий
 
-Предиктор реализует интерфейс `Predictor.predict(tile) -> list[Mask]` с двумя реализациями: instance-сегментация Ultralytics YOLOv8-seg и семантическая U-Net (`segmentation_models_pytorch`). Устройство выбирается автоматически (CUDA / MPS / CPU), инференс батчами по тайлам, half-precision на CUDA.
+Предиктор реализует интерфейс `Predictor.predict(tile) -> list[Mask]` ; рабочая реализация — instance-сегментация Ultralytics YOLOv8-seg, для тестов — детерминированный `MockPredictor`. Устройство выбирается автоматически (CUDA / MPS / CPU), инференс батчами по тайлам, half-precision на CUDA.
 
-Бейзлайн — предобученный чекпоинт сегментации зданий (источник и лицензия — `models/MODEL_CARD.md`); при провале гейта G3 на `val` выполняется дообучение в ноутбуке `notebooks/train_finetune.ipynb` (D-004) на `labels/val` (внутренний сплит 80/20) и, опционально, открытых наборах INRIA/SpaceNet. Версия модели — `model_version = "<model_name>-<sha256(weights)[:8]>"`, записывается в каждую детекцию и в `metrics.json` (`{{metrics.model.model_version}}`).
+Бейзлайн — предобученный чекпоинт сегментации зданий (источник и лицензия — `models/MODEL_CARD.md`); дообучение — на своей разметке `train` с ранней остановкой и подбором порога на `val` (D-021) и на открытом наборе AIRS (D-024); попытки с SpaceNet 2 и footprints Microsoft качество не улучшили (D-019, D-020). Версия модели — `model_version = "<model_name>-<sha256(weights)[:8]>"`, записывается в каждую детекцию и в `metrics.json` (`{{metrics.model.model_version}}`).
 
 Порог уверенности `conf_threshold` подбирается перебором на `val` по F1 при IoU ≥ 0.5 (`geoqc cv threshold-sweep`, результат `reports/threshold_sweep_val.json`); выбранное значение — `{{metrics.model.conf_threshold}}`. `test` в подборе не участвует.
 

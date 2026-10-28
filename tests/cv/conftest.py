@@ -83,7 +83,7 @@ def synthetic_aoi(tmp_path: Path) -> dict:
     tiles_dir = data / "tiles"
     labels_dir = data / "labels"
     val_dir = labels_dir / "val"
-    hidden_dir = labels_dir / "test"  # exists only to prove bundle/export never touch it
+    hidden_dir = labels_dir / "test"  # exists only to prove export never touches it
     for d in (tiles_dir, val_dir, hidden_dir, data / "interim", tmp_path / "reports"):
         d.mkdir(parents=True, exist_ok=True)
 
@@ -195,7 +195,6 @@ def synthetic_aoi(tmp_path: Path) -> dict:
             "iou_threshold": 0.5,
             "report": str(tmp_path / "reports" / "threshold_sweep_val.json"),
         },
-        "bundle": {"out": str(data / "interim" / "bundle.zip"), "tiles": "all"},
     }
     (cfg_dir / "pipeline.yaml").write_text(
         yaml.safe_dump(pipeline, sort_keys=False), encoding="utf-8"

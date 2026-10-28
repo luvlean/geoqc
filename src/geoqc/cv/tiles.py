@@ -1,4 +1,4 @@
-"""Tile index and raster access shared by predict, export-dataset, threshold-sweep and bundle.
+"""Tile index and raster access shared by predict, export-dataset and threshold-sweep.
 
 Contract (docs/CONTRACTS.md §3.3): ``data/tiles/{row}_{col}.tif`` 512x512 px with a 64 px
 overlap, nodata = 0, all tiles in the metric UTM CRS of the COG; index ``tiles.gpkg`` layer

@@ -2,7 +2,7 @@
 
 ## 5.1 Стек
 
-Python 3.11; GDAL/rasterio, rio-cogeo, shapely 2, geopandas/pyogrio, pyproj — геоданные; PyTorch, Ultralytics YOLOv8-seg, segmentation_models_pytorch — детекция; PostgreSQL + PostGIS — хранение и пространственные операции; FastAPI + uvicorn — API; Leaflet — веб-карта; Docker Compose — окружение; pytest, ruff, GitHub Actions — качество. Лицензия кода — MIT.
+Python 3.11; GDAL/rasterio, rio-cogeo, shapely 2, geopandas/pyogrio, pyproj — геоданные; PyTorch, Ultralytics YOLOv8-seg — детекция; PostgreSQL + PostGIS — хранение и пространственные операции; FastAPI + uvicorn — API; Leaflet — веб-карта; Docker Compose — окружение; pytest, ruff, GitHub Actions — качество. Лицензия кода — MIT.
 
 ## 5.2 Структура пакета
 
@@ -14,7 +14,7 @@ Python 3.11; GDAL/rasterio, rio-cogeo, shapely 2, geopandas/pyogrio, pyproj — 
 
 ## 5.4 CLI и воспроизводимость
 
-Обязательные команды каждого модуля зафиксированы контрактом (`docs/CONTRACTS.md` §6); `Makefile` оборачивает их в таргеты `install up down db-init data labels-prep detect match eval demo all test lint bundle ci clean`, где `all = up db-init data detect match eval`. Требование гейта G8 — `make all` в чистом окружении без ручных шагов, кроме явно выделенных контрольных точек человека (разметка, верификация, дообучение). Окружение с нуля — `scripts/bootstrap.sh`; секреты — `.env` по `.env.example`.
+Обязательные команды каждого модуля зафиксированы контрактом (`docs/CONTRACTS.md` §6); `Makefile` оборачивает их в таргеты `install up down db-init data labels-prep detect match eval demo all test lint ci clean`, где `all = up db-init data detect match eval`. Требование гейта G8 — `make all` в чистом окружении без ручных шагов, кроме явно выделенных контрольных точек человека (разметка, верификация, дообучение). Окружение с нуля — `scripts/bootstrap.sh`; секреты — `.env` по `.env.example`.
 
 Детерминизм: `random_seed` в конфиге, фиксированные сплиты, `model_version` из хэша весов; однократность оценки на `test` — `geoqc eval detection --split test` отказывается перезаписывать результат без `--force` и ведёт `reports/metrics_test.runs.log`.
 

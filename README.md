@@ -43,7 +43,7 @@ flowchart LR
 |---|---|---|
 | `geoqc.data` | Готовит общую основу: открытый снимок и здания OSM в одной метрической системе координат, снимок нарезан на тайлы. Проверяет, совпадает ли привязка снимка с картой (G1): при сдвиге все расхождения были бы ложными | тайлы, `buildings_ref`, `manifest.json`, `crs.metric` |
 | `geoqc.annotation` | Создаёт ручной эталон зданий — единственную честную истину для метрик (OSM сам проверяется, поэтому эталоном быть не может) — и проверяет его согласованность (G2) | `tiles_split.csv`, `buildings.geojson` для val и test |
-| `geoqc.cv` | Находит здания на снимке и превращает маски в полигоны. Ведёт веса, `model_version`, подбор порога, датасеты для дообучения и архив для Colab | `detections.geojson`, `buildings_det` |
+| `geoqc.cv` | Находит здания на снимке и превращает маски в полигоны. Ведёт веса, `model_version`, подбор порога и датасет для дообучения | `detections.geojson`, `buildings_det` |
 | `geoqc.matching` | Превращает две карты в очередь работы: сопоставляет детекции с OSM 1:1, делит расхождения на три класса и ранжирует по уверенности | `matches`, `discrepancies`, `reports/discrepancies.geojson` |
 | `geoqc.eval` | Считает все числа отчёта: качество детекции (G3–G5), точность очереди по ручной проверке (G6, G7), анализ ошибок, сравнение со вторым источником, итоговые гейты | `reports/metrics*.json`, `error_analysis.md` |
 | `geoqc.api` + `web/` | Даёт валидатору работать с очередью: карта, фильтры, карточка, «Принять / Отклонить», экспорт для MapRoulette и JOSM; вкладка «Снимок» — детекция зданий на любом загруженном снимке (D-026) | HTTP API, веб-карта |
@@ -84,7 +84,7 @@ make all                        # = up db-init data detect match eval
 make test lint                  # pytest (без network/slow/gpu), ruff
 ```
 
-Каждый make-таргет — обёртка над CLI-командой из `docs/CONTRACTS.md` §6; полный список и переменные — `make help`, команды — `geoqc --help`, `geoqc <module> --help`. Дополнительные таргеты: `db-init-test`, `demo-docker`, `bundle`, `test-all`, `test-cov`, `format`, `notebooks-check`, `compose-config`, `docker-build`, `ci`, `pre-commit`, `clean`.
+Каждый make-таргет — обёртка над CLI-командой из `docs/CONTRACTS.md` §6; полный список и переменные — `make help`, команды — `geoqc --help`, `geoqc <module> --help`. Дополнительные таргеты: `db-init-test`, `demo-docker`, `test-all`, `test-cov`, `format`, `notebooks-check`, `compose-config`, `docker-build`, `ci`, `pre-commit`, `clean`.
 
 ### Команды CLI по модулям
 
@@ -92,7 +92,7 @@ make test lint                  # pytest (без network/slow/gpu), ruff
 |---|---|---|
 | `geoqc data` | `search-aoi` `download` `preprocess` `tile` `osm` `secondary` `load-ref` `check-georef` `all` | `data/manifest.json`, `data/interim/aoi_cog.tif`, `data/tiles/`, `buildings_ref`, `reports/georef.json` |
 | `geoqc annotation` | `select-tiles` `pre-annotate --split val\|test --source secondary\|detections` `qgis-project` `validate --split`; сверх контракта — `finalize` (рабочий `work.gpkg` из QGIS → `buildings.geojson` / `recheck.geojson`) | `data/labels/tiles_split.csv`, `data/labels/<split>/draft.geojson`, `data/labels/<split>/buildings.geojson`, `reports/annotation.json` |
-| `geoqc cv` | `fetch-weights` `predict --split all\|val\|test [--to-db]` `export-dataset` `bundle` `threshold-sweep --split val` | `data/interim/detections.geojson`, `buildings_det`, `data/interim/bundle.zip`, `reports/threshold_sweep_val.json` |
+| `geoqc cv` | `fetch-weights` `predict --split all\|val\|test [--to-db]` `export-dataset` `threshold-sweep --split val` | `data/interim/detections.geojson`, `buildings_det`, `reports/threshold_sweep_val.json` |
 | `geoqc matching` | `init-db` `run --model-version <v>` `export` `stats` | `matches`, `discrepancies`, `reports/discrepancies.geojson` |
 | `geoqc eval` | `detection --split val\|test` `verification-sample` `discrepancies --verification reports/verification.csv` `error-analysis` `compare-secondary` `gates` | `reports/metrics_<split>.json`, `reports/verification_sample.csv`, `reports/error_analysis.md`, `reports/metrics.json` |
 | `geoqc api` | `serve [--host --port]`; сверх контракта — `bench` (замер `GET /discrepancies` на тестовой БД) | http://localhost:8000 (карта), `/health`, `/discrepancies`, `/export` |
@@ -108,7 +108,7 @@ data/              raw/  interim/  tiles/  labels/{val,test}/  manifest.json    
 sql/               001_schema.sql (контракт)  002+_*.sql (сопоставление)
 src/geoqc/         config.py  db.py  cli.py  data/  annotation/  cv/  matching/  eval/  api/
 web/               Leaflet SPA (статика, отдаёт FastAPI по /)
-notebooks/         train_finetune.ipynb — дообучение (локально / Colab)
+notebooks/         train_finetune.ipynb — дообучение; experiments.ipynb, airs_eda.ipynb — эксперименты и анализ AIRS
 tests/             conftest.py  <module>/  integration/
 reports/           metrics.json  metrics_val.json  metrics_test.json  error_analysis.md  figures/
 docs/              CONTRACTS.md  tasks/  annotation/  qa/  thesis/  presentation/  *.md
@@ -123,7 +123,7 @@ PLAN.md  DECISIONS.md  LOG.md  README.md
 Пайплайн не подменяет три шага, которые выполняет студент:
 
 1. **Разметка эталона в QGIS** (после `make labels-prep`). Черновые контуры (`data/labels/<split>/draft.geojson`) правятся и подтверждаются (`verified=true`) по [docs/annotation/INSTRUCTION_QGIS.md](docs/annotation/INSTRUCTION_QGIS.md) и протоколу [docs/annotation/PROTOCOL.md](docs/annotation/PROTOCOL.md); 10 % тайлов размечаются повторно «вслепую» (`recheck.geojson`) для гейта G2. Выгрузка из рабочего GeoPackage — `geoqc annotation finalize`; приёмка — `make labels-validate` (`geoqc annotation validate --split val|test`). OSM эталоном **не является** — его мы проверяем (D-005).
-2. **Дообучение модели** (если бейзлайн не проходит G3 на `val`): `make bundle` → `notebooks/train_finetune.ipynb` локально (CUDA/MPS/CPU) или в Colab (D-004); после обучения веса кладутся в `models/`, `model_version` обновляется в `config/cv.yaml` и `models/MODEL_CARD.md`. `data/labels/test/` в обучении и подборе порогов не участвует — проверяется статическим тестом QA.
+2. **Дообучение модели** (если бейзлайн не проходит G3 на `val`): `notebooks/train_finetune.ipynb` (CUDA/MPS/CPU) на своей разметке или `scripts/experiments/airs_night.py` (своя разметка + AIRS, D-024); после обучения веса кладутся в `models/`, `model_version` обновляется в `config/cv.yaml` и `models/MODEL_CARD.md`. `data/labels/test/` в обучении и подборе порогов не участвует — проверяется статическим тестом QA.
 3. **Ручная верификация расхождений** (≥ 50 шт., по классам): `geoqc eval verification-sample` → `reports/verification_sample.csv`; студент заполняет `verdict ∈ {map_error, model_error, image_issue, unsure}` → сохраняет как `reports/verification.csv` → `geoqc eval discrepancies --verification reports/verification.csv` (гейты G6, G7).
 
 Веб-сценарий для валидатора: выбрать зону → список расхождений по убыванию `confidence` → карточка (класс, confidence, IoU, ссылка на osm.org) → «Принять / Отклонить» (`PATCH /discrepancies/{id}`) → «Экспорт GeoJSON» (`/export`, формат пригоден для MapRoulette / JOSM).
@@ -151,7 +151,7 @@ PLAN.md  DECISIONS.md  LOG.md  README.md
 - Контуры крыш vs фундаментов: off-nadir съёмка, тени, растительность смещают контур; протокол разметки фиксирует, что размечается.
 - Разрешение снимка задаёт минимальный детектируемый объект; Sentinel-2 (10 м) для отдельных зданий непригоден.
 - Один снимок, один срез вектора: мониторинг во времени, другие классы объектов, покрытие города — направления развития.
-- Вычисления: CPU/MPS-инференс или один GPU уровня T4 (Colab); обучение с нуля не планировалось.
+- Вычисления: CPU/MPS-инференс и дообучение на Apple MPS; обучение с нуля не планировалось.
 - Метрики верификации (G6, G7) зависят от объёма ручной проверки (≥ 50 расхождений) и корректности вердиктов.
 
 ## Документация

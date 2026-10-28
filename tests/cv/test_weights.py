@@ -144,12 +144,12 @@ def test_fetch_weights_keeps_recorded_fine_tune(tmp_path: Path):
 
 
 def test_fetch_weights_cli_skips_non_ultralytics_backend(monkeypatch: pytest.MonkeyPatch):
-    """При backend=smp_unet команда fetch-weights ничего не скачивает и не пересчитывает model_version."""
+    """При backend=mock команда fetch-weights ничего не скачивает и не пересчитывает model_version."""
     from typer.testing import CliRunner
 
     from geoqc.cv import cli, weights
 
-    monkeypatch.setattr(cli, "load_config", lambda: {"cv": {"backend": "smp_unet"}})
+    monkeypatch.setattr(cli, "load_config", lambda: {"cv": {"backend": "mock"}})
     monkeypatch.setattr(weights, "fetch_weights", lambda *a, **k: pytest.fail("fetch called"))
     res = CliRunner().invoke(cli.app, ["fetch-weights"])
-    assert res.exit_code == 0 and "nothing to fetch" in res.output
+    assert res.exit_code == 0 and "no weights to fetch" in res.output

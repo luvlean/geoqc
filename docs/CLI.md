@@ -24,8 +24,6 @@ CLI ставится в виртуальное окружение (`make install
 | `make all` | `up db-init data detect match eval` подряд |
 | `make demo` | веб-карта и API на `http://localhost:8000`; вкладка «Снимок» — детекция на любом загруженном снимке (перетащить файл или выбрать); `REVIEW=1` добавляет вкладку верификации |
 | `make demo-docker` | то же через docker compose (собирает образ приложения) |
-| `make bundle` | архив тайлов, разметки val и конфига для Colab |
-| `make external-data` | выборка SpaceNet 2: загрузка, нарезка, отчёт |
 | `make test` / `make test-all` / `make test-cov` | быстрые тесты / все, включая сетевые и медленные / с покрытием, как в CI |
 | `make lint` / `make format` | проверка / автоисправление `ruff` |
 | `make notebooks-check` | `nbqa ruff` и `nbstripout --verify` по ноутбукам |
@@ -69,11 +67,6 @@ CLI ставится в виртуальное окружение (`make install
 | `predict` | детекция по тайлам → `detections.geojson`; `--to-db` — ещё и в `buildings_det`; `--weights` — другие веса для экспериментов |
 | `threshold-sweep` | подбор порога уверенности на val → `reports/threshold_sweep_val.json` |
 | `export-dataset` | разметка → набор YOLO-seg (train / holdout); test не используется |
-| `prepare-microsoft` | псевдоразметка из footprints Microsoft вдали от val/test |
-| `fetch-external` | загружает выборку SpaceNet 2 |
-| `prepare-external` | нарезает SpaceNet 2 на чипы 0,3 м с разметкой YOLO-seg |
-| `report-external` | статистика и графики SpaceNet 2 против нашего AOI |
-| `bundle` | архив для ноутбука в Colab (без меток test) |
 
 ### `geoqc matching` — очередь расхождений
 
@@ -111,10 +104,7 @@ CLI ставится в виртуальное окружение (`make install
 | Скрипт | Что делает |
 |---|---|
 | `airs_night.py` | дообучение на своей разметке + AIRS, оценка на val (D-024) |
-| `rid2_prepare.py` | окна RID2, исключение коллективных садов, отбор трудных примеров |
-| `rid2_train.py` | два варианта дообучения на RID2, оценка на val |
 | `weighted_compare.py` | все модели на val по порогам, обычный и взвешенный по площади F1 → `reports/experiments/weighted_f1_val.json` |
 | `build_experiments_notebook.py` | собирает `notebooks/experiments.ipynb` |
 | `airs_test_eval.py` | оценка моделей на тестовой части AIRS → `reports/experiments/airs_test.json` |
 | `refine_drafts.py`, `apply_test_review.py` | первичный проход по разметке test без модели (D-022) |
-| `progress.sh [rid2\|airs] [-f]` | ход обучения: этапы, метрики по эпохам, текущий батч |

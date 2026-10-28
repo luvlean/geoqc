@@ -1,7 +1,7 @@
 # CV module settings (owned by CV Agent). Loaded via geoqc.config.load_config()["cv"].
 # `weights.sha256`, `model_version` and `conf_threshold` are rewritten by
 # `geoqc cv fetch-weights` / `geoqc cv threshold-sweep`; everything else is edited by hand.
-backend: ultralytics              # ultralytics | smp_unet | mock
+backend: ultralytics              # ultralytics | mock (tests)
 model_name: yolov8m-building-seg-ft-ours-airs # prefix of model_version = "<model_name>-<sha256[:8]>"
 weights:
   path: models/yolov8m-building-seg-ft-ours-airs.pt
@@ -20,7 +20,7 @@ device: auto                      # auto | cuda | mps | cpu
 half_on_cuda: true
 max_det: 300
 seed: 42
-mask_threshold: 0.5               # probability cut for smp_unet masks
+mask_threshold: 0.5               # probability cut for the predicted masks
 vectorize:
   simplify_tolerance_m: 0.5       # Douglas-Peucker tolerance in metres
   min_area_m2: 12                 # drop polygons smaller than this (matches annotation.min_area_m2)
@@ -29,10 +29,6 @@ vectorize:
   score_mode: max                 # max | area_weighted
   merge_same_tile: false
   drop_nodata: true               # mask out pixels where all bands == 0 before vectorizing
-smp_unet:
-  encoder: resnet34
-  checkpoint: models/unet_resnet34.pt   # written by notebooks/train_finetune.ipynb
-  min_component_px: 16
 dataset:
   out_dir: data/interim/dataset
   label_split: train             # D-021: fine-tune on train labels ...
@@ -40,35 +36,9 @@ dataset:
   holdout_fraction: 0.2
   seed: 42
   image_format: png
-external:                         # SpaceNet 2 Buildings, CC BY-SA 4.0 (geoqc cv fetch-external / prepare-external)
-  base_url: https://spacenet-dataset.s3.amazonaws.com
-  prefix: spacenet/SN2_buildings/train
-  cities: [AOI_3_Paris, AOI_4_Shanghai, AOI_2_Vegas]
-  per_city: 100                   # deterministic sample per city (0 = all tiles)
-  seed: 42
-  raw_dir: data/raw/external/spacenet2
-  out_dir: data/interim/external/spacenet2
-  gsd_m: 0.3                      # same grid as our tiles: local UTM, square 0.3 m pixels
-  size_px: 512
-  stretch_percentiles: [2, 98]    # 11-bit WorldView-3 -> 8-bit, per band
-  holdout_fraction: 0.2
-  min_area_m2: 12                 # matches annotation.min_area_m2
-  min_valid_fraction: 0.5         # skip chips mostly outside the source image (nodata)
-  workers: 8
-microsoft:                        # geoqc cv prepare-microsoft: footprints as pseudo-labels (ODbL)
-  footprints: data/interim/secondary_buildings.geojson
-  out_dir: data/interim/external/microsoft
-  exclude_radius: 1               # val/test tiles and their neighbours (64 px overlap) are never used
-  min_valid_fraction: 0.9         # skip tiles mostly outside the image
-  min_area_m2: 12                 # matches annotation.min_area_m2
-  holdout_fraction: 0.2           # Ultralytics validation subset (val labels stay out of training)
-  seed: 42
 sweep:
   conf_floor: 0.05
   thresholds: [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
   iou_threshold: 0.5
   select_by: f1_area                # D-023: area-weighted F1 (a missed block of flats outweighs a shed)
   report: reports/threshold_sweep_val.json
-bundle:
-  out: data/interim/bundle.zip
-  tiles: all                      # all | val

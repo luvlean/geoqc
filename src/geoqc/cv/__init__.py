@@ -1,6 +1,6 @@
-"""Building detection: weights, predictors, vectorization, dataset export, sweep, bundle.
+"""Building detection: weights, predictors, vectorization, dataset export, sweep.
 
-Heavy dependencies (torch, ultralytics, segmentation_models_pytorch) are imported lazily
+Heavy dependencies (torch, ultralytics) are imported lazily
 inside the classes that need them so that ``geoqc --help`` stays fast.
 """
 

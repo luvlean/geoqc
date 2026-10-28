@@ -42,17 +42,16 @@
 ## Архитектура
 
 YOLOv8m-seg (Ultralytics, instance segmentation): backbone CSPDarknet-m, PAN-neck, детекционная голова + прототипы масок
-(32 коэффициента), ~27 млн параметров. Альтернативный бэкенд — U-Net (`segmentation_models_pytorch`, энкодер `resnet34`,
-ImageNet-инициализация) с разбиением семантической маски на связные компоненты (`backend: smp_unet`).
+(32 коэффициента), ~27 млн параметров.
 
 ## Данные дообучения
 
-- Только `data/labels/val/buildings.geojson` (объекты с `verified=true`) и тайлы `data/tiles/*.tif`, экспорт `geoqc cv export-dataset`.
-- Внутри val — детерминированный стратифицированный сплит 80/20 (`dataset.seed`, `dataset.holdout_fraction`) на `train`
-  и `holdout`; holdout используется для ранней остановки и подбора порога, в обучение не идёт.
+- Своя разметка `data/labels/train/buildings.geojson` (11 тайлов, `verified=true`, ×10 повторов) и 1318 чипов AIRS
+  (0,3 м) — `scripts/experiments/airs_night.py`, D-024; экспорт своей разметки — `geoqc cv export-dataset`.
+- Ранняя остановка и подбор порога — по `val` (13 тайлов, D-021), в обучение он не идёт.
 - Разметка тестового сплита в модуле `cv` и ноутбуке **не читается и не используется ни на одном этапе** (запрет абсолютный;
   см. `tests/cv/test_no_test_labels.py`).
-- Опционально: SpaceNet 2 (CC BY-SA 4.0, `DATA_SOURCE` в ноутбуке, `docs/datasets/spacenet2.md`), INRIA Aerial Image Labeling (ячейка в ноутбуке, выключена) — только из whitelist плана §9.
+- SpaceNet 2 и footprints Microsoft пробовались и не помогли (D-019, D-020); RID2 не выбран (D-024).
 
 ## Гиперпараметры инференса (`config/cv.yaml`)
 
@@ -105,5 +104,5 @@ G3–G5 (`reports/metrics.json`). Test (10 тайлов, 153 здания) оц�
 
 ## Окружение
 
-Python 3.11, torch 2.14 (MPS), torchvision 0.29, ultralytics 8.4.163, segmentation-models-pytorch 0.5.0, rasterio 1.4.4,
-geopandas 1.1.4, shapely 2.1.2. Обучение — Google Colab T4 или локально (MPS/CPU). Дата карточки: 2026-09-26.
+Python 3.11, torch 2.14 (MPS), torchvision 0.29, ultralytics 8.4.163, rasterio 1.4.4,
+geopandas 1.1.4, shapely 2.1.2. Обучение — локально (Apple MPS). Дата карточки: 2026-09-26.

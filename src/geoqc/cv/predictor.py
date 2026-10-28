@@ -5,8 +5,6 @@
 
 * :class:`UltralyticsSegPredictor` - YOLOv8-seg instance segmentation (weights from
   ``geoqc cv fetch-weights`` or fine-tuned in ``notebooks/train_finetune.ipynb``).
-* :class:`SmpUnetPredictor` - segmentation_models_pytorch U-Net (semantic mask split into
-  connected components), checkpoint written by the notebook.
 * :class:`MockPredictor` - brightness threshold + connected components; no weights, no
   network, deterministic. Used by tests and for smoke runs (``backend: mock``).
 
@@ -237,98 +235,6 @@ class UltralyticsSegPredictor(Predictor):
         return self.predict_batch([tile])[0]
 
 
-IMAGENET_MEAN = (0.485, 0.456, 0.406)
-IMAGENET_STD = (0.229, 0.224, 0.225)
-
-
-class SmpUnetPredictor(Predictor):
-    """segmentation_models_pytorch U-Net binary segmentation -> connected components.
-
-    Checkpoint format (written by the notebook)::
-
-        {"state_dict": ..., "arch": "Unet", "encoder": "resnet34", "classes": 1,
-         "mean": [..3..], "std": [..3..]}
-
-    A bare ``state_dict`` is accepted too (then ``encoder`` must be passed).
-    """
-
-    name = "smp_unet"
-
-    def __init__(
-        self,
-        checkpoint: str | Path,
-        *,
-        encoder: str = "resnet34",
-        device: str = "auto",
-        mask_threshold: float = 0.5,
-        min_component_px: int = 16,
-        half_on_cuda: bool = True,
-        seed: int = 42,
-    ) -> None:
-        import segmentation_models_pytorch as smp
-        import torch
-
-        self.checkpoint = Path(resolve_path(checkpoint))
-        if not self.checkpoint.exists():
-            raise FileNotFoundError(f"U-Net checkpoint not found: {self.checkpoint}")
-        self.device = resolve_device(device)
-        self.half = bool(half_on_cuda) and self.device.startswith("cuda")
-        self.mask_threshold = float(mask_threshold)
-        self.min_component_px = int(min_component_px)
-        seed_everything(seed)
-
-        ckpt = torch.load(self.checkpoint, map_location="cpu", weights_only=False)
-        if isinstance(ckpt, dict) and "state_dict" in ckpt:
-            state = ckpt["state_dict"]
-            encoder = str(ckpt.get("encoder", encoder))
-            arch = str(ckpt.get("arch", "Unet"))
-            classes = int(ckpt.get("classes", 1))
-            mean = tuple(ckpt.get("mean", IMAGENET_MEAN))
-            std = tuple(ckpt.get("std", IMAGENET_STD))
-        else:
-            state, arch, classes, mean, std = ckpt, "Unet", 1, IMAGENET_MEAN, IMAGENET_STD
-        self.encoder = encoder
-        model_cls = getattr(smp, arch)
-        self.model = model_cls(
-            encoder_name=encoder, encoder_weights=None, in_channels=3, classes=classes
-        )
-        self.model.load_state_dict(state)
-        self.model.eval().to(self.device)
-        if self.half:
-            self.model.half()
-        self._mean = torch.tensor(mean, dtype=torch.float32).view(1, 3, 1, 1)
-        self._std = torch.tensor(std, dtype=torch.float32).view(1, 3, 1, 1)
-
-    def _probabilities(self, tiles: list[np.ndarray]) -> np.ndarray:
-        import torch
-
-        x = np.stack([_check_tile(t) for t in tiles]).astype(np.float32) / 255.0  # N,H,W,3
-        xt = torch.from_numpy(x).permute(0, 3, 1, 2)
-        xt = (xt - self._mean) / self._std
-        xt = xt.to(self.device)
-        if self.half:
-            xt = xt.half()
-        with torch.no_grad():
-            logits = self.model(xt)
-            if logits.shape[1] == 1:
-                prob = torch.sigmoid(logits)[:, 0]
-            else:  # multi-class: building is class 1
-                prob = torch.softmax(logits, dim=1)[:, 1]
-        return prob.float().cpu().numpy()
-
-    def predict_batch(self, tiles: list[np.ndarray]) -> list[list[Mask]]:
-        if not tiles:
-            return []
-        probs = self._probabilities(tiles)
-        return [
-            components_to_masks(p >= self.mask_threshold, p, min_component_px=self.min_component_px)
-            for p in probs
-        ]
-
-    def predict(self, tile: np.ndarray) -> list[Mask]:
-        return self.predict_batch([tile])[0]
-
-
 def build_predictor(
     cv_cfg: dict[str, Any],
     *,
@@ -336,7 +242,7 @@ def build_predictor(
     conf: float | None = None,
     backend: str | None = None,
 ) -> Predictor:
-    """Instantiate the backend named in ``config/cv.yaml`` (``ultralytics|smp_unet|mock``)."""
+    """Instantiate the backend named in ``config/cv.yaml`` (``ultralytics|mock``)."""
     backend = (backend or cv_cfg.get("backend") or "ultralytics").lower()
     device = device or cv_cfg.get("device", "auto")
     conf = float(conf if conf is not None else cv_cfg.get("conf_threshold", 0.25))
@@ -361,15 +267,4 @@ def build_predictor(
             mask_threshold=float(cv_cfg.get("mask_threshold", 0.5)),
             seed=seed,
         )
-    if backend == "smp_unet":
-        unet = cv_cfg.get("smp_unet", {}) or {}
-        return SmpUnetPredictor(
-            unet.get("checkpoint", "models/unet_resnet34.pt"),
-            encoder=str(unet.get("encoder", "resnet34")),
-            device=device,
-            mask_threshold=float(cv_cfg.get("mask_threshold", 0.5)),
-            min_component_px=int(unet.get("min_component_px", 16)),
-            half_on_cuda=bool(cv_cfg.get("half_on_cuda", True)),
-            seed=seed,
-        )
-    raise ValueError(f"unknown cv backend {backend!r}; expected ultralytics|smp_unet|mock")
+    raise ValueError(f"unknown cv backend {backend!r}; expected ultralytics|mock")

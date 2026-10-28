@@ -244,12 +244,8 @@ def current_model_version(cv_cfg: dict[str, Any]) -> str:
     backend = str(cv_cfg.get("backend", "ultralytics"))
     if backend == "mock":
         return "mock-00000000"
-    if backend == "smp_unet":
-        path = Path(resolve_path((cv_cfg.get("smp_unet") or {}).get("checkpoint", "")))
-        name = f"unet-{(cv_cfg.get('smp_unet') or {}).get('encoder', 'resnet34')}"
-    else:
-        path = Path(resolve_path((cv_cfg.get("weights") or {}).get("path", "")))
-        name = str(cv_cfg.get("model_name", "yolov8m-building-seg"))
+    path = Path(resolve_path((cv_cfg.get("weights") or {}).get("path", "")))
+    name = str(cv_cfg.get("model_name", "yolov8m-building-seg"))
     if path.exists():
         return model_version_for(name, sha256_of(path))
     raise FileNotFoundError(

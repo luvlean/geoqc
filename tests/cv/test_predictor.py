@@ -79,28 +79,6 @@ def test_ultralytics_backend_requires_weights(tmp_path: Path):
 
 
 @pytest.mark.slow
-def test_smp_unet_predictor_on_random_checkpoint(tmp_path: Path):
-    """SmpUnetPredictor грузит чекпоинт формата ноутбука и при threshold=0 даёт одну маску на весь тайл."""
-    torch = pytest.importorskip("torch")
-    smp = pytest.importorskip("segmentation_models_pytorch")
-    from geoqc.cv.predictor import SmpUnetPredictor
-
-    torch.manual_seed(0)
-    model = smp.Unet("resnet18", encoder_weights=None, in_channels=3, classes=1)
-    ckpt = tmp_path / "unet.pt"
-    torch.save(
-        {"state_dict": model.state_dict(), "arch": "Unet", "encoder": "resnet18", "classes": 1},
-        ckpt,
-    )
-    pred = SmpUnetPredictor(ckpt, device="cpu", mask_threshold=0.0, min_component_px=1)
-    tile = np.random.default_rng(0).integers(0, 255, size=(64, 64, 3), dtype=np.uint8)
-    masks = pred.predict(tile)
-    assert len(masks) == 1 and masks[0].area_px == 64 * 64
-    assert 0.0 <= masks[0].score <= 1.0
-    assert len(pred.predict_batch([tile, tile])) == 2
-
-
-@pytest.mark.slow
 def test_ultralytics_predictor_runs_when_weights_present(synthetic_aoi: dict):
     """Реальный YOLOv8-seg бэкенд (если веса скачаны) отрабатывает на синтетическом тайле без ошибок и в batch-режиме."""
     from geoqc.config import REPO_ROOT

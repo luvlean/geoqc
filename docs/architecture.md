@@ -8,7 +8,7 @@
 |---|---|---|---|
 | `data` | AOI, снимок, вектор, тайлы, загрузка эталона, проверка геопривязки | OpenAerialMap / Maxar Open Data, Overpass API, MS/Google footprints, `config/aoi.geojson` | `data/raw/*.tif`, `data/manifest.json`, `data/interim/aoi_cog.tif`, `data/tiles/`, `data/interim/osm_buildings.geojson`, `data/interim/secondary_buildings.geojson`, таблица `buildings_ref`, `reports/georef.json`, `reports/aoi_candidates.json` |
 | `annotation` | отбор тайлов, предразметка, валидация эталона, G2, проект QGIS | `tiles.gpkg`, `osm_buildings.geojson`, `secondary_buildings.geojson` или `detections.geojson` | `data/labels/tiles_split.csv`, `data/labels/<split>/draft.geojson`, `reports/annotation.json`, проект `.qgz` / стили `.qml` |
-| `cv` | веса, инференс по тайлам, векторизация масок, склейка, датасет и бандл для дообучения, подбор порога на `val` | `data/tiles/*.tif`, `config/cv.yaml`, `models/` | `data/interim/detections.geojson`, таблица `buildings_det`, `data/interim/dataset/`, `data/interim/bundle.zip`, `reports/threshold_sweep_val.json`, `models/MODEL_CARD.md` |
+| `cv` | веса, инференс по тайлам, векторизация масок, склейка, датасет для дообучения, подбор порога на `val`, детекция на загруженном снимке | `data/tiles/*.tif`, `config/cv.yaml`, `models/` | `data/interim/detections.geojson`, таблица `buildings_det`, `data/interim/dataset/`, `reports/threshold_sweep_val.json`, `models/MODEL_CARD.md` |
 | `matching` | 1:1 сопоставление ref↔det по IoU, классификация, скоринг, экспорт очереди | `buildings_ref` (`source='osm'` — эталон; `microsoft`/`google` — второй источник), `buildings_det`, `config/matching.yaml` | таблицы `matches`, `discrepancies`, `reports/discrepancies.geojson` |
 | `eval` | метрики детекции, верификационная выборка, precision расхождений, сравнение с вторым источником, анализ ошибок, гейты | `data/labels/{val,test}/buildings.geojson`, `detections.geojson`, `discrepancies`, `reports/*.json`, `reports/verification.csv`, `config/quality_gates.yaml` | `reports/metrics_val.json`, `reports/metrics_test.json`, `reports/verification_sample.csv`, `reports/error_analysis.md`, `reports/figures/`, `reports/metrics.json` |
 | `api` + `web/` | FastAPI: GeoJSON, MVT, тайлы снимка, статусы, экспорт; Leaflet-карта | PostGIS, `data/interim/aoi_cog.tif`, `config/aoi.geojson`, `data/manifest.json`, `.env` | HTTP :8000 |
@@ -125,7 +125,7 @@ erDiagram
 |---|---|---|---|
 | `install` | `scripts/bootstrap.sh`: venv, `requirements-dev.txt`, `pip install -e .`, `.env` из примера, pre-commit | Python 3.11 | `.venv/`, `.env` |
 | `up` / `down` | `docker compose up -d --wait db` / `down` | Docker | контейнер `geoqc-db` :5433 |
-| `db-init` | `geoqc matching init-db`; пока саб-приложение не доступно — `scripts/db_init.py` | `up` | таблицы и функции `sql/` |
+| `db-init` | `geoqc matching init-db` | `up` | таблицы и функции `sql/` |
 | `db-init-test` | `scripts/db_init.py --test` | `up` | схема в `geoqc_test` |
 | `data` | `geoqc data all` | `db-init`, сеть (whitelist) | см. §1, строка `data` |
 | `labels-prep` | `geoqc annotation select-tiles`; `pre-annotate --split val|test --source $(PRE_SOURCE)`; `qgis-project` | `data` | `tiles_split.csv`, `draft.geojson`, проект QGIS → **правка студентом** |
@@ -136,7 +136,6 @@ erDiagram
 | `demo` | `up db-init` → `geoqc api serve --host $(HOST) --port $(PORT)` | `match` | http://localhost:8000 |
 | `demo-docker` | `docker compose up -d --build --wait db app` | Docker | то же в контейнере |
 | `all` | `up db-init data detect match eval` | — | всё выше |
-| `bundle` | `geoqc cv bundle` | `labels-prep` | `data/interim/bundle.zip` для ноутбука |
 | `test` / `test-all` / `test-cov` | `pytest -m "not network and not slow and not gpu"` / все тесты с `GEOQC_NETWORK=1` / с покрытием | `install` | `coverage.xml` |
 | `lint` / `format` | `ruff format --check . && ruff check .` / с исправлением | `install` | — |
 | `notebooks-check` | `scripts/ci/check_notebooks.sh` (nbqa ruff, `nbstripout --verify`) | — | — |
