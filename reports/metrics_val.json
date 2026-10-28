@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "split": "val",
-  "generated_at": "2026-10-28T14:01:53+00:00",
-  "git_commit": "6bbeff88f9d3800331ab2dcebf665b31697a99b1",
+  "generated_at": "2026-10-28T23:22:45+00:00",
+  "git_commit": "94a00f52f4f1e88ad8dc3d58913f9ef160d595d3",
   "is_metric": true,
   "labels_path": "data/labels/val/buildings.geojson",
   "labels_verified": true,

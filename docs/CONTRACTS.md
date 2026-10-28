@@ -97,7 +97,7 @@ DDL — `sql/001_schema.sql` (буквально контракт): `buildings_r
 ### 3.9 Метрики `reports/metrics.json` (схема фиксирована)
 ```json
 {
-  "schema_version": "1.0", "generated_at": "ISO-8601", "git_commit": "sha",
+  "schema_version": "1.0", "generated_at": "ISO-8601", "git_commit": "sha", "git_dirty": false,
   "dataset": {"aoi": "...", "n_tiles_val": 0, "n_tiles_test": 0, "n_gt_val": 0, "n_gt_test": 0},
   "model": {"model_version": "...", "conf_threshold": 0.0, "iou_threshold": 0.5},
   "georeference": {"median_offset_m": 0.0, "n_control_points": 0},
@@ -144,11 +144,11 @@ DDL — `sql/001_schema.sql` (буквально контракт): `buildings_r
 | Модуль | Команды |
 |---|---|
 | data | `search-aoi` → `reports/aoi_candidates.json`; `download`; `preprocess` (COG, обрезка, сдвиг); `tile`; `osm` → `data/interim/osm_buildings.geojson`; `secondary` (MS/Google footprints, если есть); `load-ref` (в `buildings_ref`); `check-georef` → `reports/georef.json`; `all` |
-| annotation | `select-tiles` → `data/labels/tiles_split.csv`; `add-test-tiles` (D-021); `pre-annotate --split train|val|test --source secondary|detections` → `draft.geojson`; `validate --split` → `reports/annotation.json`; `qgis-project` (генерирует проект/слои для QGIS) |
+| annotation | `select-tiles` → `data/labels/tiles_split.csv`; `add-test-tiles` (D-021); `pre-annotate --split train|val|test --source secondary|detections` → `draft.geojson`; `qgis-project` (генерирует проект/слои для QGIS); `finalize --split [--annotator]` (`work.gpkg` → `buildings.geojson`, `recheck.geojson`); `validate --split` → `reports/annotation.json` |
 | cv | `fetch-weights`; `predict --split all|train|val|test [--to-db] [--weights]` → `detections.geojson`; `export-dataset` (labels train → обучение, val → holdout, D-021); `threshold-sweep --split val` → `reports/threshold_sweep_val.json` |
 | matching | `init-db` (применяет `sql/`); `run --model-version` → `matches`, `discrepancies`; `export` → `reports/discrepancies.geojson`; `stats` |
 | eval | `detection --split val|test` → `reports/metrics_<split>.json`; `verification-sample` → `reports/verification_sample.csv`; `discrepancies --verification reports/verification.csv`; `error-analysis` → `reports/error_analysis.md`; `compare-secondary`; `gates` → `reports/metrics.json` |
-| api | `serve [--host --port]` |
+| api | `serve [--host --port] [--review]`; `bench` (скорость `GET /discrepancies` на тестовой БД) |
 
 ## 7. Make-таргеты (Orchestrator)
 `install` `up` `down` `db-init` `data` `labels-prep` `detect` `match` `eval` `demo` `all` `test` `lint` `ci` `clean`.

@@ -23,7 +23,7 @@ import numpy as np
 import rasterio
 from affine import Affine
 from PIL import Image
-from rasterio.enums import Resampling
+from rasterio.enums import ColorInterp, Resampling
 from rasterio.warp import transform_geom
 from shapely.affinity import affine_transform, scale
 from shapely.geometry import mapping
@@ -59,15 +59,24 @@ class ImageDetections:
     geo: list[dict[str, Any]] = field(default_factory=list)  # GeoJSON geometries, EPSG:4326
 
 
-def _pixel_size_m(src: rasterio.io.DatasetReader) -> float | None:
+def _pixel_size_m(src: rasterio.io.DatasetReader) -> tuple[float, float] | None:
+    """(x, y) pixel size in metres from the georeference; None for a plain picture.
+
+    Kept per axis: in EPSG:4326 a square-degree pixel is cos(lat) times narrower than tall.
+    """
     if src.crs is None or src.transform.is_identity:
         return None
-    px = (abs(src.transform.a) + abs(src.transform.e)) / 2
+    t = src.transform
+    px, py = math.hypot(t.a, t.d), math.hypot(t.b, t.e)
     if src.crs.is_projected:
-        return px * float(src.crs.linear_units_factor[1])
+        k = float(src.crs.linear_units_factor[1])
+        return px * k, py * k
     if src.crs.is_geographic:
-        lat = src.xy(src.height // 2, src.width // 2)[1]
-        return px * 111_320.0 * math.cos(math.radians(lat))
+        # length of one degree on the WGS 84 ellipsoid at the image centre
+        phi = math.radians(src.xy(src.height // 2, src.width // 2)[1])
+        m_lat = 111_132.92 - 559.82 * math.cos(2 * phi) + 1.175 * math.cos(4 * phi)
+        m_lon = 111_412.84 * math.cos(phi) - 93.5 * math.cos(3 * phi)
+        return px * m_lon, py * m_lat
     return None
 
 
@@ -103,21 +112,29 @@ def load_image(
     with src:
         geo_gsd = _pixel_size_m(src)
         if gsd_m:
-            source_gsd, gsd_from = float(gsd_m), "user"
+            (gx, gy), gsd_from = (float(gsd_m), float(gsd_m)), "user"
         elif geo_gsd:
-            source_gsd, gsd_from = geo_gsd, "georeference"
+            (gx, gy), gsd_from = geo_gsd, "georeference"
         else:
-            source_gsd, gsd_from = float(default_gsd_m), "default"
-        factor = source_gsd / target_gsd_m
-        w, h = max(1, round(src.width * factor)), max(1, round(src.height * factor))
+            (gx, gy), gsd_from = (float(default_gsd_m), float(default_gsd_m)), "default"
+        fx, fy = gx / target_gsd_m, gy / target_gsd_m
+        w, h = max(1, round(src.width * fx)), max(1, round(src.height * fy))
         if max(w, h) > max_side_px:
             raise ImageError(
                 f"после приведения к {target_gsd_m} м/пикс снимок {w}×{h} px больше лимита "
                 f"{max_side_px} px: обрежьте его или проверьте размер пикселя"
             )
-        bands = [1, 2, 3] if src.count >= 3 else [1, 1, 1]
-        rs = Resampling.average if factor < 1 else Resampling.bilinear
-        arr = src.read(bands, out_shape=(3, h, w), resampling=rs)
+        rs = Resampling.average if fx * fy < 1 else Resampling.bilinear
+        if src.count == 1 and src.colorinterp[0] == ColorInterp.palette:
+            # indexed PNG/GIF: the band holds colour indices, so resample them as labels
+            lut = np.zeros((256, 3), np.uint8)
+            for k, rgba in src.colormap(1).items():
+                lut[k] = rgba[:3]
+            idx = src.read(1, out_shape=(h, w), resampling=Resampling.nearest)
+            arr = np.transpose(lut[idx], (2, 0, 1))
+        else:
+            bands = [1, 2, 3] if src.count >= 3 else [1, 1, 1]
+            arr = src.read(bands, out_shape=(3, h, w), resampling=rs)
         valid = src.read_masks(1, out_shape=(h, w), resampling=Resampling.nearest) > 0
         georef = geo_gsd is not None
         transform = src.transform @ Affine.scale(src.width / w, src.height / h) if georef else None
@@ -128,7 +145,7 @@ def load_image(
         rgb=np.ascontiguousarray(rgb),
         valid=valid,
         gsd_m=target_gsd_m,
-        source_gsd_m=source_gsd,
+        source_gsd_m=math.sqrt(gx * gy),
         source_size=size,
         gsd_from=gsd_from,
         crs=crs,

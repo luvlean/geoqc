@@ -8,7 +8,6 @@ written to the database; the upload is deleted after the request.
 from __future__ import annotations
 
 import logging
-import shutil
 import tempfile
 import threading
 from pathlib import Path
@@ -84,9 +83,14 @@ def detect(
     with tempfile.TemporaryDirectory(prefix="geoqc-detect-") as tmp:
         path = Path(tmp) / f"upload{suffix}"
         with path.open("wb") as out:
-            shutil.copyfileobj(file.file, out, length=1024 * 1024)
-        if path.stat().st_size > limit:
-            raise HTTPException(status_code=413, detail=f"файл больше {d['max_upload_mb']} МБ")
+            size = 0
+            while chunk := file.file.read(1024 * 1024):
+                size += len(chunk)
+                if size > limit:
+                    raise HTTPException(
+                        status_code=413, detail=f"файл больше {d['max_upload_mb']} МБ"
+                    )
+                out.write(chunk)
         if path.stat().st_size == 0:
             raise HTTPException(status_code=422, detail="пустой файл")
         try:
@@ -99,9 +103,8 @@ def detect(
             )
         except image_detect.ImageError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
-    predictor = _detector(ctx)
-    with _LOCK:
-        res = image_detect.detect(img, predictor, cv.get("vectorize") or {}, conf=conf)
+    with _LOCK:  # one model load and one inference at a time (single GPU/MPS)
+        res = image_detect.detect(img, _detector(ctx), cv.get("vectorize") or {}, conf=conf)
     pixel, wgs84 = image_detect.to_feature_collections(res)
     h, w = img.valid.shape
     log.info(

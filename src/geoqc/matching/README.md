@@ -96,7 +96,8 @@ geoqc matching export
      (иначе она была бы в `matches`). `geom` = объединение ref и det, `iou` = IoU пары.
    - `missing_in_map`: остальные несопоставленные (и не подавленные) детекции; `iou` = max IoU с любым osm-эталоном
      (NULL, если пересечений нет); `geom` = det. Сюда же попадает «вторая» детекция на один эталон.
-   - `missing_on_image`: osm-эталоны без match и без пары mismatch; `iou` = max IoU с любой детекцией версии;
+   - `missing_on_image`: osm-эталоны без match, без пары mismatch и без подавленного куска `ref_fragment` (D-025);
+     `iou` = max IoU с любой детекцией версии;
      `geom` = ref. Если передан AOI, эталоны, не пересекающие AOI, не рассматриваются (там нет снимка).
 5. **Скоринг** — признаки в SQL (`geoqc_discrepancy_features`), формула в Python (`scoring.py`), запись
    `discrepancies.confidence` + `discrepancy_features`.

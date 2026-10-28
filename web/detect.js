@@ -21,6 +21,7 @@
   var viewer = null;     // { map, overlay, polys }
   var onMap = null;      // L.GeoJSON on the main map
   var busy = false;
+  var rerun = false;    // a file was chosen while the previous one was still running
 
   var panel = document.createElement("section");
   panel.className = "panel detect list-tab";
@@ -125,28 +126,34 @@
 
   // ---------------------------------------------------------------- request
   function run() {
-    if (!file || busy) return;
+    if (!file) return;
+    if (busy) { rerun = true; return; }
     busy = true;
     btnRun.disabled = true;
     var t0 = Date.now();
-    setStatus("<b>" + esc(file.name) + "</b>: загрузка и распознавание…", "busy");
+    var name = file.name;
+    setStatus("<b>" + esc(name) + "</b>: загрузка и распознавание…", "busy");
     var form = new FormData();
-    form.append("file", file, file.name);
+    form.append("file", file, name);
     if (gsdInput.value) form.append("gsd_m", gsdInput.value);
     form.append("conf", conf.value);
     fetch("/detect", { method: "POST", body: form }).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (j) {
-        if (!r.ok) throw new Error(typeof j.detail === "string" ? j.detail : "HTTP " + r.status);
-        return j;
+        if (r.ok) return j;
+        var d = j.detail;
+        // FastAPI validation errors come as a list of {loc, msg}
+        if (Array.isArray(d)) d = d.map(function (e) { return (e.loc || []).slice(-1)[0] + ": " + e.msg; }).join("; ");
+        throw new Error(typeof d === "string" && d ? d : "HTTP " + r.status);
       });
     }).then(function (j) {
       result = j;
       showResult((Date.now() - t0) / 1000);
     }).catch(function (err) {
-      setStatus("<b>" + esc(file.name) + "</b>: " + esc(err.message), "error");
+      setStatus("<b>" + esc(name) + "</b>: " + esc(err.message), "error");
     }).then(function () {
       busy = false;
       btnRun.disabled = !file;
+      if (rerun) { rerun = false; run(); }
     });
   }
 

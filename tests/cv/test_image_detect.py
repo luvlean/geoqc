@@ -105,3 +105,49 @@ def test_conf_threshold_and_non_raster(tmp_path):
     with pytest.raises(image_detect.ImageError):
         image_detect.load_image(bad)
     assert image_detect.preview_data_url(img).startswith("data:image/jpeg;base64,")
+
+
+def test_geographic_crs_keeps_buildings_square(tmp_path):
+    """EPSG:4326 на широте 60°: пиксель 0,3 × 0,3 м — это неравные градусы; площадь здания не искажается."""
+    from pyproj import Geod
+
+    geod = Geod(ellps="WGS84")
+    lon0, lat0 = 30.0, 60.0
+    dx = geod.fwd(lon0, lat0, 90, 0.3)[0] - lon0  # degrees for 0.3 m east
+    dy = geod.fwd(lon0, lat0, 0, 0.3)[1] - lat0  # degrees for 0.3 m north
+    img = np.full((600, 600, 3), 40, np.uint8)
+    img[200:300, 200:300] = 255  # 100 x 100 px = 30 x 30 m
+    p = tmp_path / "wgs84.tif"
+    with rasterio.open(
+        p,
+        "w",
+        driver="GTiff",
+        width=600,
+        height=600,
+        count=3,
+        dtype="uint8",
+        crs="EPSG:4326",
+        transform=from_origin(lon0, lat0 + 300 * dy, dx, dy),
+    ) as dst:
+        dst.write(np.transpose(img, (2, 0, 1)))
+    loaded = image_detect.load_image(p)
+    assert loaded.rgb.shape[:2] == (600, 600) and loaded.source_gsd_m == pytest.approx(
+        0.3, rel=0.01
+    )
+    res = image_detect.detect(loaded, MockPredictor(threshold=200), VEC, conf=0.5)
+    pixel, _ = image_detect.to_feature_collections(res)
+    assert [f["properties"]["area_m2"] for f in pixel["features"]] == pytest.approx(
+        [900.0], rel=0.02
+    )
+
+
+def test_palette_png_uses_colours_not_indices(tmp_path):
+    """Индексированный PNG: в канале номера цветов, снимок собирается из палитры."""
+    img = np.full((300, 300, 3), 40, np.uint8)
+    img[100:160, 100:160] = 255  # 60 x 60 px = 324 m2
+    p = tmp_path / "pal.png"
+    Image.fromarray(img).convert("P", palette=Image.ADAPTIVE, colors=4).save(p)
+    loaded = image_detect.load_image(p)
+    assert loaded.rgb.max() == 255
+    res = image_detect.detect(loaded, MockPredictor(threshold=200), VEC, conf=0.5)
+    assert [round(d.geom.area * 0.09) for d in res.detections] == [324]

@@ -73,7 +73,7 @@ make up db-init                 # docker compose up -d db; geoqc matching init-d
 # 3. Пайплайн
 make data                       # geoqc data all: AOI, снимок, COG, тайлы, OSM, buildings_ref, геопривязка
 make labels-prep                # geoqc annotation select-tiles + pre-annotate (val, test) + qgis-project → правка в QGIS (см. ниже)
-make labels-validate            # geoqc annotation finalize + validate --split val|test → reports/annotation.json (G2)
+make labels-validate            # geoqc annotation finalize + validate --split train|val|test → reports/annotation.json (G2)
 make detect                     # geoqc cv fetch-weights + predict --split all --to-db        (SPLIT=val|test)
 make match                      # geoqc matching run --model-version <config/cv.yaml> + export + stats   (MODEL_VERSION=<v>)
 make eval                       # geoqc eval detection val+test, verification-sample, discrepancies (если есть reports/verification.csv),
@@ -122,9 +122,9 @@ PLAN.md  DECISIONS.md  LOG.md  README.md
 
 Пайплайн не подменяет три шага, которые выполняет студент:
 
-1. **Разметка эталона в QGIS** (после `make labels-prep`). Черновые контуры (`data/labels/<split>/draft.geojson`) правятся и подтверждаются (`verified=true`) по [docs/annotation/INSTRUCTION_QGIS.md](docs/annotation/INSTRUCTION_QGIS.md) и протоколу [docs/annotation/PROTOCOL.md](docs/annotation/PROTOCOL.md); 10 % тайлов размечаются повторно «вслепую» (`recheck.geojson`) для гейта G2. Выгрузка из рабочего GeoPackage — `geoqc annotation finalize`; приёмка — `make labels-validate` (`geoqc annotation validate --split val|test`). OSM эталоном **не является** — его мы проверяем (D-005).
+1. **Разметка эталона в QGIS** (после `make labels-prep`). Черновые контуры (`data/labels/<split>/draft.geojson`) правятся и подтверждаются (`verified=true`) по [docs/annotation/INSTRUCTION_QGIS.md](docs/annotation/INSTRUCTION_QGIS.md) и протоколу [docs/annotation/PROTOCOL.md](docs/annotation/PROTOCOL.md); 10 % тайлов размечаются повторно «вслепую» (`recheck.geojson`) для гейта G2. Выгрузка из рабочего GeoPackage — `geoqc annotation finalize`; приёмка — `make labels-validate` (`geoqc annotation validate --split train|val|test`). OSM эталоном **не является** — его мы проверяем (D-005).
 2. **Дообучение модели** (если бейзлайн не проходит G3 на `val`): `notebooks/train_finetune.ipynb` (CUDA/MPS/CPU) на своей разметке или `scripts/experiments/airs_night.py` (своя разметка + AIRS, D-024); после обучения веса кладутся в `models/`, `model_version` обновляется в `config/cv.yaml` и `models/MODEL_CARD.md`. `data/labels/test/` в обучении и подборе порогов не участвует — проверяется статическим тестом QA.
-3. **Ручная верификация расхождений** (≥ 50 шт., по классам): `geoqc eval verification-sample` → `reports/verification_sample.csv`; студент заполняет `verdict ∈ {map_error, model_error, image_issue, unsure}` → сохраняет как `reports/verification.csv` → `geoqc eval discrepancies --verification reports/verification.csv` (гейты G6, G7).
+3. **Ручная верификация расхождений** (≥ 50 шт., по классам): `geoqc eval verification-sample` → `reports/verification_sample.csv`; студент ставит `verdict ∈ {map_error, model_error, image_issue, unsure}` во вкладке «Верификация» веб-карты (`make demo REVIEW=1`; вердикты пишутся в `reports/verification.csv`) или вручную в CSV → `geoqc eval discrepancies --verification reports/verification.csv` (гейты G6, G7).
 
 Веб-сценарий для валидатора: выбрать зону → список расхождений по убыванию `confidence` → карточка (класс, confidence, IoU, ссылка на osm.org) → «Принять / Отклонить» (`PATCH /discrepancies/{id}`) → «Экспорт GeoJSON» (`/export`, формат пригоден для MapRoulette / JOSM).
 

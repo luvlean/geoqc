@@ -65,9 +65,11 @@ labels-prep: ## Select tiles, pre-annotate val/test drafts, generate the QGIS pr
 	$(GEOQC) annotation qgis-project --split val
 	$(GEOQC) annotation qgis-project --split test
 
-labels-validate: ## Export QGIS work.gpkg (finalize) and validate labels -> reports/annotation.json
+labels-validate: ## Export QGIS work.gpkg (finalize) and validate train/val/test labels -> reports/annotation.json
+	$(GEOQC) annotation finalize --split train --annotator "$(ANNOTATOR)"
 	$(GEOQC) annotation finalize --split val --annotator "$(ANNOTATOR)"
 	$(GEOQC) annotation finalize --split test --annotator "$(ANNOTATOR)"
+	$(GEOQC) annotation validate --split train
 	$(GEOQC) annotation validate --split val
 	$(GEOQC) annotation validate --split test
 

@@ -249,3 +249,10 @@ def test_build_metrics_flags_metrics_of_another_model(synthetic_env):
     gates = build_metrics(synthetic_env.paths, cfg)["gates"]
     assert "val metrics are for m-old, config/cv.yaml has m-new" in gates["G3"]["note"]
     assert "m-old" not in (gates["G4"]["note"] or "")
+
+
+def test_read_git_dirty_outside_a_repository(tmp_path):
+    """Вне git-репозитория (или без git) признак незакоммиченных изменений неизвестен — None."""
+    from geoqc.eval.common import read_git_dirty
+
+    assert read_git_dirty(tmp_path) is None

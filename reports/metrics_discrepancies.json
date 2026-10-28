@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-28T14:02:48+00:00",
-  "git_commit": "6bbeff88f9d3800331ab2dcebf665b31697a99b1",
+  "generated_at": "2026-10-28T23:22:48+00:00",
+  "git_commit": "94a00f52f4f1e88ad8dc3d58913f9ef160d595d3",
   "verification_path": "reports/verification.csv",
   "counts_by_class": {
     "missing_in_map": 631,
@@ -79,5 +79,7 @@
       "value_incl_unsure": 0.64
     }
   },
-  "notes": []
+  "notes": [
+    "50 verified ids re-anchored to the rebuilt queue by class and point (verdicts unchanged, reports/verification.csv rewritten)"
+  ]
 }

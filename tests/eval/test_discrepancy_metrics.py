@@ -192,3 +192,34 @@ def test_fetch_discrepancies_db(db_conn):
     assert df["class"].tolist() == ["missing_in_map", "missing_on_image", "geometry_mismatch"]
     assert 37.0 < df.loc[0, "lon"] < 37.001 and 55.0 < df.loc[0, "lat"] < 55.001
     assert fetch_discrepancies_db(db_conn, model_version="other").empty
+
+
+def test_reanchor_ids_by_class_and_point():
+    """Пересобранная очередь: id ищутся по классу и точке; неоднозначные и пропавшие не переносятся."""
+    from geoqc.eval.discrepancy_metrics import reanchor_ids
+
+    verified = pd.DataFrame(
+        {
+            "id": [1, 2, 3, 4],
+            "class": ["missing_in_map"] * 3 + ["missing_on_image"],
+            "lon": [30.1, 30.2, 30.3, 30.4],
+            "lat": [59.1, 59.2, 59.3, 59.4],
+        }
+    )
+    queue = pd.DataFrame(
+        {
+            "id": [11, 12, 13, 14, 15],
+            "class": ["missing_in_map"] * 4 + ["geometry_mismatch"],
+            "lon": [30.1, 30.2, 30.2, 30.9, 30.4],
+            "lat": [59.1, 59.2, 59.2, 59.9, 59.4],
+        }
+    )
+    # 1 -> 11; 2 is ambiguous (two rows at the point); 3 is gone; 4 changed class
+    assert reanchor_ids(verified, queue) == {1: 11}
+    assert reanchor_ids(verified.drop(columns="lon"), queue) == {}
+    # the new id already belongs to another verified row, or two rows point to one discrepancy
+    assert reanchor_ids(verified.assign(id=[1, 11, 3, 4]), queue) == {}
+    twice = pd.DataFrame(
+        {"id": [1, 2], "class": ["missing_in_map"] * 2, "lon": [30.1] * 2, "lat": [59.1] * 2}
+    )
+    assert reanchor_ids(twice, queue) == {}

@@ -1,6 +1,6 @@
 {
   "dataset": "AIRS (Chen et al. 2019), Christchurch; imagery and outlines LINZ CC BY 4.0",
-  "airs_dir": "/Users/daniil.zhukov/Downloads/archive-2",
+  "airs_dir": "data/raw/external/airs",
   "tiles": {
     "test": {
       "tiles": 95,

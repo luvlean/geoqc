@@ -143,24 +143,36 @@ def test_full_synthetic_pipeline_through_cli(synthetic_env):
     )
     assert disc["n_checked"] == len(sample) and disc["n_not_in_queue"] == 0
 
-    stale = sample.assign(id=sample["id"] + 10_000)  # the queue was rebuilt after the sample
-    stale.to_csv(rd / "verification_stale.csv", index=False)
-    res = runner.invoke(
-        app,
-        [
-            "discrepancies",
-            "--verification",
-            str(rd / "verification_stale.csv"),
-            "--from-geojson",
-            str(env.discrepancies_geojson),
-            "--out",
-            str(rd / "stale.json"),
-            "--reports-dir",
-            str(rd),
-        ],
+    def run_stale(df: pd.DataFrame) -> dict:
+        df.to_csv(rd / "verification_stale.csv", index=False)
+        res = runner.invoke(
+            app,
+            [
+                "discrepancies",
+                "--verification",
+                str(rd / "verification_stale.csv"),
+                "--from-geojson",
+                str(env.discrepancies_geojson),
+                "--out",
+                str(rd / "stale.json"),
+                "--reports-dir",
+                str(rd),
+            ],
+        )
+        assert res.exit_code == 0, res.output
+        return json.loads((rd / "stale.json").read_text())
+
+    # the queue was rebuilt with new ids: the same discrepancies are found by class and point
+    rebuilt = run_stale(sample.assign(id=sample["id"] + 10_000))
+    assert rebuilt["n_not_in_queue"] == 0 and "re-anchored" in rebuilt["notes"][0]
+    fixed = pd.read_csv(rd / "verification_stale.csv")
+    assert fixed["id"].tolist() == sample["id"].tolist()
+    assert fixed["verdict"].tolist() == sample["verdict"].tolist()
+    # a different queue (other points): nothing to re-anchor, the sample is reported as stale
+    other = run_stale(sample.assign(id=sample["id"] + 10_000, lon=sample["lon"] + 0.01))
+    assert (
+        other["n_not_in_queue"] == len(sample) and "not in the current queue" in other["notes"][0]
     )
-    assert res.exit_code == 0 and "not in the current queue" in res.output
-    assert json.loads((rd / "stale.json").read_text())["n_not_in_queue"] == len(sample)
 
     res = _run(
         env, "compare-secondary", "--split", "test", "--secondary", str(env.secondary_geojson)

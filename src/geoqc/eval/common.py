@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import subprocess
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -133,6 +134,25 @@ class EvalPaths:
 
 
 # --------------------------------------------------------------------------- git / json
+def read_git_dirty(repo_root: Path = REPO_ROOT) -> bool | None:
+    """True when tracked files outside ``reports/`` differ from HEAD; None without a git binary.
+
+    ``reports/`` is excluded: the eval commands themselves rewrite it before ``gates`` runs.
+    """
+    try:
+        out = subprocess.run(
+            ["git", "status", "--porcelain", "--untracked-files=no", "--", ".", ":!reports"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=True,
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return bool(out.strip())
+
+
 def read_git_commit(repo_root: Path = REPO_ROOT) -> str | None:
     """Return HEAD sha by reading ``.git`` files (no git binary is invoked)."""
     git_path = repo_root / ".git"
@@ -201,6 +221,13 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
     with path.open("w", encoding="utf-8") as fh:
         json.dump(_nan_to_none(payload), fh, indent=2, ensure_ascii=False, default=_json_default)
         fh.write("\n")
+
+
+def write_csv_atomic(df: pd.DataFrame, path: Path) -> None:
+    """Write ``df`` to ``path`` through a temporary file: a crash never leaves half a CSV."""
+    tmp = Path(path).with_suffix(Path(path).suffix + ".tmp")
+    df.to_csv(tmp, index=False)
+    tmp.replace(path)
 
 
 def read_json(path: Path | None) -> dict[str, Any] | None:

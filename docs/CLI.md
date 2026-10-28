@@ -108,3 +108,13 @@ CLI ставится в виртуальное окружение (`make install
 | `build_experiments_notebook.py` | собирает `notebooks/experiments.ipynb` |
 | `airs_test_eval.py` | оценка моделей на тестовой части AIRS → `reports/experiments/airs_test.json` |
 | `refine_drafts.py`, `apply_test_review.py` | первичный проход по разметке test без модели (D-022) |
+
+## Служебные скрипты
+
+| Скрипт | Что делает |
+|---|---|
+| `scripts/bootstrap.sh` | окружение с нуля: `.venv`, зависимости, пакет, `.env` из примера (`make install`) |
+| `scripts/db_init.py [--test]` | накатывает `sql/*.sql` на рабочую или тестовую базу (`make db-init-test`, CI) |
+| `scripts/render_metrics_table.py table` | Markdown-таблицы детекции и гейтов из `reports/metrics.json` |
+| `scripts/render_metrics_table.py fill docs/thesis/*.md --out-dir build/thesis` | главы записки с подставленными `{{metrics.*}}` / `{{manifest.*}}`; код 1, если ключа нет |
+| `scripts/ci/check_notebooks.sh` | `nbqa ruff` и `nbstripout --verify` (`make notebooks-check`) |

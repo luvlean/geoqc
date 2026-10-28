@@ -57,8 +57,8 @@ YOLOv8m-seg (Ultralytics, instance segmentation): backbone CSPDarknet-m, PAN-nec
 
 | Параметр | Значение | Комментарий |
 |---|---|---|
-| `imgsz` | 512 | размер тайла, `retina_masks=True` |
-| `conf_threshold` | 0,20 (sweep на val, 2026-10-24) | **подбирается только на val** командой `geoqc cv threshold-sweep --split val`; сплит и дата фиксируются в `conf_threshold_split` |
+| `imgsz` | 768 | тайл 512 px подаётся в модель с увеличением до 768 (лучше на мелких зданиях, D-021), `retina_masks=True` |
+| `conf_threshold` | 0,50 (по F1 по площади на val, D-023/D-024) | **подбирается только на val** командой `geoqc cv threshold-sweep --split val`; сплит и дата фиксируются в `conf_threshold_split` |
 | `nms_iou` | 0,5 | NMS по боксам |
 | `mask_threshold` | 0,5 | бинаризация маски |
 | `vectorize.simplify_tolerance_m` | 0,5 м | Дуглас–Пекер |
@@ -67,8 +67,8 @@ YOLOv8m-seg (Ultralytics, instance segmentation): backbone CSPDarknet-m, PAN-nec
 | `device` | auto | cuda → mps → cpu; `half` только на CUDA |
 | `seed` | 42 | инференс детерминирован |
 
-Гиперпараметры дообучения (ноутбук): `epochs`, `batch`, `imgsz=512`, `amp=True`, `patience`, `seed=42`, `optimizer=auto`
-(Ultralytics) или AdamW + cosine (U-Net) — фактические значения прогона дописываются в автоблок при экспорте весов.
+Гиперпараметры дообучения: AdamW, `lr0 = 2e-4`, `warmup_bias_lr = 0`, `imgsz = 768`, `amp = True`, ранняя остановка по
+`val`, `seed = 42`, аугментации для аэрофото (поворот до ±90°, отражения по обеим осям, HSV); фактические значения прогона — в автоблоке.
 
 ## Метрики
 

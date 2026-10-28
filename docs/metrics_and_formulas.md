@@ -99,10 +99,10 @@ $$
 |---|---|---|---|
 | `match` | $\mathrm{IoU}(r,d)\ge0.5$, оба свободны | — | `matches` |
 | `geometry_mismatch` | $0.1 \le \mathrm{IoU}(r,d) < 0.5$, ни $r$, ни $d$ не в `matches` | $r \cup d$ (или по контракту модуля) | `discrepancies` |
-| `missing_in_map` | $d$ без пары, $m(d) < 0.1$ | $d$ | `discrepancies` |
-| `missing_on_image` | $r$ без пары | $r$ | `discrepancies` |
+| `missing_in_map` | $d$ без пары и без несопоставленного $r$ с $\mathrm{IoU} \ge 0.1$ (в т. ч. $d$ поверх уже сопоставленного $r$) | $d$ | `discrepancies` |
+| `missing_on_image` | $r$ без пары, не партнёр `geometry_mismatch` и без подавленного куска внутри (D-025) | $r$ | `discrepancies` |
 
-Предобработка (`edge_cases.py`, SQL-функции `sql/002_matching.sql`): детекции с попарным IoU $>$ `dedup_iou` $=0.7$ подавляются (NMS; подавленные id — в `det_suppressed`, строки `buildings_det` сохраняются); мультиполигональные детекции разбиваются по частям (`split_multipart_detections`); объект, не покрытый AOI, сжатой на `aoi_edge_buffer_m` $=10$ м, получает флаг `aoi_edge` → множитель `aoi_edge_factor` в §6.
+Предобработка (`edge_cases.py`, SQL-функции `sql/002_matching.sql`), по порядку: мультиполигональные детекции разбиваются по частям (`split_multipart_detections`); детекции с попарным IoU $>$ `dedup_iou` $=0.7$ подавляются (NMS; подавленные id — в `det_suppressed`, строки `buildings_det` сохраняются); подавляются части $< 12$ м² и куски, на $\ge 80\%$ лежащие внутри другой детекции, в $\ge 4$ раза большей (D-018); подавляются детекции, на $\ge 80\%$ лежащие внутри одного здания OSM при $\mathrm{IoU} < 0.5$ с ним, — такое здание не считается `missing_on_image` (D-025); объект, не покрытый AOI, сжатой на `aoi_edge_buffer_m` $=10$ м, получает флаг `aoi_edge` → множитель `aoi_edge_factor` в §6.
 
 Пример: квадраты §1 — сдвиг 0 м → `match` (IoU 1); сдвиг 5 м → `geometry_mismatch` (1/3); сдвиг 10 м → пересечения нет: детекция → `missing_in_map`, объект OSM → `missing_on_image`.
 

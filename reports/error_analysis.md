@@ -1,6 +1,6 @@
 # Анализ ошибок детекции — split `val`
 
-Сгенерировано `geoqc eval error-analysis` 2026-10-28T14:02:00+00:00, commit `6bbeff88f9d3800331ab2dcebf665b31697a99b1`. Все цифры — из `reports/error_analysis.json` (та же оценка, что в `reports/metrics_val.json`); IoU-порог 0.50, сопоставление `greedy`.
+Сгенерировано `geoqc eval error-analysis` 2026-10-28T23:22:50+00:00, commit `94a00f52f4f1e88ad8dc3d58913f9ef160d595d3`. Все цифры — из `reports/error_analysis.json` (та же оценка, что в `reports/metrics_val.json`); IoU-порог 0.50, сопоставление `greedy`.
 
 ## Сводка
 

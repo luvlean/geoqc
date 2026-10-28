@@ -17,6 +17,7 @@ from geoqc.eval.common import (
     now_iso,
     read_git_commit,
     rel,
+    write_csv_atomic,
     write_json,
 )
 
@@ -267,9 +268,12 @@ def discrepancies(
     reports_dir: Path | None = _REPORTS_OPT,
 ) -> None:
     """Precision per class, overall and Precision@N from the student's verdicts -> reports/metrics_discrepancies.json."""
+    import pandas as pd
+
     from geoqc.eval.discrepancy_metrics import (
         counts_by_class,
         read_verification_csv,
+        reanchor_ids,
         verification_metrics,
     )
 
@@ -290,6 +294,16 @@ def discrepancies(
     try:
         rows, counts_source = _load_discrepancy_rows(paths, from_geojson, model_version)
         counts = counts_by_class(rows)
+        mapping = reanchor_ids(df, rows)
+        if mapping:
+            raw = pd.read_csv(verification, dtype=str, keep_default_na=False)
+            raw["id"] = [str(mapping.get(int(i), int(i))) for i in raw["id"]]
+            write_csv_atomic(raw, verification)
+            df["id"] = [mapping.get(int(i), int(i)) for i in df["id"]]
+            notes.append(
+                f"{len(mapping)} verified ids re-anchored to the rebuilt queue by class and point "
+                f"(verdicts unchanged, {rel(verification, paths.repo_root)} rewritten)"
+            )
         checked = df.loc[df["verdict"].notna(), "id"]
         n_not_in_queue = int((~checked.isin(rows["id"])).sum())
         if n_not_in_queue:

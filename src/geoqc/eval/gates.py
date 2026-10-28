@@ -13,6 +13,7 @@ from geoqc.eval.common import (
     now_iso,
     pick,
     read_git_commit,
+    read_git_dirty,
     read_json,
     rel,
 )
@@ -25,6 +26,7 @@ METRICS_TEMPLATE: dict[str, Any] = {
     "schema_version": "1.0",
     "generated_at": None,
     "git_commit": None,
+    "git_dirty": None,
     "dataset": {
         "aoi": None,
         "n_tiles_val": None,
@@ -193,6 +195,8 @@ def build_metrics(
     metrics["git_commit"] = (
         git_commit if git_commit is not None else read_git_commit(paths.repo_root)
     )
+    # code changed after the commit above: the numbers are not reproducible from it alone
+    metrics["git_dirty"] = None if git_commit is not None else read_git_dirty(paths.repo_root)
     missing: dict[str, str] = {}
     inputs: dict[str, str | None] = {}
 

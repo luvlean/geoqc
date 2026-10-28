@@ -1,10 +1,10 @@
 # Глава 6. Экспериментальная оценка
 
-Все числа — из `reports/metrics.json` (схема `docs/CONTRACTS.md` §3.9), сгенерированного `geoqc eval gates` на коммите `{{metrics.git_commit}}` (`{{metrics.generated_at}}`); подстановка — `scripts/render_metrics_table.py fill`. Определения метрик — `docs/metrics_and_formulas.md`. Пороги гейтов зафиксированы до получения результатов на `test` (`config/quality_gates.yaml`).
+Все числа — из `reports/metrics.json` (схема `docs/CONTRACTS.md` §3.9), сгенерированного `geoqc eval gates` на коммите `{{metrics.git_commit}}` (`{{metrics.generated_at}}`, незакоммиченные изменения кода: {{metrics.git_dirty}}); подстановка — `scripts/render_metrics_table.py fill`. Определения метрик — `docs/metrics_and_formulas.md`. Пороги гейтов зафиксированы до получения результатов на `test` (`config/quality_gates.yaml`).
 
 ## 6.1 Методика
 
-- Сплиты: `val` (`{{metrics.dataset.n_tiles_val}}` тайлов, `{{metrics.dataset.n_gt_val}}` зданий) — подбор порога уверенности и дообучение; `test` (`{{metrics.dataset.n_tiles_test}}` тайлов, `{{metrics.dataset.n_gt_test}}` зданий) — однократная оценка.
+- Сплиты (D-021): `train` (11 тайлов, 126 зданий) — дообучение; `val` (`{{metrics.dataset.n_tiles_val}}` тайлов, `{{metrics.dataset.n_gt_val}}` зданий) — ранняя остановка, выбор модели и порога уверенности; `test` (`{{metrics.dataset.n_tiles_test}}` тайлов, `{{metrics.dataset.n_gt_test}}` зданий) — однократная оценка.
 - Детекции обрезаются по тайлам сплита; сопоставление 1:1 с эталоном (`config/eval.yaml → match_method`), пара засчитывается при IoU ≥ 0.5.
 - Модель `{{metrics.model.model_version}}`, порог `{{metrics.model.conf_threshold}}` (подобран на `val`, `reports/threshold_sweep_val.json`).
 - Расхождения верифицированы вручную на стратифицированной выборке (`reports/verification_sample.csv` → `reports/verification.csv`, вердикты `map_error / model_error / image_issue / unsure`).
@@ -48,7 +48,7 @@ Precision@`{{metrics.discrepancies.precision_at_n.n}}` очереди по уб�
 
 ## 6.5 Сравнение с альтернативным источником
 
-Второй источник (`{{metrics.comparison.secondary_source}}`) как «детектор» против ручной разметки `test`: precision `{{metrics.comparison.detection_vs_secondary.precision}}`, recall `{{metrics.comparison.detection_vs_secondary.recall}}`, F1 `{{metrics.comparison.detection_vs_secondary.f1}}` — сопоставить с собственной детекцией на `test` (п. 6.3). Вывод о целесообразности fallback плана (использовать готовые контуры как детектор) делается по этой паре чисел.
+Второй источник (`{{metrics.comparison.secondary_source}}`) как «детектор» против ручной разметки `test`: precision `{{metrics.comparison.secondary_vs_gt.precision}}`, recall `{{metrics.comparison.secondary_vs_gt.recall}}`, F1 `{{metrics.comparison.secondary_vs_gt.f1}}` — против F1 `{{metrics.comparison.detection_vs_gt.f1}}` собственной детекции на тех же тайлах (п. 6.3). Согласие модели и второго источника между собой: F1 `{{metrics.comparison.detection_vs_secondary.f1}}`. Вывод о целесообразности fallback плана (использовать готовые контуры как детектор) делается по этой паре чисел.
 
 ## 6.6 Анализ ошибок
 

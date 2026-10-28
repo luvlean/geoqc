@@ -181,6 +181,33 @@ def write_sample_csv(df: pd.DataFrame, path: Path) -> None:
 
 
 # --------------------------------------------------------------------------- verification
+def reanchor_ids(verified: pd.DataFrame, queue: pd.DataFrame, ndigits: int = 6) -> dict[int, int]:
+    """Old id -> current id for verified rows missing from a rebuilt queue.
+
+    ``matching run`` recreates ``discrepancies`` with new ids; the same discrepancy keeps its class
+    and representative point, so it is found again by (class, lon, lat). Ambiguous keys are skipped.
+    """
+    if not {"lon", "lat"} <= set(verified.columns) or not {"lon", "lat"} <= set(queue.columns):
+        return {}
+
+    def key(df: pd.DataFrame) -> list[tuple[str, float, float]]:
+        return list(
+            zip(df["class"], df["lon"].round(ndigits), df["lat"].round(ndigits), strict=True)
+        )
+
+    q = queue.assign(_k=key(queue))
+    q = q[~q["_k"].duplicated(keep=False)].set_index("_k")["id"]
+    lost = verified[~verified["id"].isin(queue["id"])]
+    found = {
+        int(old): int(q[k]) for old, k in zip(lost["id"], key(lost), strict=True) if k in q.index
+    }
+    # never create a duplicate id in the verification file
+    taken = set(verified["id"].astype(int)) - set(found)
+    targets = pd.Series(list(found.values()), dtype="int64")
+    clash = set(targets[targets.duplicated(keep=False)]) | taken
+    return {old: new for old, new in found.items() if new not in clash}
+
+
 def read_verification_csv(path: Path) -> pd.DataFrame:
     """Read the filled ``verification.csv``; verdicts are normalised (strip/lower), empty -> NaN."""
     if not Path(path).exists():

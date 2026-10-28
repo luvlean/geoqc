@@ -129,7 +129,7 @@ erDiagram
 | `db-init-test` | `scripts/db_init.py --test` | `up` | схема в `geoqc_test` |
 | `data` | `geoqc data all` | `db-init`, сеть (whitelist) | см. §1, строка `data` |
 | `labels-prep` | `geoqc annotation select-tiles`; `pre-annotate --split val|test --source $(PRE_SOURCE)`; `qgis-project` | `data` | `tiles_split.csv`, `draft.geojson`, проект QGIS → **правка студентом** |
-| `labels-validate` | `geoqc annotation validate --split val`, `--split test` | разметка `verified=true`, выгруженная из QGIS командой `geoqc annotation finalize` (без make-таргета) | `reports/annotation.json` (G2) |
+| `labels-validate` | `geoqc annotation finalize` + `validate` для `train`, `val`, `test` | разметка `verified=true` в QGIS (`work.gpkg`) | `data/labels/<split>/buildings.geojson`, `reports/annotation.json` (G2) |
 | `detect` | `geoqc cv fetch-weights`; `predict --split $(SPLIT) --to-db` | `data` | `detections.geojson`, `buildings_det` |
 | `match` | `geoqc matching run --model-version $(MODEL_VERSION)` (по умолчанию `config/cv.yaml → model_version`); `export`; `stats` | `detect`, `data` | `matches`, `discrepancies`, `reports/discrepancies.geojson` |
 | `eval` | `geoqc eval detection --split val`, `--split test`; `verification-sample`; `discrepancies --verification $(VERIFICATION)` (только если файл есть); `error-analysis`; `compare-secondary`; `gates` | `match`, эталон, `reports/verification.csv` | `reports/metrics*.json`, `verification_sample.csv`, `error_analysis.md`, `figures/` |

@@ -22,7 +22,7 @@
     "top_global": 20
   },
   "short_classes": [],
-  "generated_at": "2026-10-28T14:01:55+00:00",
+  "generated_at": "2026-10-28T23:22:47+00:00",
   "source": "db:discrepancies",
   "model_version": null,
   "output": "reports/verification_sample.csv"
