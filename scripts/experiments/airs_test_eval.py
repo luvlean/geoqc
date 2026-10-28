@@ -3,7 +3,7 @@
 Chips as in airs_night.py: 7.5 cm -> 0.3 m (average resampling, x4), 512 px grid, >= 90 % data;
 unlike training, chips without buildings are kept (false detections count). Ground truth: connected
 components of the roof mask >= 12 m2 (touching roofs form one object, as in training).
-Detections: geoqc predictor + postprocess (simplify, >= 12 m2) at conf 0.05, then scored per
+Detections: geoqc predictor + postprocess (simplify, >= 12 m2) at the lowest threshold, then scored per
 threshold; 1:1 greedy matching per chip, IoU >= 0.5, plain and area-weighted P/R/F1 (D-023).
 Result: reports/experiments/airs_test.json. Not a gate: AIRS train was part of the training data,
 so this measures unseen Christchurch tiles, not our AOI.
@@ -123,7 +123,7 @@ def main() -> None:
     }
     for name, (weights, chosen) in MODELS.items():
         pred = UltralyticsSegPredictor(
-            weights, conf=0.05, nms_iou=float(cv["nms_iou"]), imgsz=768, max_det=300
+            weights, conf=min(THRESHOLDS), nms_iou=float(cv["nms_iou"]), imgsz=768, max_det=300
         )
         dets = []
         for k in range(0, len(data), 8):
@@ -136,6 +136,8 @@ def main() -> None:
                         vectorize_masks(masks, Affine(GSD, 0, 0, 0, GSD, 0), cid), cv["vectorize"]
                     )
                 )
+            if k % 400 == 0:
+                print(f"{name}: {k}/{len(data)} chips", flush=True)
         rows = [score(data, dets, t) for t in sorted({*THRESHOLDS, chosen})]
         at = next(r for r in rows if r["conf"] == chosen)
         report["models"][name] = {
