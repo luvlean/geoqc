@@ -440,6 +440,12 @@
     map.on("moveend", scheduleList);
     loadList();
     loadStats();
+    if (cfg.detect_tools) {
+      // Building detection on an uploaded image (POST /detect, config/api.yaml detect.enabled).
+      var det = document.createElement("script");
+      det.src = "/detect.js" + (ASSET_QUERY ? "?" + ASSET_QUERY : "");
+      document.body.appendChild(det);
+    }
     if (cfg.review_tools) {
       // Tester-only verification panel (config/api.yaml review.enabled, `serve --review`).
       var script = document.createElement("script");
@@ -463,6 +469,7 @@
     onSelect: function (fn) { state.onSelect.push(fn); },
     addTab: addTab,
     showTab: showTab,
+    map: function () { return state.map; },
     fetchJSON: fetchJSON,
     showNote: showNote,
     escapeHtml: escapeHtml,

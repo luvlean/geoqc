@@ -16,9 +16,10 @@
 | `routes/tiles.py` | `build_mvt_query`: один SQL с `ST_AsMVT` по слоям `discrepancies`, `buildings_ref`, `buildings_det` (подавленные детекции исключены) |
 | `routes/imagery.py` | PNG-тайлы из `aoi_cog.tif` через rio-tiler; вне покрытия — прозрачный тайл |
 | `routes/verification.py` | Режим тестировщика (`review.enabled` или `serve --review`, иначе роутер не подключается). Ручная проверка из веба: читает `reports/verification.csv` (до первого вердикта — `verification_sample.csv`), `PATCH` меняет только `verdict`/`comment` строк выборки, запись атомарная; выборка не перезаписывается |
+| `routes/detect.py` | Детекция на загруженном снимке (`detect.enabled`, по умолчанию включена): модель из `config/cv.yaml` грузится при первом запросе и работает под блокировкой; снимок приводится к 0,3 м/пикс и режется на тайлы в `geoqc.cv.image_detect`; в базу ничего не пишется, файл удаляется после ответа |
 | `routes/meta.py` | `/health`, `/stats`, `/config/map` (центр AOI, атрибуции, подложки), прокси Esri с ключом на сервере |
 | `cli.py` | `serve` (uvicorn) и `bench` (синтетические строки в тестовой БД, замер `GET /discrepancies`) |
-| `web/` (в корне репозитория) | `index.html`, `app.js`, `style.css`: Leaflet + VectorGrid, список топ-N, карточка, кнопки статуса, экспорт, поиск по id (`/#<id>`); под снимком — OSM, снимок покрывает только AOI. боковая панель из вкладок («Очередь», «Слои и фильтры»), прокручивается только активная вкладка, карточка закреплена внизу. `review.js`/`review.css` добавляют вкладку «Верификация» (клавиши 1–4), грузится только при `review_tools` из `/config/map` и работает через `window.geoqc` |
+| `web/` (в корне репозитория) | `index.html`, `app.js`, `style.css`: Leaflet + VectorGrid, список топ-N, карточка, кнопки статуса, экспорт, поиск по id (`/#<id>`); под снимком — OSM, снимок покрывает только AOI. боковая панель из вкладок («Очередь», «Слои и фильтры»), прокручивается только активная вкладка, карточка закреплена внизу. `detect.js`/`detect.css` добавляют вкладку «Снимок» (при `detect_tools`): перетаскивание файла в любое место страницы или выбор из файловой системы, просмотр результата поверх карты, вывод на основную карту и GeoJSON для снимков с привязкой. `review.js`/`review.css` добавляют вкладку «Верификация» (клавиши 1–4), грузится только при `review_tools` из `/config/map` и работает через `window.geoqc` |
 
 Путь запроса: роутер получает `AppContext` через `Depends(get_ctx)`, берёт соединение из пула, выполняет SQL с
 параметрами и возвращает pydantic-модель или GeoJSON. Если БД недоступна, все ручки, кроме `/health`, отвечают 503.
@@ -54,6 +55,8 @@
 | `GET /imagery/{z}/{x}/{y}.png` | тайл COG через rio-tiler `Reader.tile`; прозрачный PNG вне покрытия; 404 без COG |
 | `GET /verification` (режим тестировщика) | выборка ручной проверки: `items` (`n`, `id`, `class`, `confidence`, `iou`, `verdict`, `comment`), `done`/`total`; 404 без выборки |
 | `PATCH /verification/{id}` body `{"verdict":"map_error\|model_error\|image_issue\|unsure\|null","comment":"…"}` | пишет вердикт в `reports/verification.csv`; 422 — неизвестный вердикт, 404 — id вне выборки |
+| `GET /detect/config` | версия модели, порог по умолчанию, лимиты загрузки (`detect` в `config/api.yaml`) |
+| `POST /detect` multipart `file`, `gsd_m?`, `conf?` | снимок (GeoTIFF, PNG, JPEG, …) → приведение к 0,3 м/пикс, тайлы 512 с перекрытием 64, склейка контуров; ответ: JPEG-превью, контуры в пикселях превью, для снимка с привязкой — в EPSG:4326 (`features_wgs84`); 413 — больше `max_upload_mb`, 422 — не растр или больше `max_side_px` |
 | `GET /stats` | счётчики по классам/статусам, `model_versions`, `buildings: {ref, det, det_suppressed}` |
 | `GET /config/map` | центр/bbox AOI, атрибуции (OSM ODbL, источник снимка, Esri), подложки, `esri_enabled`, `note` |
 | `GET /basemap/esri/{z}/{y}/{x}` | прокси Esri World Imagery, токен подставляется на сервере; 404 без `ARCGIS_API_KEY` |

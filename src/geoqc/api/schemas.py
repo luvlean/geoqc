@@ -177,6 +177,7 @@ class MapConfig(BaseModel):
     imagery_available: bool
     esri_enabled: bool
     review_tools: bool = False
+    detect_tools: bool = False
     osm_snapshot_date: str | None = None
     classes: list[str] = list(DISCREPANCY_CLASSES)
     statuses: list[str] = list(DISCREPANCY_STATUSES)

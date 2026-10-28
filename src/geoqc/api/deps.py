@@ -50,6 +50,15 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "imagery": {"tile_size": 256, "resampling": "bilinear"},
     # Manual verification tools (GET/PATCH /verification, web panel): off in the product.
     "review": {"enabled": False},
+    # Building detection on an uploaded image (POST /detect, web tab "Снимок").
+    "detect": {
+        "enabled": True,
+        "max_upload_mb": 300,
+        "max_side_px": 6144,
+        "target_gsd_m": 0.3,
+        "default_gsd_m": 0.3,
+        "min_conf": 0.1,
+    },
     "paths": {
         "aoi": "config/aoi.geojson",
         "manifest": "data/manifest.json",
@@ -116,6 +125,7 @@ class AppContext:
     arcgis_api_key: str = ""
     paths: dict[str, Path] = field(default_factory=dict)
     review_enabled: bool = False
+    detector: Any = None  # predictor for POST /detect, loaded on first use
     pool: ConnectionPool | None = None
     _matching_tables: bool | None = field(default=None, repr=False)
 

@@ -21,7 +21,7 @@ from starlette.responses import HTMLResponse, Response
 
 from geoqc import __version__
 from geoqc.api.deps import REVIEW_ENV, AppContext
-from geoqc.api.routes import discrepancies, imagery, meta, tiles, verification
+from geoqc.api.routes import detect, discrepancies, imagery, meta, tiles, verification
 
 log = logging.getLogger("geoqc.api")
 
@@ -88,7 +88,7 @@ def create_app(
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(ctx.config["server"].get("cors_origins", ["*"])),
-        allow_methods=["GET", "PATCH", "OPTIONS"],
+        allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
         allow_headers=["*"],
     )
     app.include_router(meta.router)
@@ -97,6 +97,8 @@ def create_app(
     app.include_router(imagery.router)
     if ctx.review_enabled:
         app.include_router(verification.router)
+    if ctx.config["detect"]["enabled"]:
+        app.include_router(detect.router)
 
     web_dir = ctx.paths["web"]
     if serve_static and web_dir.is_dir():

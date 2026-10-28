@@ -36,6 +36,14 @@ imagery:
 review:                  # tester-only verification panel and /verification endpoints
   enabled: false         # one run: `geoqc api serve --review` or `make demo REVIEW=1`
 
+detect:                  # building detection on an uploaded image (POST /detect, web tab "Снимок")
+  enabled: true
+  max_upload_mb: 300
+  max_side_px: 6144      # longest side after resampling to target_gsd_m (6144 px = 1.8 km)
+  target_gsd_m: 0.3      # the model was trained at 0.3 m/px
+  default_gsd_m: 0.3     # pixel size of a picture without georeference unless the user sets one
+  min_conf: 0.1          # lowest threshold the web slider can ask for
+
 paths:                   # repo-relative (see geoqc.config.resolve_path)
   aoi: config/aoi.geojson
   manifest: data/manifest.json
