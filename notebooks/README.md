@@ -1,5 +1,20 @@
 # Ноутбуки
 
+## `airs_eda.ipynb` — анализ внешнего датасета AIRS
+
+Состав, покрытие крышами, размеры и форма зданий, цвет — в сравнении с нашей разметкой `train`/`val`; выводы в
+последней ячейке и в `docs/datasets/airs.md`. Путь к данным — переменная `AIRS_DIR` (по умолчанию
+`data/raw/external/airs` или `~/Downloads/archive-2`). Рисунки пишутся в `docs/datasets/figures/airs_*`, тяжёлые
+расчёты кэшируются в `data/interim/external/airs/eda/`. Это единственный ноутбук, который хранится **с выводами**
+(метаданные `keep_output: true`: `nbstripout` оставляет графики и убирает только номера и время запусков).
+
+## `experiments.ipynb` — все эксперименты с моделью
+
+Сводная таблица F1/P/R по всем попыткам улучшить модель (внешние датасеты, дообучение на своей разметке,
+аугментации, масштаб входа, AIRS), F1 по порогам, кривые обучения, полнота и точность по размерам зданий и выводы.
+Только читает готовые результаты (`reports/experiments/`, `data/interim/experiments/`); хранится с выводами
+(`keep_output: true`). Рисунки — `docs/figures/experiments_*.png`.
+
 ## `train_finetune.ipynb` — дообучение детектора зданий
 
 Универсальный ноутбук (`DECISIONS.md D-004`): один файл для локального запуска (CUDA / Apple MPS / CPU) и Google Colab.
@@ -25,10 +40,10 @@ jupyter lab notebooks/train_finetune.ipynb
 
 Run all. Параметры — в ячейке «6. Параметры обучения» (`TRAINER`, `EPOCHS`, `BATCH`, `RESUME`, `SMOKE_TEST`).
 `SMOKE_TEST = True` (2 эпохи: при одной Ultralytics не делает прогрев lr) проверяет весь путь до экспорта весов за несколько минут.
-Источник данных — `DATA_SOURCE` в ячейке «4. Данные»: `"val"` (наша проверенная разметка), `"spacenet"` (только SpaceNet 2:
+Источник данных — `DATA_SOURCE` в ячейке «4. Данные»: `"ours"` (наша проверенная разметка: train — обучение, val — holdout, D-021), `"spacenet"` (только SpaceNet 2:
 прогон, пока разметки нет; `config/cv.yaml` и карточка не меняются, веса — `models/<name>-spacenet.pt`) или
-`"val+spacenet"`, `"microsoft"` или `"microsoft+spacenet"` (footprints Microsoft на тайлах вне val/test, D-019). Режимы без
-`"val"` — эксперименты: конфиг и карточка не меняются, веса сравниваются с текущими через `geoqc cv predict --weights`.
+`"ours+spacenet"`, `"microsoft"` или `"microsoft+spacenet"` (footprints Microsoft на тайлах вне val/test, D-019). Режимы без
+`"ours"` — эксперименты: конфиг и карточка не меняются, веса сравниваются с текущими через `geoqc cv predict --weights`.
 SpaceNet скачивается и готовится при первом запуске (`make external-data`, `docs/datasets/spacenet2.md`).
 
 ### Google Colab
@@ -67,7 +82,7 @@ U-Net (`resnet34`) на тех же данных примерно в 1,5–2 р�
 3. `geoqc matching run --model-version <model_version>` → расхождения; `geoqc eval detection --split val` → гейт G3 (F1 ≥ 0,70).
 4. Test-сплит оценивается один раз после фиксации весов и порога (`geoqc eval detection --split test`, `make eval`);
    ноутбук его не читает.
-5. Если G3 не пройден: увеличить `EPOCHS`/`PATIENCE`, попробовать `TRAINER="unet"`, подмешать SpaceNet (`DATA_SOURCE="val+spacenet"`) или INRIA
+5. Если G3 не пройден: увеличить `EPOCHS`/`PATIENCE`, попробовать `TRAINER="unet"`, подмешать SpaceNet (`DATA_SOURCE="ours+spacenet"`) или INRIA
    (ячейка 5, выключена по умолчанию) или использовать fallback плана §8 (Microsoft/Google footprints как «детектор»).
 
 ### Проверки

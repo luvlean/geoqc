@@ -144,8 +144,8 @@ DDL — `sql/001_schema.sql` (буквально контракт): `buildings_r
 | Модуль | Команды |
 |---|---|
 | data | `search-aoi` → `reports/aoi_candidates.json`; `download`; `preprocess` (COG, обрезка, сдвиг); `tile`; `osm` → `data/interim/osm_buildings.geojson`; `secondary` (MS/Google footprints, если есть); `load-ref` (в `buildings_ref`); `check-georef` → `reports/georef.json`; `all` |
-| annotation | `select-tiles` → `data/labels/tiles_split.csv`; `pre-annotate --split val|test --source secondary|detections` → `draft.geojson`; `validate --split` → `reports/annotation.json`; `qgis-project` (генерирует проект/слои для QGIS) |
-| cv | `fetch-weights`; `predict --split all|val|test [--to-db]` → `detections.geojson`; `export-dataset` (labels val → формат обучения); `bundle` → `data/interim/bundle.zip` для Colab; `threshold-sweep --split val` → `reports/threshold_sweep_val.json` |
+| annotation | `select-tiles` → `data/labels/tiles_split.csv`; `add-test-tiles` (D-021); `pre-annotate --split train|val|test --source secondary|detections` → `draft.geojson`; `validate --split` → `reports/annotation.json`; `qgis-project` (генерирует проект/слои для QGIS) |
+| cv | `fetch-weights`; `predict --split all|train|val|test [--to-db] [--weights]` → `detections.geojson`; `export-dataset` (labels train → обучение, val → holdout, D-021); `bundle` → `data/interim/bundle.zip` для Colab; `threshold-sweep --split val` → `reports/threshold_sweep_val.json` |
 | matching | `init-db` (применяет `sql/`); `run --model-version` → `matches`, `discrepancies`; `export` → `reports/discrepancies.geojson`; `stats` |
 | eval | `detection --split val|test` → `reports/metrics_<split>.json`; `verification-sample` → `reports/verification_sample.csv`; `discrepancies --verification reports/verification.csv`; `error-analysis` → `reports/error_analysis.md`; `compare-secondary`; `gates` → `reports/metrics.json` |
 | api | `serve [--host --port]` |

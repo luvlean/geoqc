@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import copy
 import json
+import shutil
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import pytest
 from rasterio.transform import from_origin
 from shapely.geometry import MultiPolygon, box
@@ -144,3 +147,26 @@ def test_forbidden_labels_path_is_rejected(tmp_path: Path):
     with pytest.raises(PermissionError):
         assert_not_forbidden(bad)
     assert assert_not_forbidden(tmp_path / "data" / "labels" / "val" / "buildings.geojson")
+
+
+def test_export_train_with_val_holdout(synthetic_aoi: dict):
+    """D-021: label_split=train идёт в train целиком, тайлы val со своей разметкой — в holdout; test запрещён."""
+    split_csv = synthetic_aoi["split_csv"]
+    df = pd.read_csv(split_csv, dtype={"tile_id": str})
+    df.loc[df["tile_id"] == "0_0", "split"] = "train"
+    df.to_csv(split_csv, index=False)
+    labels_dir = synthetic_aoi["labels_dir"]
+    (labels_dir / "train").mkdir()
+    shutil.copy(
+        labels_dir / "val" / "buildings.geojson", labels_dir / "train" / "buildings.geojson"
+    )
+    cv = copy.deepcopy(synthetic_aoi["cv"])
+    cv["dataset"].update(label_split="train", holdout_split="val")
+    out = synthetic_aoi["data"] / "interim" / "dataset_d021"
+    s = export_dataset(cv, synthetic_aoi["pipeline"], split_csv=split_csv, out_dir=out)
+    assert (s.n_train, s.n_holdout) == (1, 1)
+    assert read_holdout_tile_ids(out) == ["0_1"]
+    assert (out / "images" / "train" / "0_0.png").exists()
+    cv["dataset"]["holdout_split"] = "test"
+    with pytest.raises(PermissionError):
+        export_dataset(cv, synthetic_aoi["pipeline"], split_csv=split_csv, out_dir=out)

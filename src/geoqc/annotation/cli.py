@@ -73,9 +73,43 @@ def select_tiles_cmd(
     typer.echo(f"-> {rep['outputs']['tiles_split']}")
 
 
+@app.command("add-test-tiles")
+def add_test_tiles_cmd(
+    n_tiles: int = typer.Option(10, "--n-tiles", help="New test tiles to draw."),
+    seed: int | None = typer.Option(None, "--seed"),
+    labels_dir: Path | None = LABELS_DIR_OPT,
+    tiles_index: Path | None = TILES_INDEX_OPT,
+) -> None:
+    """Append a fresh stratified test set to tiles_split.csv, away from the labelled tiles (D-021)."""
+    import pandas as pd
+
+    from geoqc.annotation.common import read_tiles_split
+    from geoqc.annotation.select_tiles import add_test_tiles
+
+    cfg, paths = _paths(labels_dir, tiles_index)
+    split = read_tiles_split(paths.tiles_split_csv)
+    if (split["split"] == "test").any():
+        typer.secho("tiles_split.csv already has test tiles; nothing appended", fg="red", err=True)
+        raise typer.Exit(2)
+    feats = pd.read_csv(
+        paths.labels_dir / "tiles_features.csv", dtype={"tile_id": str, "stratum": str}
+    )
+    acfg = cfg["annotation"]
+    new = add_test_tiles(
+        split,
+        feats,
+        n_tiles,
+        int(acfg.get("seed", 42) if seed is None else seed),
+        min_aoi_coverage=float(acfg.get("select_tiles", {}).get("min_aoi_coverage", 0.9)),
+    )
+    pd.concat([split, new], ignore_index=True).to_csv(paths.tiles_split_csv, index=False)
+    typer.echo(f"added {len(new)} test tiles: {new.groupby('stratum').size().to_dict()}")
+    typer.echo(", ".join(new["tile_id"]))
+
+
 @app.command("pre-annotate")
 def pre_annotate_cmd(
-    split: str = typer.Option(..., "--split", help="val | test"),
+    split: str = typer.Option(..., "--split", help="train | val | test"),
     source: str | None = typer.Option(
         None, "--source", help="secondary | detections (default: first available)."
     ),
@@ -108,7 +142,7 @@ def pre_annotate_cmd(
 
 @app.command("qgis-project")
 def qgis_project_cmd(
-    split: str = typer.Option(..., "--split", help="val | test"),
+    split: str = typer.Option(..., "--split", help="train | val | test"),
     force: bool = typer.Option(
         False, "--force", help="Recreate work.gpkg from draft (keeps a .bak)."
     ),
@@ -154,7 +188,7 @@ def qgis_project_cmd(
 
 @app.command("finalize")
 def finalize_cmd(
-    split: str = typer.Option(..., "--split", help="val | test"),
+    split: str = typer.Option(..., "--split", help="train | val | test"),
     annotator: str | None = typer.Option(
         None, "--annotator", help="Fill empty annotator fields with this name."
     ),
@@ -186,7 +220,7 @@ def finalize_cmd(
 
 @app.command("validate")
 def validate_cmd(
-    split: str = typer.Option(..., "--split", help="val | test"),
+    split: str = typer.Option(..., "--split", help="train | val | test"),
     labels: Path | None = typer.Option(
         None, "--labels", help="Labels file (default: data/labels/<split>/buildings.geojson)."
     ),

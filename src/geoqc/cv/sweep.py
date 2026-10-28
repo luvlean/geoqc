@@ -107,6 +107,12 @@ def evaluate(
     fn = len(gts) - tp
     p, r, f1 = precision_recall_f1(tp, fp, fn)
     mean_iou = float(np.mean([v for _, _, v in pairs])) if pairs else 0.0
+    # area-weighted P/R/F1 (D-023): matched area over all detection / ground-truth area
+    gt_a = np.array([g.area for g in gts], float)
+    det_a = np.array([g.area for g in preds], float)
+    pw = float(det_a[[q for _, q, _ in pairs]].sum() / det_a.sum()) if det_a.sum() > 0 else 0.0
+    rw = float(gt_a[[g for g, _, _ in pairs]].sum() / gt_a.sum()) if gt_a.sum() > 0 else 0.0
+    fw = 2 * pw * rw / (pw + rw) if pw + rw else 0.0
     return {
         "tp": tp,
         "fp": fp,
@@ -115,6 +121,9 @@ def evaluate(
         "recall": round(r, 6),
         "f1": round(f1, 6),
         "mean_iou_matched": round(mean_iou, 6),
+        "precision_area": round(pw, 6),
+        "recall_area": round(rw, 6),
+        "f1_area": round(fw, 6),
         "metrics_impl": impl,
     }
 
@@ -140,11 +149,12 @@ def sweep_thresholds(
     return rows
 
 
-def pick_best(rows: Sequence[dict[str, Any]]) -> dict[str, Any]:
-    """Highest F1; ties -> higher precision, then higher threshold (fewer false positives)."""
+def pick_best(rows: Sequence[dict[str, Any]], select_by: str = "f1") -> dict[str, Any]:
+    """Highest ``select_by`` (``f1`` or ``f1_area``, D-023); ties -> higher precision, then higher
+    threshold (fewer false positives)."""
     if not rows:
         raise ValueError("empty sweep")
-    return max(rows, key=lambda r: (r["f1"], r["precision"], r["conf"]))
+    return max(rows, key=lambda r: (r[select_by], r["precision"], r["conf"]))
 
 
 def run_sweep(
@@ -246,7 +256,8 @@ def run_sweep(
     gts = list(gt_sel.to_crs(metric_crs).geometry)
 
     rows = sweep_thresholds(raw_by_tile, gts, thresholds, vec_cfg, iou_thr)
-    best = pick_best(rows)
+    select_by = str(sw.get("select_by", "f1"))
+    best = pick_best(rows, select_by)
     now = dt.datetime.now(dt.UTC).isoformat(timespec="seconds")
     report = {
         "split": split,
@@ -261,11 +272,13 @@ def run_sweep(
         "metrics_impl": rows[0]["metrics_impl"] if rows else "local",
         "vectorize": vec_cfg,
         "thresholds": rows,
+        "select_by": select_by,
         "best": {
             "conf": best["conf"],
             "f1": best["f1"],
             "precision": best["precision"],
             "recall": best["recall"],
+            "f1_area": best["f1_area"],
         },
     }
     out = Path(resolve_path(report_path or sw.get("report", "reports/threshold_sweep_val.json")))

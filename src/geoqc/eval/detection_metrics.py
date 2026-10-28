@@ -163,10 +163,30 @@ def mean_iou(pairs: Iterable[tuple[int, int, float]] | Iterable[float]) -> float
     return float(np.mean(values)) if values else 0.0
 
 
-def detection_summary(match: MatchResult) -> dict[str, Any]:
-    """The ``detection.<split>`` block of metrics.json (CONTRACTS §3.9)."""
+def area_weighted_prf(
+    match: MatchResult | Sequence[tuple[int, int, float]],
+    gt_areas: Sequence[float],
+    det_areas: Sequence[float],
+) -> tuple[float, float, float]:
+    """Area-weighted P/R/F1 (D-023): every building counts by its area, so a missed apartment
+    block weighs more than a missed shed. P = matched detection area / all detection area,
+    R = matched ground-truth area / all ground-truth area, F1 = their harmonic mean."""
+    pairs = match.pairs if isinstance(match, MatchResult) else list(match)
+    gt_a, det_a = np.asarray(gt_areas, float), np.asarray(det_areas, float)
+    p = float(det_a[[q for _, q, _ in pairs]].sum() / det_a.sum()) if det_a.sum() > 0 else 0.0
+    r = float(gt_a[[g for g, _, _ in pairs]].sum() / gt_a.sum()) if gt_a.sum() > 0 else 0.0
+    return p, r, (2 * p * r / (p + r) if p + r else 0.0)
+
+
+def detection_summary(
+    match: MatchResult,
+    gt_areas: Sequence[float] | None = None,
+    det_areas: Sequence[float] | None = None,
+) -> dict[str, Any]:
+    """The ``detection.<split>`` block of metrics.json (CONTRACTS §3.9); with areas also the
+    area-weighted P/R/F1 used to choose the model and threshold (D-023)."""
     p, r, f1 = precision_recall_f1(match.tp, match.fp, match.fn)
-    return {
+    out = {
         "tp": match.tp,
         "fp": match.fp,
         "fn": match.fn,
@@ -175,6 +195,10 @@ def detection_summary(match: MatchResult) -> dict[str, Any]:
         "f1": f1,
         "mean_iou_matched": mean_iou(match.pairs),
     }
+    if gt_areas is not None and det_areas is not None:
+        pw, rw, fw = area_weighted_prf(match, gt_areas, det_areas)
+        out.update(precision_area=pw, recall_area=rw, f1_area=fw)
+    return out
 
 
 # --------------------------------------------------------------------------- split evaluation
@@ -202,7 +226,11 @@ class SplitEvaluation:
 
     # -- derived tables -----------------------------------------------------
     def summary(self) -> dict[str, Any]:
-        return detection_summary(self.match)
+        return detection_summary(
+            self.match,
+            self.gt.geometry.area.to_numpy() if len(self.gt) else [],
+            self.det.geometry.area.to_numpy() if len(self.det) else [],
+        )
 
     def gt_status(self) -> pd.Series:
         """Per GT row: 'tp' or 'fn'."""

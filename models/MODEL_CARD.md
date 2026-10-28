@@ -8,14 +8,18 @@
 <!-- weights:begin -->
 | Поле | Значение |
 |---|---|
-| model_version | `yolov8m-building-seg-1996bc04` |
+| model_version | `yolov8m-building-seg-ft-ours-airs-f87c92a9` |
 | backend | ultralytics |
-| weights | `models/yolov8m-building-seg.pt` |
-| sha256 | `1996bc046edf98fe7f5f63c0df8e5c7b61968437252042fb1394c027f2f9c656` |
-| source | https://huggingface.co/keremberke/yolov8m-building-segmentation |
-| license | no licence tag on the model repo; derivative of Ultralytics yolov8m-seg (AGPL-3.0); training data Roboflow 'Buildings Instance Segmentation' (CC BY 4.0) |
+| weights | `models/yolov8m-building-seg-ft-ours-airs.pt` |
+| sha256 | `f87c92a91e5f8f6290b305b2a53d9a8d8e3065cd32da894e6021f75b0ab15c2b` |
+| source | fine-tuned by scripts/experiments/airs_night.py from yolov8m-building-seg-1996bc04 |
+| license | AGPL-3.0 (Ultralytics derivative); AIRS imagery/outlines LINZ CC BY 4.0, AIRS package licence unstated |
 | fallback (COCO, no building class) | no |
-| fetched_at | 2026-10-03T07:50:01+00:00 |
+| fetched_at | 2026-10-28T13:01:43+00:00 |
+| fine-tune | AdamW lr0=2e-4, imgsz 768, 19 epochs, best epoch 9, early stopping on val; aerial + colour augmentation |
+| train data | train (11 tiles, 126 buildings) x10 + AIRS 1318 chips at 0.3 m (23 452 buildings); val/test never used for training |
+| inference | imgsz 768, conf 0.50 (chosen by area-weighted F1 on val, D-023) |
+| backup | GitHub release weights-ours-airs-f87c92a9 (private) |
 <!-- weights:end -->
 
 ## Источник весов
@@ -69,17 +73,24 @@ ImageNet-инициализация) с разбиением семантиче�
 
 ## Метрики
 
-Метрики детекции считает `geoqc eval detection` (`--split val|test` → `reports/metrics_*.json`); sweep порога —
-`reports/threshold_sweep_val.json`. Сопоставление 1:1, IoU ≥ 0,5; эталон — проверенная разметка val (126 зданий, 11 тайлов).
+Метрики детекции считает `geoqc eval detection` (`--split val|test` → `reports/metrics_*.json`): сопоставление 1:1,
+IoU ≥ 0,5. С D-021 эталон `val` — 13 тайлов, 190 зданий, не участвовавших в обучении; модель и порог выбираются по
+F1, взвешенному по площади (D-023). Все эксперименты — `notebooks/experiments.ipynb`, `reports/experiments/`.
 
-| Сплит | Порог | Precision | Recall | F1 | mean IoU |
-|---|---|---|---|---|---|
-| val | 0,25 (стартовый) | 0,748 | 0,706 | 0,727 | 0,805 |
-| val | 0,20 (подобран) | 0,721 | 0,778 | 0,748 | 0,796 |
-| test | — | оценивается один раз после разметки test | | | |
+| Модель | Вход | Порог | F1 по площади | F1 | Precision | Recall | mean IoU |
+|---|---|---|---|---|---|---|---|
+| базовая `yolov8m-building-seg-1996bc04` | 768 | 0,30 | 0,869 | 0,789 | — | — | 0,823 |
+| текущая `…-ft-ours-airs-f87c92a9`, подбор порога | 768 | 0,50 | 0,978 | 0,847 | 0,881 | 0,816 | 0,835 |
+| **текущая, `val` (пайплайн)** | 768 | 0,50 | **0,966** | **0,833** | 0,852 | 0,816 | 0,829 |
+| **текущая, `test` (однократно)** | 768 | 0,50 | **0,926** | **0,812** | 0,834 | 0,791 | 0,807 |
 
-Дообучение не проводилось: базовые веса проходят G3 (F1 ≥ 0,70) на val и зафиксированы (D-017).
-Слабое место — многоэтажная застройка (F1 0,62 при пороге 0,25): крупные корпуса детектируются частями.
+Строка «подбор порога» — детекции, предсказанные отдельно по тайлам `val` (`scripts/experiments/weighted_compare.py`);
+строки «пайплайн» — `make detect` по всему снимку со склейкой контуров соседних тайлов и `geoqc eval detection`, это официальные
+G3–G5 (`reports/metrics.json`). Test (10 тайлов, 153 здания) оценён один раз после всех решений по модели и порогу.
+
+Текущая модель находит все 74 здания `val` от 100 м² без ложных срабатываний среди крупных; слабое место —
+постройки 12–30 м² (половина ошибок). Варианты с RID2 (D-024) равны по F1 по площади, но дают по одному ложному
+крупному зданию; их веса — `models/yolov8m-building-seg-ft-ours-airs-rid2-{masked,full}.pt`.
 
 ## Окружение
 

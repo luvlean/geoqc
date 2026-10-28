@@ -48,6 +48,21 @@ def suppress_small_detections(
         return int(cur.fetchone()["n"])
 
 
+def suppress_ref_fragments(
+    conn: psycopg.Connection, model_version: str, metric_srid: int, cover: float, iou_match: float
+) -> int:
+    """Suppress detections lying >= ``cover`` inside one OSM building they do not match (D-025).
+
+    The building itself is then not reported as missing_on_image.
+    """
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT geoqc_suppress_ref_fragments(%s, %s, %s, %s) AS n",
+            (model_version, metric_srid, cover, iou_match),
+        )
+        return int(cur.fetchone()["n"])
+
+
 def split_multipart_detections(conn: psycopg.Connection, model_version: str) -> int:
     """Replace multipart detections by one row per part. Returns the number of rows split."""
     with conn.cursor() as cur:

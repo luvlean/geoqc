@@ -18,7 +18,7 @@
 |---|---|---|
 | веса | `fetch-weights` | `weights.fetch_weights`: если файл есть, только считается хеш; если нет — скачивание с HF Hub, иначе (если разрешено) COCO-чекпоинт Ultralytics. Затем `model_version_for` → `update_cv_config` + `update_model_card` (уже записанные в автоблок сведения о дообучении сохраняются) |
 | детекция | `predict` | `pipeline.run_predict`: `load_tile_index` → `filter_by_split` → `predict_tiles_raw` (батчи `read_tile` → `Predictor.predict_batch` → `vectorize_masks`) → `vectorize.postprocess` (склейка на перекрытиях, Дуглас–Пекер, фильтр площади) → `write_detections`; с `--to-db` ещё `load_to_db` |
-| датасет | `export-dataset` | `dataset.export_dataset`, только `val`: `split_tiles` (train/holdout по стратам, seed) → `polygon_to_yolo_lines` + `rasterize_mask` → `data/interim/dataset/` |
+| датасет | `export-dataset` | `dataset.export_dataset`: тайлы `dataset.label_split` (train) → train, тайлы `holdout_split` (val) со своей разметкой → holdout; без `holdout_split` — `split_tiles` (train/holdout по стратам, seed); разметка test не читается → `polygon_to_yolo_lines` + `rasterize_mask` → `data/interim/dataset/` |
 | внешний датасет | `fetch-external`, `prepare-external`, `report-external` | `external.fetch_spacenet` (листинг S3 → детерминированная выборка → загрузка с кэшем) → `prepare_spacenet` (`prepare_chip`: UTM 0,3 м, 512 px, растяжка p2–p98, обрезка полигонов) → тот же формат, что у `export-dataset`; `external_report.build_report` строит статистику и рисунки |
 | псевдоразметка | `prepare-microsoft` | `microsoft.export_microsoft_dataset`: footprints Microsoft на тайлах вне val/test и их соседей (`excluded_tiles`), без тайлов с nodata > 10 % и без зданий → тот же формат, что у `export-dataset`, holdout — 20 % этих тайлов (D-019) |
 | порог | `threshold-sweep` | `sweep.run_sweep`: один инференс при `conf_floor` → для каждого порога фильтр масок и тот же `postprocess` → `evaluate` (метрики из `eval.detection_metrics`) → `pick_best` → `conf_threshold` в `cv.yaml` |
@@ -125,7 +125,7 @@ IoU кусков мал (например, 0,16 при ширине 100 м и п
 
 ```bash
 geoqc cv fetch-weights [--force] [--no-fallback]
-geoqc cv predict --split all|val|test [--to-db] [--limit N] [--out path] [--device auto|cuda|mps|cpu] [--conf 0.3] [--backend mock] [--append]
+geoqc cv predict --split all|train|val|test [--to-db] [--limit N] [--out path] [--device auto|cuda|mps|cpu] [--conf 0.3] [--backend mock] [--append]
 geoqc cv export-dataset [--labels data/labels/val/buildings.geojson] [--out data/interim/dataset] [--seed 42] [--holdout-fraction 0.2] [--allow-unverified]
 geoqc cv prepare-microsoft [--out data/interim/external/microsoft]
 geoqc cv predict --split val --weights models/<name>.pt --out data/interim/detections_<name>.geojson   # experiment: config and DB untouched

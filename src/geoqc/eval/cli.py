@@ -162,7 +162,7 @@ def detection(
         )
     typer.echo(
         f"{split}: tiles={report['n_tiles']} gt={report['n_gt']} det={report['n_det']} "
-        f"tp={s['tp']} fp={s['fp']} fn={s['fn']} P={s['precision']:.4f} R={s['recall']:.4f} F1={s['f1']:.4f} meanIoU={s['mean_iou_matched']:.4f}"
+        f"tp={s['tp']} fp={s['fp']} fn={s['fn']} P={s['precision']:.4f} R={s['recall']:.4f} F1={s['f1']:.4f} meanIoU={s['mean_iou_matched']:.4f} F1area={s.get('f1_area', 0):.4f}"
     )
     for note in report["notes"]:
         typer.echo(f"note: {note}")

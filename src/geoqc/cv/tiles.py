@@ -23,7 +23,7 @@ from shapely.geometry import box
 from geoqc.config import REPO_ROOT, resolve_path
 
 TILE_NAME_RE = re.compile(r"^(?P<row>\d+)_(?P<col>\d+)\.tif$")
-SPLITS = ("all", "val", "test")
+SPLITS = ("all", "train", "val", "test")
 
 
 @dataclass

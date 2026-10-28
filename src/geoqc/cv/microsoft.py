@@ -39,7 +39,7 @@ from geoqc.cv.dataset import (
 from geoqc.cv.tiles import load_tile_index, read_split_csv, read_tile
 from geoqc.cv.vectorize import polygons_only
 
-LABELLED_SPLITS = ("val", "test")
+LABELLED_SPLITS = ("train", "val", "test")
 
 
 @dataclass

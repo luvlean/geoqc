@@ -1,0 +1,672 @@
+{
+  "split": "val",
+  "iou_threshold": 0.5,
+  "match_method": "greedy",
+  "summary": {
+    "tp": 155,
+    "fp": 27,
+    "fn": 35,
+    "precision": 0.8516483516483516,
+    "recall": 0.8157894736842105,
+    "f1": 0.8333333333333333,
+    "mean_iou_matched": 0.8292227068844745,
+    "precision_area": 0.9676387234440387,
+    "recall_area": 0.9652707623639795,
+    "f1_area": 0.966453292437829
+  },
+  "per_stratum": {
+    "dense_multistorey": {
+      "n_tiles": 3,
+      "n_gt": 23,
+      "n_det": 20,
+      "tp": 17,
+      "fp": 3,
+      "fn": 6,
+      "precision": 0.85,
+      "recall": 0.7391304347826086,
+      "f1": 0.7906976744186046,
+      "mean_iou_matched": 0.8778300625666622
+    },
+    "industrial": {
+      "n_tiles": 2,
+      "n_gt": 20,
+      "n_det": 19,
+      "tp": 18,
+      "fp": 1,
+      "fn": 2,
+      "precision": 0.9473684210526315,
+      "recall": 0.9,
+      "f1": 0.9230769230769231,
+      "mean_iou_matched": 0.8808758068351991
+    },
+    "low_rise_private": {
+      "n_tiles": 4,
+      "n_gt": 105,
+      "n_det": 112,
+      "tp": 92,
+      "fp": 20,
+      "fn": 13,
+      "precision": 0.8214285714285714,
+      "recall": 0.8761904761904762,
+      "f1": 0.847926267281106,
+      "mean_iou_matched": 0.8099877368012093
+    },
+    "mixed": {
+      "n_tiles": 4,
+      "n_gt": 42,
+      "n_det": 31,
+      "tp": 28,
+      "fp": 3,
+      "fn": 14,
+      "precision": 0.9032258064516129,
+      "recall": 0.6666666666666666,
+      "f1": 0.7671232876712328,
+      "mean_iou_matched": 0.8297061498112661
+    }
+  },
+  "per_tile": [
+    {
+      "tile_id": "10_18",
+      "stratum": "low_rise_private",
+      "n_gt": 49,
+      "n_det": 55,
+      "tp": 46,
+      "fp": 9,
+      "fn": 3,
+      "precision": 0.8363636363636363,
+      "recall": 0.9387755102040817,
+      "f1": 0.8846153846153846,
+      "mean_iou_matched": 0.8038152996436945
+    },
+    {
+      "tile_id": "10_2",
+      "stratum": "low_rise_private",
+      "n_gt": 40,
+      "n_det": 41,
+      "tp": 34,
+      "fp": 7,
+      "fn": 6,
+      "precision": 0.8292682926829268,
+      "recall": 0.85,
+      "f1": 0.8395061728395061,
+      "mean_iou_matched": 0.8220987531622371
+    },
+    {
+      "tile_id": "10_20",
+      "stratum": "mixed",
+      "n_gt": 16,
+      "n_det": 12,
+      "tp": 11,
+      "fp": 1,
+      "fn": 5,
+      "precision": 0.9166666666666666,
+      "recall": 0.6875,
+      "f1": 0.7857142857142857,
+      "mean_iou_matched": 0.7777535320062635
+    },
+    {
+      "tile_id": "10_4",
+      "stratum": "mixed",
+      "n_gt": 13,
+      "n_det": 9,
+      "tp": 8,
+      "fp": 1,
+      "fn": 5,
+      "precision": 0.8888888888888888,
+      "recall": 0.6153846153846154,
+      "f1": 0.7272727272727274,
+      "mean_iou_matched": 0.860311794515902
+    },
+    {
+      "tile_id": "12_7",
+      "stratum": "dense_multistorey",
+      "n_gt": 9,
+      "n_det": 9,
+      "tp": 7,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.7777777777777778,
+      "recall": 0.7777777777777778,
+      "f1": 0.7777777777777778,
+      "mean_iou_matched": 0.8464769080782469
+    },
+    {
+      "tile_id": "13_15",
+      "stratum": "industrial",
+      "n_gt": 11,
+      "n_det": 10,
+      "tp": 10,
+      "fp": 0,
+      "fn": 1,
+      "precision": 1.0,
+      "recall": 0.9090909090909091,
+      "f1": 0.9523809523809523,
+      "mean_iou_matched": 0.8712216693835705
+    },
+    {
+      "tile_id": "13_9",
+      "stratum": "mixed",
+      "n_gt": 3,
+      "n_det": 3,
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "mean_iou_matched": 0.9097338621799754
+    },
+    {
+      "tile_id": "19_11",
+      "stratum": "dense_multistorey",
+      "n_gt": 4,
+      "n_det": 2,
+      "tp": 2,
+      "fp": 0,
+      "fn": 2,
+      "precision": 1.0,
+      "recall": 0.5,
+      "f1": 0.6666666666666666,
+      "mean_iou_matched": 0.9503035970129752
+    },
+    {
+      "tile_id": "1_13",
+      "stratum": "low_rise_private",
+      "n_gt": 14,
+      "n_det": 13,
+      "tp": 10,
+      "fp": 3,
+      "fn": 4,
+      "precision": 0.7692307692307693,
+      "recall": 0.7142857142857143,
+      "f1": 0.7407407407407408,
+      "mean_iou_matched": 0.8036582191854222
+    },
+    {
+      "tile_id": "1_18",
+      "stratum": "industrial",
+      "n_gt": 9,
+      "n_det": 9,
+      "tp": 8,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.8888888888888888,
+      "recall": 0.8888888888888888,
+      "f1": 0.8888888888888888,
+      "mean_iou_matched": 0.8929434786497351
+    },
+    {
+      "tile_id": "3_21",
+      "stratum": "mixed",
+      "n_gt": 10,
+      "n_det": 7,
+      "tp": 6,
+      "fp": 1,
+      "fn": 4,
+      "precision": 0.8571428571428571,
+      "recall": 0.6,
+      "f1": 0.7058823529411764,
+      "mean_iou_matched": 0.8441312333299019
+    },
+    {
+      "tile_id": "5_4",
+      "stratum": "dense_multistorey",
+      "n_gt": 10,
+      "n_det": 9,
+      "tp": 8,
+      "fp": 1,
+      "fn": 2,
+      "precision": 0.8888888888888888,
+      "recall": 0.8,
+      "f1": 0.8421052631578948,
+      "mean_iou_matched": 0.8871456891324474
+    },
+    {
+      "tile_id": "8_14",
+      "stratum": "low_rise_private",
+      "n_gt": 2,
+      "n_det": 3,
+      "tp": 2,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.6666666666666666,
+      "recall": 1.0,
+      "f1": 0.8,
+      "mean_iou_matched": 0.7777141013655186
+    }
+  ],
+  "worst_tiles": [
+    {
+      "tile_id": "19_11",
+      "stratum": "dense_multistorey",
+      "n_gt": 4,
+      "n_det": 2,
+      "tp": 2,
+      "fp": 0,
+      "fn": 2,
+      "precision": 1.0,
+      "recall": 0.5,
+      "f1": 0.6666666666666666,
+      "mean_iou_matched": 0.9503035970129752
+    },
+    {
+      "tile_id": "3_21",
+      "stratum": "mixed",
+      "n_gt": 10,
+      "n_det": 7,
+      "tp": 6,
+      "fp": 1,
+      "fn": 4,
+      "precision": 0.8571428571428571,
+      "recall": 0.6,
+      "f1": 0.7058823529411764,
+      "mean_iou_matched": 0.8441312333299019
+    },
+    {
+      "tile_id": "10_4",
+      "stratum": "mixed",
+      "n_gt": 13,
+      "n_det": 9,
+      "tp": 8,
+      "fp": 1,
+      "fn": 5,
+      "precision": 0.8888888888888888,
+      "recall": 0.6153846153846154,
+      "f1": 0.7272727272727274,
+      "mean_iou_matched": 0.860311794515902
+    },
+    {
+      "tile_id": "1_13",
+      "stratum": "low_rise_private",
+      "n_gt": 14,
+      "n_det": 13,
+      "tp": 10,
+      "fp": 3,
+      "fn": 4,
+      "precision": 0.7692307692307693,
+      "recall": 0.7142857142857143,
+      "f1": 0.7407407407407408,
+      "mean_iou_matched": 0.8036582191854222
+    },
+    {
+      "tile_id": "12_7",
+      "stratum": "dense_multistorey",
+      "n_gt": 9,
+      "n_det": 9,
+      "tp": 7,
+      "fp": 2,
+      "fn": 2,
+      "precision": 0.7777777777777778,
+      "recall": 0.7777777777777778,
+      "f1": 0.7777777777777778,
+      "mean_iou_matched": 0.8464769080782469
+    },
+    {
+      "tile_id": "10_20",
+      "stratum": "mixed",
+      "n_gt": 16,
+      "n_det": 12,
+      "tp": 11,
+      "fp": 1,
+      "fn": 5,
+      "precision": 0.9166666666666666,
+      "recall": 0.6875,
+      "f1": 0.7857142857142857,
+      "mean_iou_matched": 0.7777535320062635
+    },
+    {
+      "tile_id": "8_14",
+      "stratum": "low_rise_private",
+      "n_gt": 2,
+      "n_det": 3,
+      "tp": 2,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.6666666666666666,
+      "recall": 1.0,
+      "f1": 0.8,
+      "mean_iou_matched": 0.7777141013655186
+    },
+    {
+      "tile_id": "10_2",
+      "stratum": "low_rise_private",
+      "n_gt": 40,
+      "n_det": 41,
+      "tp": 34,
+      "fp": 7,
+      "fn": 6,
+      "precision": 0.8292682926829268,
+      "recall": 0.85,
+      "f1": 0.8395061728395061,
+      "mean_iou_matched": 0.8220987531622371
+    },
+    {
+      "tile_id": "5_4",
+      "stratum": "dense_multistorey",
+      "n_gt": 10,
+      "n_det": 9,
+      "tp": 8,
+      "fp": 1,
+      "fn": 2,
+      "precision": 0.8888888888888888,
+      "recall": 0.8,
+      "f1": 0.8421052631578948,
+      "mean_iou_matched": 0.8871456891324474
+    },
+    {
+      "tile_id": "10_18",
+      "stratum": "low_rise_private",
+      "n_gt": 49,
+      "n_det": 55,
+      "tp": 46,
+      "fp": 9,
+      "fn": 3,
+      "precision": 0.8363636363636363,
+      "recall": 0.9387755102040817,
+      "f1": 0.8846153846153846,
+      "mean_iou_matched": 0.8038152996436945
+    }
+  ],
+  "area_bins_m2": [
+    0.0,
+    25.0,
+    50.0,
+    100.0,
+    200.0,
+    500.0,
+    1000.0,
+    5000.0,
+    1000000.0
+  ],
+  "area_histogram": {
+    "fp": {
+      "edges": [
+        0.0,
+        25.0,
+        50.0,
+        100.0,
+        200.0,
+        500.0,
+        1000.0,
+        5000.0,
+        1000000.0
+      ],
+      "counts": [
+        18,
+        3,
+        5,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      "n": 27
+    },
+    "fn": {
+      "edges": [
+        0.0,
+        25.0,
+        50.0,
+        100.0,
+        200.0,
+        500.0,
+        1000.0,
+        5000.0,
+        1000000.0
+      ],
+      "counts": [
+        26,
+        5,
+        2,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "n": 35
+    },
+    "tp_gt": {
+      "edges": [
+        0.0,
+        25.0,
+        50.0,
+        100.0,
+        200.0,
+        500.0,
+        1000.0,
+        5000.0,
+        1000000.0
+      ],
+      "counts": [
+        35,
+        23,
+        25,
+        32,
+        26,
+        11,
+        3,
+        0
+      ],
+      "n": 155
+    }
+  },
+  "area_quantiles": {
+    "fp": {
+      "n": 27,
+      "min": 12.079038456865415,
+      "p25": 15.142499998121929,
+      "median": 17.594999999655993,
+      "p75": 40.70249999893218,
+      "max": 407.6528571623496,
+      "mean": 40.39550354084691
+    },
+    "fn": {
+      "n": 35,
+      "min": 12.004252702304926,
+      "p25": 13.827336282440868,
+      "median": 18.77489533712217,
+      "p75": 25.38310151920937,
+      "max": 166.06911166297175,
+      "mean": 30.35675614907297
+    },
+    "tp_gt": {
+      "n": 155,
+      "min": 12.113239866096112,
+      "p25": 28.692691712192726,
+      "median": 85.63543759739365,
+      "p75": 205.7469024833601,
+      "max": 4171.953570955519,
+      "mean": 190.52220978587079
+    }
+  },
+  "iou_histogram": {
+    "matched": {
+      "edges": [
+        0.0,
+        0.1,
+        0.2,
+        0.30000000000000004,
+        0.4,
+        0.5,
+        0.6000000000000001,
+        0.7000000000000001,
+        0.8,
+        0.9,
+        1.0
+      ],
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        12,
+        42,
+        69,
+        30
+      ],
+      "n": 155
+    },
+    "best_iou_unmatched_gt": {
+      "edges": [
+        0.0,
+        0.1,
+        0.2,
+        0.30000000000000004,
+        0.4,
+        0.5,
+        0.6000000000000001,
+        0.7000000000000001,
+        0.8,
+        0.9,
+        1.0
+      ],
+      "counts": [
+        32,
+        0,
+        2,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "n": 35
+    }
+  },
+  "iou_quantiles_matched": {
+    "n": 155,
+    "min": 0.5411198055866214,
+    "p25": 0.7834506293316138,
+    "median": 0.8444914914258915,
+    "p75": 0.892332499155167,
+    "max": 0.9678427694726306,
+    "mean": 0.8292227068844745
+  },
+  "complex_roofs": {
+    "threshold": 0.85,
+    "n_gt": 190,
+    "complex": {
+      "n": 40,
+      "fn": 7,
+      "fn_rate": 0.175,
+      "mean_iou_matched": 0.8198737709919143
+    },
+    "simple": {
+      "n": 150,
+      "fn": 28,
+      "fn_rate": 0.18666666666666668,
+      "mean_iou_matched": 0.8317515174127901
+    },
+    "convexity_median_all": 0.9499628869792138
+  },
+  "tile_border": {
+    "buffer_m": 5.0,
+    "fn": {
+      "n": 35,
+      "n_with_tile": 35,
+      "at_border": 8,
+      "share": 0.22857142857142856
+    },
+    "tp_gt": {
+      "n": 155,
+      "n_with_tile": 155,
+      "at_border": 51,
+      "share": 0.32903225806451614
+    },
+    "fp": {
+      "n": 27,
+      "n_with_tile": 27,
+      "at_border": 10,
+      "share": 0.37037037037037035
+    },
+    "tp_det": {
+      "n": 155,
+      "n_with_tile": 155,
+      "at_border": 51,
+      "share": 0.32903225806451614
+    }
+  },
+  "density": {
+    "dense_stratum": {
+      "n_tiles": 3,
+      "n_gt": 23,
+      "n_det": 20,
+      "tp": 17,
+      "fp": 3,
+      "fn": 6,
+      "precision": 0.85,
+      "recall": 0.7391304347826086,
+      "f1": 0.7906976744186046,
+      "mean_iou_matched": 0.8778300625666622
+    },
+    "density_metric": "density_per_ha",
+    "q75_threshold": 5.933973524266878,
+    "densest_quartile": {
+      "n_tiles": 4,
+      "tp": 101,
+      "fp": 20,
+      "fn": 18,
+      "precision": 0.8347107438016529,
+      "recall": 0.8487394957983193,
+      "f1": 0.8416666666666667
+    },
+    "rest": {
+      "n_tiles": 9,
+      "tp": 54,
+      "fp": 7,
+      "fn": 17,
+      "precision": 0.8852459016393442,
+      "recall": 0.7605633802816901,
+      "f1": 0.8181818181818182
+    },
+    "densest_tiles": [
+      "10_18",
+      "10_2",
+      "10_20",
+      "1_13"
+    ]
+  },
+  "raster_proxies": {
+    "n_rasters": 13,
+    "shadow": {
+      "luminance_quantile": 0.25,
+      "threshold_luminance": 131.7587251881411,
+      "median_luminance_tp": 149.3270706221475,
+      "median_luminance_fn": 167.50002702702702,
+      "n_fn": 35,
+      "n_fn_dark": 6,
+      "share_fn_dark": 0.17142857142857143
+    },
+    "vegetation": {
+      "exg_threshold": 20.0,
+      "median_exg_tp": -6.26,
+      "median_exg_fp": 1.510046367851623,
+      "n_fp": 27,
+      "n_fp_green": 6,
+      "share_fp_green": 0.2222222222222222,
+      "share_tp_green": 0.07096774193548387
+    }
+  },
+  "notes": [],
+  "generated_at": "2026-10-28T14:02:00+00:00",
+  "git_commit": "6bbeff88f9d3800331ab2dcebf665b31697a99b1",
+  "is_metric": true,
+  "figures": {
+    "iou_hist": "reports/figures/iou_hist_val.png",
+    "area_hist": "reports/figures/area_hist_val.png"
+  },
+  "tile_figures": {
+    "19_11": "reports/figures/error_val_19_11.png",
+    "3_21": "reports/figures/error_val_3_21.png",
+    "10_4": "reports/figures/error_val_10_4.png",
+    "1_13": "reports/figures/error_val_1_13.png",
+    "12_7": "reports/figures/error_val_12_7.png",
+    "10_20": "reports/figures/error_val_10_20.png"
+  }
+}

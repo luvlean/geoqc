@@ -255,6 +255,54 @@ def sample_tiles(
     return out.sort_values(["split", "stratum", "row", "col"]).reset_index(drop=True)
 
 
+def add_test_tiles(
+    tiles_split: pd.DataFrame,
+    feats: pd.DataFrame,
+    n_tiles: int,
+    seed: int,
+    min_per_stratum: int = 2,
+    min_aoi_coverage: float = 0.9,
+) -> pd.DataFrame:
+    """New ``test`` rows: stratified, not adjacent to any tile already in ``tiles_split`` or to each other.
+
+    ``feats`` is ``tiles_features.csv`` written by ``select-tiles`` (stratum per tile). Used once for
+    D-021, when the old val/test became train/val and a fresh test set was drawn.
+    """
+    rng = np.random.default_rng(seed)
+    occupied = {
+        (int(r), int(c)) for r, c in zip(tiles_split["row"], tiles_split["col"], strict=True)
+    }
+    cand = feats[
+        feats["stratum"].fillna("").astype(str).ne("")
+        & (feats["aoi_coverage"] >= min_aoi_coverage)
+        & ~feats["tile_id"].astype(str).isin(set(tiles_split["tile_id"].astype(str)))
+    ].copy()
+    cand = cand[
+        [
+            not _is_adjacent((int(r), int(c)), occupied)
+            for r, c in zip(cand["row"], cand["col"], strict=True)
+        ]
+    ]
+    cand = cand.sort_values(["stratum", "row", "col"]).reset_index(drop=True)
+    counts = {s: int((cand["stratum"] == s).sum()) for s in STRATA if (cand["stratum"] == s).any()}
+    alloc = _allocate(counts, n_tiles, min_per_stratum)
+    chosen: list[dict[str, Any]] = []
+    for s in sorted(counts):
+        rows = cand[cand["stratum"] == s].to_dict("records")
+        taken = 0
+        for i in rng.permutation(len(rows)):
+            rc = (int(rows[i]["row"]), int(rows[i]["col"]))
+            if taken >= alloc[s] or rc in occupied or _is_adjacent(rc, occupied):
+                continue
+            chosen.append({**rows[i], "split": "test"})
+            occupied.add(rc)
+            taken += 1
+    if not chosen:
+        return pd.DataFrame(columns=TILES_SPLIT_COLUMNS)
+    out = pd.DataFrame(chosen)[TILES_SPLIT_COLUMNS].astype({"row": int, "col": int})
+    return out.sort_values(["stratum", "row", "col"]).reset_index(drop=True)
+
+
 def pick_recheck(
     tiles_split: pd.DataFrame, fraction: float, min_tiles: int, seed: int
 ) -> pd.DataFrame:

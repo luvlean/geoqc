@@ -1,26 +1,23 @@
 {
-  "metric_crs": "EPSG:32636",
-  "n_draft_features": 195,
-  "n_source_features": 4024,
-  "n_tiles": 13,
-  "output": "data/labels/test/draft.geojson",
-  "per_tile": {
-    "10_18": 43,
-    "10_2": 38,
-    "10_20": 13,
-    "10_4": 12,
-    "12_7": 24,
-    "13_15": 9,
-    "13_9": 4,
-    "19_11": 4,
-    "1_13": 8,
-    "1_18": 15,
-    "3_21": 13,
-    "5_4": 11,
-    "8_14": 1
-  },
+  "split": "test",
   "source": "secondary",
   "source_path": "data/interim/secondary_buildings.geojson",
-  "split": "test",
-  "tiles_without_draft": []
+  "n_source_features": 4024,
+  "n_tiles": 10,
+  "n_draft_features": 133,
+  "tiles_without_draft": [],
+  "per_tile": {
+    "11_14": 5,
+    "12_3": 6,
+    "15_12": 24,
+    "1_11": 4,
+    "3_17": 19,
+    "5_17": 4,
+    "6_14": 5,
+    "7_16": 28,
+    "8_2": 11,
+    "9_16": 27
+  },
+  "metric_crs": "EPSG:32636",
+  "output": "data/labels/test/draft.geojson"
 }

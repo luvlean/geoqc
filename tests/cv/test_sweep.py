@@ -134,3 +134,13 @@ def test_sweep_refuses_other_splits(synthetic_aoi: dict):
         run_sweep(
             synthetic_aoi["cv"], synthetic_aoi["pipeline"], split="all", predictor=MockPredictor()
         )
+
+
+def test_pick_best_by_area_weighted_f1():
+    """select_by=f1_area выбирает порог по взвешенному F1, а не по обычному (D-023)."""
+    rows = [
+        {"conf": 0.3, "f1": 0.86, "f1_area": 0.95, "precision": 0.84},
+        {"conf": 0.5, "f1": 0.85, "f1_area": 0.98, "precision": 0.90},
+    ]
+    assert pick_best(rows)["conf"] == 0.3
+    assert pick_best(rows, "f1_area")["conf"] == 0.5

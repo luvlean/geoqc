@@ -31,8 +31,11 @@ def test_tile_index_and_split_filter(synthetic_aoi: dict):
     assert len(filter_by_split(index, "val", synthetic_aoi["split_csv"])) == 2
     assert len(filter_by_split(index, "test", synthetic_aoi["split_csv"])) == 1
     assert len(filter_by_split(index, "all")) == 3
+    assert (
+        len(filter_by_split(index, "train", synthetic_aoi["split_csv"])) == 0
+    )  # D-021 split, none here
     with pytest.raises(ValueError):
-        filter_by_split(index, "train")
+        filter_by_split(index, "holdout")
     tile = read_tile(index["path"].iloc[0], "0_0")
     assert tile.image.shape == (512, 512, 3) and tile.image.dtype.name == "uint8"
     assert not tile.nodata_mask.any()

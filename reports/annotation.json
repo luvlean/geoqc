@@ -6,81 +6,6 @@
       "recheck": "data/labels/val/recheck.geojson",
       "metric_crs": "EPSG:32636",
       "stats": {
-        "n_features": 126,
-        "n_verified": 126,
-        "n_tiles": 11,
-        "n_tiles_with_labels": 11,
-        "tiles_without_labels": [],
-        "per_tile": {
-          "12_17": 46,
-          "13_20": 11,
-          "16_14": 1,
-          "16_9": 6,
-          "17_11": 10,
-          "3_19": 11,
-          "4_15": 2,
-          "6_19": 1,
-          "7_4": 8,
-          "7_7": 1,
-          "8_18": 29
-        },
-        "area_m2": {
-          "min": 12.25922442865536,
-          "median": 62.85292027514133,
-          "max": 6617.966726016541
-        },
-        "sources": {
-          "manual": 110,
-          "pre_annotation": 16
-        }
-      },
-      "agreement": {
-        "recheck_tiles": [
-          "4_15"
-        ],
-        "n_checked": 1,
-        "agreement_iou": 0.9366313838714466,
-        "agreement_f1": 1.0,
-        "overall": {
-          "n_first": 2,
-          "n_recheck": 2,
-          "n_pairs": 2,
-          "tp": 2,
-          "fp": 0,
-          "fn": 0,
-          "mean_iou_pairs": 0.9366313838714466,
-          "mean_iou_matched": 0.9366313838714466,
-          "f1": 1.0
-        },
-        "per_tile": {
-          "4_15": {
-            "n_first": 2,
-            "n_recheck": 2,
-            "n_pairs": 2,
-            "tp": 2,
-            "fp": 0,
-            "fn": 0,
-            "mean_iou_pairs": 0.9366313838714466,
-            "mean_iou_matched": 0.9366313838714466,
-            "f1": 1.0
-          }
-        },
-        "iou_match": 0.5,
-        "pair_min_iou": 0.0
-      },
-      "status": "accepted",
-      "errors_by_code": {},
-      "warnings_by_code": {},
-      "errors": [],
-      "warnings": [],
-      "n_errors": 0,
-      "n_warnings": 0
-    },
-    "test": {
-      "labels": "data/labels/test/buildings.geojson",
-      "recheck": "data/labels/test/recheck.geojson",
-      "metric_crs": "EPSG:32636",
-      "stats": {
         "n_features": 190,
         "n_verified": 190,
         "n_tiles": 13,
@@ -164,9 +89,132 @@
       "warnings": [],
       "n_errors": 0,
       "n_warnings": 0
+    },
+    "test": {
+      "labels": "data/labels/test/buildings.geojson",
+      "recheck": "data/labels/test/recheck.geojson",
+      "metric_crs": "EPSG:32636",
+      "stats": {
+        "n_features": 153,
+        "n_verified": 153,
+        "n_tiles": 10,
+        "n_tiles_with_labels": 10,
+        "tiles_without_labels": [],
+        "per_tile": {
+          "11_14": 7,
+          "12_3": 6,
+          "15_12": 30,
+          "1_11": 2,
+          "3_17": 23,
+          "5_17": 4,
+          "6_14": 5,
+          "7_16": 33,
+          "8_2": 12,
+          "9_16": 31
+        },
+        "area_m2": {
+          "min": 12.113787367278492,
+          "median": 41.72856935067342,
+          "max": 2315.6945712713627
+        },
+        "sources": {
+          "manual": 146,
+          "pre_annotation": 7
+        }
+      },
+      "agreement": null,
+      "status": "accepted",
+      "errors_by_code": {},
+      "warnings_by_code": {
+        "recheck_missing": 1
+      },
+      "errors": [],
+      "warnings": [
+        {
+          "code": "recheck_missing",
+          "message": "recheck.geojson not found: G2 not computed for test"
+        }
+      ],
+      "n_errors": 0,
+      "n_warnings": 1
+    },
+    "train": {
+      "labels": "data/labels/train/buildings.geojson",
+      "recheck": "data/labels/train/recheck.geojson",
+      "metric_crs": "EPSG:32636",
+      "stats": {
+        "n_features": 126,
+        "n_verified": 126,
+        "n_tiles": 11,
+        "n_tiles_with_labels": 11,
+        "tiles_without_labels": [],
+        "per_tile": {
+          "12_17": 46,
+          "13_20": 11,
+          "16_14": 1,
+          "16_9": 6,
+          "17_11": 10,
+          "3_19": 11,
+          "4_15": 2,
+          "6_19": 1,
+          "7_4": 8,
+          "7_7": 1,
+          "8_18": 29
+        },
+        "area_m2": {
+          "min": 12.25922442865536,
+          "median": 62.85292027514133,
+          "max": 6617.966726016541
+        },
+        "sources": {
+          "manual": 110,
+          "pre_annotation": 16
+        }
+      },
+      "agreement": {
+        "recheck_tiles": [
+          "4_15"
+        ],
+        "n_checked": 1,
+        "agreement_iou": 0.9366313838714466,
+        "agreement_f1": 1.0,
+        "overall": {
+          "n_first": 2,
+          "n_recheck": 2,
+          "n_pairs": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "mean_iou_pairs": 0.9366313838714466,
+          "mean_iou_matched": 0.9366313838714466,
+          "f1": 1.0
+        },
+        "per_tile": {
+          "4_15": {
+            "n_first": 2,
+            "n_recheck": 2,
+            "n_pairs": 2,
+            "tp": 2,
+            "fp": 0,
+            "fn": 0,
+            "mean_iou_pairs": 0.9366313838714466,
+            "mean_iou_matched": 0.9366313838714466,
+            "f1": 1.0
+          }
+        },
+        "iou_match": 0.5,
+        "pair_min_iou": 0.0
+      },
+      "status": "accepted",
+      "errors_by_code": {},
+      "warnings_by_code": {},
+      "errors": [],
+      "warnings": [],
+      "n_errors": 0,
+      "n_warnings": 0
     }
   },
-  "generated_at": "2026-10-27T10:55:27+00:00",
+  "generated_at": "2026-10-28T10:28:49+00:00",
   "config": {
     "min_area_m2": 12.0,
     "iou_match": 0.5,

@@ -64,9 +64,12 @@ def build_bundle(
     root: str | Path | None = None,
 ) -> BundleSummary:
     b_cfg = dict(cv_cfg.get("bundle") or {})
+    ds_cfg = dict(cv_cfg.get("dataset") or {})
+    label_split = str(ds_cfg.get("label_split", LABEL_SPLIT))
+    label_splits = [s for s in (label_split, ds_cfg.get("holdout_split")) if s]
     tiles_mode = (tiles or b_cfg.get("tiles") or "all").lower()
-    if tiles_mode not in {"all", LABEL_SPLIT}:
-        raise ValueError(f"tiles must be 'all' or '{LABEL_SPLIT}'")
+    if tiles_mode not in {"all", label_split}:
+        raise ValueError(f"tiles must be 'all' or '{label_split}'")
     root = Path(resolve_path(root or REPO_ROOT))
     paths = (pipeline_cfg or {}).get("paths", {}) if pipeline_cfg else {}
     tiles_dir_p = Path(resolve_path(tiles_dir or paths.get("tiles", "data/tiles")))
@@ -84,16 +87,17 @@ def build_bundle(
     files: list[Path] = []
     entries: list[tuple[Path, str]] = []  # (file, arcname) for files outside ``root``
     index = load_tile_index(tiles_dir_p, index_path)
-    if tiles_mode == LABEL_SPLIT and split_csv_p.exists():
-        index = filter_by_split(index, LABEL_SPLIT, split_csv_p)
+    if tiles_mode == label_split and split_csv_p.exists():
+        index = filter_by_split(index, label_split, split_csv_p)
     tile_paths = [Path(p) for p in index["path"]] if len(index) else []
     files += [p for p in tile_paths if p.exists()]
     gpkg = Path(resolve_path(index_path)) if index_path else tiles_dir_p / "tiles.gpkg"
     if gpkg.exists():
         files.append(gpkg)
-    val_dir = labels_dir_p / LABEL_SPLIT
-    if val_dir.is_dir():
-        files += sorted(p for p in val_dir.glob("*.geojson") if p.is_file())
+    for split_name in label_splits:  # never FORBIDDEN_SPLIT: export_dataset refuses it
+        split_dir = labels_dir_p / str(split_name)
+        if split_dir.is_dir():
+            files += sorted(p for p in split_dir.glob("*.geojson") if p.is_file())
     if split_csv_p.exists():
         files.append(split_csv_p)
     if manifest_p.exists():

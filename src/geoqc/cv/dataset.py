@@ -1,8 +1,10 @@
-"""``geoqc cv export-dataset``: val labels + tiles -> YOLO-seg txt polygons and U-Net masks.
+"""``geoqc cv export-dataset``: labelled tiles -> YOLO-seg txt polygons and U-Net masks.
 
-Only the ``val`` split is ever used for training material; the val tiles are split
-deterministically (seeded, stratified by ``stratum`` when present) into ``train`` and
-``holdout`` (default 80/20). The holdout part is what ``threshold-sweep --holdout`` scores.
+The training labels come from ``dataset.label_split`` (``train`` since D-021; ``val`` before it).
+With ``dataset.holdout_split`` set, all label-split tiles go to ``train`` and the tiles of the
+holdout split (``val``) with their own labels form ``holdout`` (early stopping, threshold);
+without it the label-split tiles are split deterministically (seeded, stratified by ``stratum``)
+into ``train`` and ``holdout`` (default 80/20). ``test`` labels are never read.
 
 Output layout ``data/interim/dataset/``::
 
@@ -36,8 +38,8 @@ from geoqc.config import resolve_path
 from geoqc.cv.tiles import filter_by_split, load_tile_index, read_split_csv, read_tile
 from geoqc.cv.vectorize import polygons_only
 
-LABEL_SPLIT = "val"  # the only split whose labels this module may read
-FORBIDDEN_SPLIT = "test"
+LABEL_SPLIT = "val"  # default label split when cv.dataset.label_split is not set
+FORBIDDEN_SPLIT = "test"  # labels of this split are never read by the cv module
 SUBSETS = ("train", "holdout")
 
 
@@ -196,25 +198,44 @@ def export_dataset(
     tiles_dir = tiles_dir or paths.get("tiles", "data/tiles")
     index_path = index_path or ((pipeline_cfg or {}).get("tiles", {}) or {}).get("index")
 
+    label_split = str(ds_cfg.get("label_split", LABEL_SPLIT))
+    holdout_split = ds_cfg.get("holdout_split")
+    if FORBIDDEN_SPLIT in (label_split, holdout_split):
+        raise PermissionError(
+            f"labels of split {FORBIDDEN_SPLIT!r} are never used by the cv module"
+        )
     labels_root = Path(paths.get("labels", "data/labels"))
     split_csv = split_csv or labels_root / "tiles_split.csv"
     labels_file = assert_not_forbidden(
-        labels_path or labels_root / LABEL_SPLIT / "buildings.geojson"
+        labels_path or labels_root / label_split / "buildings.geojson"
     )
     labels = load_labels(labels_file, require_verified=require_verified)
-    index = load_tile_index(tiles_dir, index_path)
+    all_tiles = load_tile_index(tiles_dir, index_path)
     split_df = read_split_csv(split_csv)
-    index = filter_by_split(index, LABEL_SPLIT, split_csv)
+    index = filter_by_split(all_tiles, label_split, split_csv)
     if len(index) == 0:
-        raise ValueError(f"no tiles of split {LABEL_SPLIT!r} found in the tile index")
-    strata = (
-        dict(zip(split_df["tile_id"].astype(str), split_df["stratum"].astype(str), strict=True))
-        if "stratum" in split_df.columns
-        else None
-    )
-    assignment = split_tiles(
-        list(index["tile_id"]), holdout_fraction=frac, seed=seed, strata=strata
-    )
+        raise ValueError(f"no tiles of split {label_split!r} found in the tile index")
+    tile_labels = dict.fromkeys(index["tile_id"].astype(str), labels)
+    if holdout_split:
+        hold_index = filter_by_split(all_tiles, str(holdout_split), split_csv)
+        hold_labels = load_labels(
+            assert_not_forbidden(labels_root / str(holdout_split) / "buildings.geojson"),
+            require_verified=require_verified,
+        )
+        assignment = dict.fromkeys(index["tile_id"].astype(str), "train")
+        assignment.update(dict.fromkeys(hold_index["tile_id"].astype(str), "holdout"))
+        tile_labels.update(dict.fromkeys(hold_index["tile_id"].astype(str), hold_labels))
+        index = pd.concat([index, hold_index], ignore_index=True)
+        frac = 0.0
+    else:
+        strata = (
+            dict(zip(split_df["tile_id"].astype(str), split_df["stratum"].astype(str), strict=True))
+            if "stratum" in split_df.columns
+            else None
+        )
+        assignment = split_tiles(
+            list(index["tile_id"]), holdout_fraction=frac, seed=seed, strata=strata
+        )
 
     for sub in SUBSETS:
         for kind in ("images", "labels", "masks"):
@@ -223,12 +244,14 @@ def export_dataset(
     counts = {s: 0 for s in SUBSETS}
     instances = {s: 0 for s in SUBSETS}
     n_empty = 0
-    labels_metric: gpd.GeoDataFrame | None = None
+    metric_cache: dict[int, gpd.GeoDataFrame] = {}
     rows: list[dict[str, Any]] = []
     for row in index.itertuples(index=False):
         tile = read_tile(row.path, str(row.tile_id))
-        if labels_metric is None:
-            labels_metric = labels.to_crs(tile.crs) if tile.crs is not None else labels
+        src = tile_labels[tile.tile_id]
+        if id(src) not in metric_cache:
+            metric_cache[id(src)] = src.to_crs(tile.crs) if tile.crs is not None else src
+        labels_metric = metric_cache[id(src)]
         h, w = tile.shape
         bounds = box(*_bounds_from_transform(tile.transform, w, h))
         cand = labels_metric[labels_metric.intersects(bounds)]

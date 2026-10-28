@@ -49,7 +49,7 @@ def fetch_weights_cmd(
 @app.command("predict")
 def predict_cmd(
     split: Annotated[
-        str, typer.Option("--split", help="all | val | test (tiles to run on)")
+        str, typer.Option("--split", help="all | train | val | test (tiles to run on)")
     ] = "all",
     to_db: Annotated[bool, typer.Option("--to-db", help="Also load into buildings_det")] = False,
     limit: Annotated[

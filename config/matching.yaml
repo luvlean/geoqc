@@ -12,6 +12,8 @@ suppress_small_detections: true     # after split + NMS: drop slivers and roof f
 min_det_area_m2: 12                 # same minimum as cv.vectorize.min_area_m2 and annotation
 nested_cover: 0.8                   # share of a detection inside a larger one ...
 nested_max_area_ratio: 0.25         # ... that is at least 4x bigger -> nested fragment
+suppress_ref_fragments: true        # a piece of one mapped building: neither it nor the building is a discrepancy (D-025)
+ref_fragment_cover: 0.8             # share of a detection inside one osm building it does not match
 split_multipart_detections: true    # one buildings_det row per polygon part before matching
 aoi_path: config/aoi.geojson        # AOI polygon (Data Agent); absent -> no edge handling
 aoi_edge_buffer_m: 10               # subject not covered by AOI shrunk by this buffer -> aoi_edge flag

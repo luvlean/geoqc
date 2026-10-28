@@ -11,13 +11,13 @@
 
 ```bash
 geoqc annotation select-tiles                          # → data/labels/tiles_split.csv, recheck_tiles.csv, select_tiles_report.json
-geoqc annotation pre-annotate --split val|test [--source secondary|detections] [--force]
+geoqc annotation pre-annotate --split train|val|test [--source secondary|detections] [--force]
                                                        # → data/labels/<split>/draft.geojson (verified=false)
-geoqc annotation qgis-project --split val|test [--force] [--no-qgis] [--annotator NAME]
+geoqc annotation qgis-project --split train|val|test [--force] [--no-qgis] [--annotator NAME]
                                                        # → work.gpkg, qgis/*.qml, qgis/annotation_<split>.qgz
-geoqc annotation finalize --split val|test [--annotator NAME] [--input work.gpkg]
+geoqc annotation finalize --split train|val|test [--annotator NAME] [--input work.gpkg]
                                                        # work.gpkg → buildings.geojson, recheck.geojson
-geoqc annotation validate --split val|test [--strict]  # → reports/annotation.json, exit 1 при rejected
+geoqc annotation validate --split train|val|test [--strict]  # → reports/annotation.json, exit 1 при rejected
 ```
 
 Все команды принимают `--labels-dir` и `--tiles-index` для тестов. Make-цели: `labels-prep`, `labels-validate`.

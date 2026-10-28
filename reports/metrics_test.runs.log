@@ -1,0 +1,1 @@
+2026-10-28T13:56:20+00:00 outcome=completed commit=6bbeff88f9d3800331ab2dcebf665b31697a99b1 split=test out=reports/metrics_test.json model_version=yolov8m-building-seg-ft-ours-airs-f87c92a9 f1=0.8121 reason=

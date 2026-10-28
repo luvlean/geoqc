@@ -1,0 +1,219 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-10-28T14:03:26+00:00",
+  "git_commit": "6bbeff88f9d3800331ab2dcebf665b31697a99b1",
+  "dataset": {
+    "aoi": "Пушкин, Отдельный парк, Тярлево",
+    "n_tiles_val": 13,
+    "n_tiles_test": 10,
+    "n_gt_val": 190,
+    "n_gt_test": 153
+  },
+  "model": {
+    "model_version": "yolov8m-building-seg-ft-ours-airs-f87c92a9",
+    "conf_threshold": 0.5,
+    "iou_threshold": 0.5
+  },
+  "georeference": {
+    "median_offset_m": 0.487,
+    "n_control_points": 40
+  },
+  "annotation": {
+    "agreement_iou": 0.8875466530968942,
+    "agreement_f1": 0.9166666666666666,
+    "n_checked": 3
+  },
+  "detection": {
+    "val": {
+      "tp": 155,
+      "fp": 27,
+      "fn": 35,
+      "precision": 0.8516483516483516,
+      "recall": 0.8157894736842105,
+      "f1": 0.8333333333333333,
+      "mean_iou_matched": 0.8292227068844745
+    },
+    "test": {
+      "tp": 121,
+      "fp": 24,
+      "fn": 32,
+      "precision": 0.8344827586206897,
+      "recall": 0.7908496732026143,
+      "f1": 0.8120805369127516,
+      "mean_iou_matched": 0.8069408364933103
+    }
+  },
+  "discrepancies": {
+    "counts_by_class": {
+      "missing_in_map": 631,
+      "missing_on_image": 298,
+      "geometry_mismatch": 73
+    },
+    "verified_by_class": {
+      "missing_in_map": {
+        "n": 18,
+        "true_error": 16,
+        "precision": 0.8888888888888888,
+        "unsure": 0,
+        "model_error": 2,
+        "image_issue": 0
+      },
+      "missing_on_image": {
+        "n": 17,
+        "true_error": 9,
+        "precision": 0.5294117647058824,
+        "unsure": 0,
+        "model_error": 8,
+        "image_issue": 0
+      },
+      "geometry_mismatch": {
+        "n": 15,
+        "true_error": 7,
+        "precision": 0.4666666666666667,
+        "unsure": 0,
+        "model_error": 8,
+        "image_issue": 0
+      }
+    },
+    "precision_overall": 0.64,
+    "precision_at_n": {
+      "n": 20,
+      "value": 0.55,
+      "n_available": 20,
+      "value_incl_unsure": 0.55
+    },
+    "n_checked": 50
+  },
+  "comparison": {
+    "secondary_source": "microsoft",
+    "detection_vs_secondary": {
+      "precision": 0.496551724137931,
+      "recall": 0.5413533834586466,
+      "f1": 0.5179856115107913
+    },
+    "detection_vs_gt": {
+      "tp": 121,
+      "fp": 24,
+      "fn": 32,
+      "precision": 0.8344827586206897,
+      "recall": 0.7908496732026143,
+      "f1": 0.8120805369127516,
+      "mean_iou_matched": 0.8069408364933103,
+      "precision_area": 0.9468304081744723,
+      "recall_area": 0.9051801615575681,
+      "f1_area": 0.9255369443847075
+    },
+    "secondary_vs_gt": {
+      "tp": 80,
+      "fp": 53,
+      "fn": 73,
+      "precision": 0.6015037593984962,
+      "recall": 0.5228758169934641,
+      "f1": 0.5594405594405596,
+      "mean_iou_matched": 0.7007483738177284,
+      "precision_area": 0.8085294006695741,
+      "recall_area": 0.7784918101206639,
+      "f1_area": 0.7932263442775455
+    }
+  },
+  "reproducibility": {
+    "make_all_passed": true
+  },
+  "tests": {
+    "passed": true,
+    "n_tests": 359
+  },
+  "gates": {
+    "G1": {
+      "metric": "georeference.median_offset_m",
+      "description": "Median image-vs-vector offset after correction, m",
+      "target": 2.0,
+      "op": "<=",
+      "actual": 0.487,
+      "passed": true,
+      "note": ""
+    },
+    "G2": {
+      "metric": "annotation.agreement_iou",
+      "description": "Label agreement IoU on 10% re-annotated sample",
+      "target": 0.8,
+      "op": ">=",
+      "actual": 0.8875466530968942,
+      "passed": true,
+      "note": ""
+    },
+    "G3": {
+      "metric": "detection.val.f1",
+      "description": "Building detection F1 @ IoU>=0.5 on val",
+      "target": 0.7,
+      "op": ">=",
+      "actual": 0.8333333333333333,
+      "passed": true,
+      "note": ""
+    },
+    "G4": {
+      "metric": "detection.test.f1",
+      "description": "Building detection F1 @ IoU>=0.5 on test",
+      "target": 0.7,
+      "op": ">=",
+      "actual": 0.8120805369127516,
+      "passed": true,
+      "note": ""
+    },
+    "G5": {
+      "metric": "detection.test.mean_iou_matched",
+      "description": "Mean IoU of matched buildings on test",
+      "target": 0.6,
+      "op": ">=",
+      "actual": 0.8069408364933103,
+      "passed": true,
+      "note": ""
+    },
+    "G6": {
+      "metric": "discrepancies.precision_overall",
+      "description": "Precision of discrepancies by manual verification",
+      "target": 0.7,
+      "op": ">=",
+      "actual": 0.64,
+      "passed": false,
+      "note": ""
+    },
+    "G7": {
+      "metric": "discrepancies.precision_at_n.value",
+      "description": "Precision@20 of the review queue",
+      "target": 0.75,
+      "op": ">=",
+      "actual": 0.55,
+      "passed": false,
+      "note": ""
+    },
+    "G8": {
+      "metric": "reproducibility.make_all_passed",
+      "description": "`make all` in a clean environment",
+      "target": true,
+      "op": "==",
+      "actual": true,
+      "passed": true,
+      "note": ""
+    },
+    "G9": {
+      "metric": "tests.passed",
+      "description": "pytest passes; matching and classification covered",
+      "target": true,
+      "op": "==",
+      "actual": true,
+      "passed": true,
+      "note": ""
+    }
+  },
+  "inputs": {
+    "metrics_val": "reports/metrics_val.json",
+    "metrics_test": "reports/metrics_test.json",
+    "georef": "reports/georef.json",
+    "annotation": "reports/annotation.json",
+    "metrics_discrepancies": "reports/metrics_discrepancies.json",
+    "comparison": "reports/comparison.json",
+    "manifest": "data/manifest.json",
+    "aoi": "config/aoi.geojson"
+  }
+}

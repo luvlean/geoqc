@@ -9,6 +9,7 @@ from shapely.geometry import Polygon, box
 
 from geoqc.eval.detection_metrics import (
     MatchResult,
+    area_weighted_prf,
     detection_summary,
     evaluate_geodataframes,
     evaluate_split,
@@ -216,3 +217,25 @@ def test_val_training_note_counts_train_tiles(tmp_path):
     assert (
         val_training_note({"cv": {"dataset": {"out_dir": str(tmp_path / "nope")}}}, ["1_1"]) == []
     )
+
+
+def test_area_weighted_prf_weighs_large_buildings_more():
+    """Взвешенный F1 (D-023): пропущенный дом 1000 м² весит больше, чем пропущенный сарай 20 м²."""
+    gts = [box(0, 0, 40, 25), box(100, 0, 104, 5)]  # 1000 m2 block, 20 m2 shed
+    found_block = match_one_to_one(gts, [box(0, 0, 40, 25)], 0.5)
+    found_shed = match_one_to_one(gts, [box(100, 0, 104, 5)], 0.5)
+    gt_areas = [g.area for g in gts]
+    pb, rb, fb = area_weighted_prf(found_block, gt_areas, [1000.0])
+    ps, rs, fs = area_weighted_prf(found_shed, gt_areas, [20.0])
+    assert (pb, ps) == (1.0, 1.0)
+    assert rb == pytest.approx(1000 / 1020) and rs == pytest.approx(20 / 1020)
+    assert fb > 0.98 > 0.05 > fs
+    # plain F1 cannot tell the two cases apart
+    assert detection_summary(found_block)["f1"] == detection_summary(found_shed)["f1"]
+    s = detection_summary(found_block, gt_areas, [1000.0])
+    assert s["f1_area"] == pytest.approx(fb)
+
+
+def test_area_weighted_prf_empty():
+    """Без зданий и детекций взвешенные метрики равны нулю, деления на ноль нет."""
+    assert area_weighted_prf([], [], []) == (0.0, 0.0, 0.0)

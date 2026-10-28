@@ -22,7 +22,7 @@ from shapely.geometry.base import BaseGeometry
 from geoqc.config import CONFIG_DIR, load_config, repo_relative, resolve_path
 
 STORAGE_CRS = "EPSG:4326"
-SPLITS = ("val", "test")
+SPLITS = ("train", "val", "test")  # D-021: train labels fine-tune, val tunes, test is final
 STRATA = ("dense_multistorey", "low_rise_private", "industrial", "mixed")
 LABEL_PROPERTIES = ("tile_id", "split", "source", "verified", "annotator", "notes")
 SOURCES = ("manual", "pre_annotation")

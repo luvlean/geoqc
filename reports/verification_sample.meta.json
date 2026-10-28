@@ -3,26 +3,26 @@
   "per_class_min": 15,
   "top_k_global": 20,
   "seed": 42,
-  "n_available": 1161,
+  "n_available": 1002,
   "n_selected": 50,
   "available_by_class": {
-    "missing_in_map": 696,
-    "missing_on_image": 307,
-    "geometry_mismatch": 158
+    "missing_in_map": 631,
+    "missing_on_image": 298,
+    "geometry_mismatch": 73
   },
   "selected_by_class": {
-    "missing_in_map": 20,
-    "missing_on_image": 15,
+    "missing_in_map": 18,
+    "missing_on_image": 17,
     "geometry_mismatch": 15
   },
   "selected_by_reason": {
-    "class_random": 11,
+    "class_random": 13,
     "class_top": 14,
-    "fill_random": 5,
+    "fill_random": 3,
     "top_global": 20
   },
   "short_classes": [],
-  "generated_at": "2026-10-26T22:24:21+00:00",
+  "generated_at": "2026-10-28T14:01:55+00:00",
   "source": "db:discrepancies",
   "model_version": null,
   "output": "reports/verification_sample.csv"

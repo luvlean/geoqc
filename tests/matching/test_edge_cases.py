@@ -119,6 +119,28 @@ def test_suppressed_fragments_do_not_reach_the_queue(db, db_conn, cfg):
     assert res.n_det_suppressed == 2
 
 
+def test_ref_fragments_leave_the_queue_with_their_building(db, db_conn, cfg):
+    """Кусок здания OSM (≥ 80 % внутри, IoU < 0,5) подавляется, и само здание не уходит в missing_on_image."""
+    hall = db.ref(sq(0, 0, 40, 20), osm_id=1)  # 800 m2, the model found two halves of it
+    left = db.det(sq(0, 0, 18, 20), score=0.8)  # IoU 0.45
+    right = db.det(sq(22, 0, 40, 20), score=0.8)
+    house = db.ref(sq(100, 0, 110, 10), osm_id=2)
+    db.det(sq(100, 0, 110, 9), score=0.9)  # IoU 0.9 -> match, not a fragment
+    shed = db.det(sq(200, 0, 206, 6), score=0.7)  # half inside a mapped building -> stays
+    db.ref(sq(203, 0, 213, 6), osm_id=3)
+    run_matching(db_conn, MV, cfg=cfg)
+    assert db.by_class() == {"missing_in_map": 0, "missing_on_image": 0, "geometry_mismatch": 3}
+    cfg["matching"].update(suppress_ref_fragments=True, ref_fragment_cover=0.8)
+    res = run_matching(db_conn, MV, cfg=cfg)
+    sup = {r["det_id"]: r for r in db.rows("SELECT det_id, ref_id, reason FROM det_suppressed")}
+    assert set(sup) == {left, right}
+    assert {(r["reason"], r["ref_id"]) for r in sup.values()} == {("ref_fragment", hall)}
+    assert res.n_det_suppressed == 2 and res.n_matches == 1
+    rows = db.discrepancies()
+    assert [(x["class"], x["det_id"]) for x in rows] == [("geometry_mismatch", shed)]
+    assert hall not in {x["ref_id"] for x in rows} and house not in {x["ref_id"] for x in rows}
+
+
 def test_split_multipart_is_idempotent(db, db_conn):
     """Разбиение мультиполигонов: второй вызов ничего не меняет."""
     from .conftest import multi

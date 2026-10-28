@@ -1,13 +1,13 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
 <qgis styleCategories="Symbology" version="3.34.0">
   <renderer-v2 type="RuleRenderer" forceraster="0" symbollevels="0" enableorderby="0" referencescale="-1">
-    <rules key="{16a81a88-a2e8-450e-a927-2ecea0999049}">
-      <rule key="{588a9945-c700-49ba-a499-a18b38a789ae}" symbol="0" label="тайл" filter="coalesce(&quot;recheck&quot;, false) = false"/>
-      <rule key="{6c55635f-2956-40c0-afbc-4a880c36fa53}" symbol="1" label="тайл для повторной разметки (recheck)" filter="&quot;recheck&quot; = true"/>
+    <rules key="{8a518102-f11f-4a8b-932d-8bcfbdd10d8c}">
+      <rule key="{b1b1d195-e46b-44f4-bb17-b04a775966ee}" symbol="0" label="тайл" filter="coalesce(&quot;recheck&quot;, false) = false"/>
+      <rule key="{cd31e984-6f7d-4ffb-aac9-0dc276e4b778}" symbol="1" label="тайл для повторной разметки (recheck)" filter="&quot;recheck&quot; = true"/>
     </rules>
     <symbols>
       <symbol type="fill" name="0" alpha="1" clip_to_extent="1" force_rhr="0" is_animated="0" frame_rate="10">
-        <layer class="SimpleFill" enabled="1" locked="0" pass="0" id="{da83739f-2949-4507-b7d0-6895d0153a59}">
+        <layer class="SimpleFill" enabled="1" locked="0" pass="0" id="{8e42749c-2e88-4ad7-9109-3b5aefcd956b}">
           <Option type="Map">
             <Option type="QString" name="border_width_map_unit_scale" value="3x:0,0,0,0,0,0"/>
             <Option type="QString" name="color" value="255,255,0,0"/>
@@ -24,7 +24,7 @@
         </layer>
       </symbol>
       <symbol type="fill" name="1" alpha="1" clip_to_extent="1" force_rhr="0" is_animated="0" frame_rate="10">
-        <layer class="SimpleFill" enabled="1" locked="0" pass="0" id="{a179669d-266c-4b23-9aca-a7b7ac72f33d}">
+        <layer class="SimpleFill" enabled="1" locked="0" pass="0" id="{f94b419e-8c96-4567-973b-9771a09b1aa9}">
           <Option type="Map">
             <Option type="QString" name="border_width_map_unit_scale" value="3x:0,0,0,0,0,0"/>
             <Option type="QString" name="color" value="0,255,255,0"/>

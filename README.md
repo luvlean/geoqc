@@ -158,6 +158,7 @@ PLAN.md  DECISIONS.md  LOG.md  README.md
 
 - Контракты: [docs/CONTRACTS.md](docs/CONTRACTS.md) · ТЗ агентов: `docs/tasks/`
 - Архитектура: [docs/architecture.md](docs/architecture.md)
+- Все команды (CLI, make, скрипты экспериментов): [docs/CLI.md](docs/CLI.md)
 - Формулы и метрики: [docs/metrics_and_formulas.md](docs/metrics_and_formulas.md)
 - План ведения документации: [docs/DOCUMENTATION_PLAN.md](docs/DOCUMENTATION_PLAN.md)
 - Разметка: `docs/annotation/PROTOCOL.md`, `docs/annotation/INSTRUCTION_QGIS.md`, `data/labels/README.md`

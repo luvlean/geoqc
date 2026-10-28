@@ -1,0 +1,10 @@
+{
+  "source": "RID2 (Krapf et al., TUM), Beeldmateriaal Nederland, CC BY 4.0",
+  "gsd_m": 0.3,
+  "windows": 876,
+  "candidates": 601,
+  "hard": 400,
+  "small_buildings_hard": 12715,
+  "missed_by_current_model": 12062,
+  "excluded_allotment_windows": 27
+}

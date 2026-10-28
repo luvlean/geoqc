@@ -1,0 +1,43 @@
+{
+  "model_version": "yolov8m-building-seg-ft-ours-airs-f87c92a9",
+  "weights": "models/yolov8m-building-seg-ft-ours-airs.pt",
+  "sha256": "f87c92a91e5f8f6290b305b2a53d9a8d8e3065cd32da894e6021f75b0ab15c2b",
+  "saved_at": "2026-10-28T09:01:08+00:00",
+  "base": "models/yolov8m-building-seg.pt (yolov8m-building-seg-1996bc04)",
+  "task": "segment",
+  "names": {
+    "0": "building"
+  },
+  "train_data": {
+    "ours": "data/labels/train (11 tiles, 126 buildings) x10",
+    "airs": {
+      "chips": 1318,
+      "instances": 23452,
+      "gsd_m": 0.3,
+      "source": "AIRS (Chen et al. 2019), LINZ CC BY 4.0"
+    }
+  },
+  "training": {
+    "script": "scripts/experiments/airs_night.py",
+    "imgsz": 768,
+    "epochs_run": 19,
+    "best_epoch": 9,
+    "optimizer": "AdamW lr0=2e-4",
+    "early_stopping_on": "our val (13 tiles)"
+  },
+  "val_result": {
+    "conf": 0.4,
+    "precision": 0.84,
+    "recall": 0.8842105263157894,
+    "f1": 0.8615384615384616,
+    "mean_iou_matched": 0.8271949848647447,
+    "tp": 168,
+    "fp": 32,
+    "fn": 22
+  },
+  "inference": {
+    "imgsz": 768,
+    "conf_threshold": 0.4
+  },
+  "license_note": "AIRS imagery/outlines: LINZ CC BY 4.0 (Crown Copyright Reserved); AIRS package licence unstated; base weights AGPL-3.0"
+}

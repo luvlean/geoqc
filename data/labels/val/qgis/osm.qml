@@ -3,7 +3,7 @@
   <renderer-v2 type="singleSymbol" forceraster="0" symbollevels="0" enableorderby="0" referencescale="-1">
     <symbols>
       <symbol type="fill" name="0" alpha="1" clip_to_extent="1" force_rhr="0" is_animated="0" frame_rate="10">
-        <layer class="SimpleFill" enabled="1" locked="0" pass="0" id="{bec306ff-8309-4367-b29c-5709874cdd85}">
+        <layer class="SimpleFill" enabled="1" locked="0" pass="0" id="{d9372377-6ce5-40ee-a5e6-7d994d67d529}">
           <Option type="Map">
             <Option type="QString" name="border_width_map_unit_scale" value="3x:0,0,0,0,0,0"/>
             <Option type="QString" name="color" value="0,120,255,0"/>

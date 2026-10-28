@@ -1,4 +1,4 @@
 tile_id,split,stratum
-12_7,test,dense_multistorey
-1_13,test,low_rise_private
-4_15,val,dense_multistorey
+12_7,val,dense_multistorey
+1_13,val,low_rise_private
+4_15,train,dense_multistorey

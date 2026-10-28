@@ -3,24 +3,18 @@
   "metric_crs": "EPSG:32636",
   "layers": {
     "buildings": {
-      "n_input": 261,
+      "n_input": 217,
       "dropped_empty": 0,
-      "dropped_small": 71,
-      "clipped": 43,
+      "dropped_small": 64,
+      "clipped": 32,
       "tile_reassigned": 0,
-      "n_output": 190,
-      "n_verified": 190,
+      "n_output": 153,
+      "n_verified": 153,
       "output": "data/labels/test/buildings.geojson"
     },
     "recheck": {
-      "n_input": 28,
-      "dropped_empty": 0,
-      "dropped_small": 7,
-      "clipped": 3,
-      "tile_reassigned": 0,
-      "n_output": 21,
-      "n_verified": 21,
-      "output": "data/labels/test/recheck.geojson"
+      "n_input": 0,
+      "output": null
     }
   },
   "input": "data/labels/test/work.gpkg"

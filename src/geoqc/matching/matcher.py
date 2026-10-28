@@ -403,6 +403,10 @@ def run_matching(
             float(mcfg["nested_max_area_ratio"]),
             iou_match,
         )
+    if mcfg.get("suppress_ref_fragments", False):
+        res.n_det_suppressed += edge_cases.suppress_ref_fragments(
+            conn, mv, srid, float(mcfg["ref_fragment_cover"]), iou_match
+        )
 
     if algo == "greedy":
         match_greedy_sql(conn, mv, srid, iou_match)

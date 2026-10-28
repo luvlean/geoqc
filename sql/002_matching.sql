@@ -20,6 +20,8 @@ CREATE INDEX IF NOT EXISTS det_suppressed_model_idx ON det_suppressed (model_ver
 ALTER TABLE det_suppressed ALTER COLUMN kept_det_id DROP NOT NULL;
 ALTER TABLE det_suppressed ALTER COLUMN iou DROP NOT NULL;
 ALTER TABLE det_suppressed ADD COLUMN IF NOT EXISTS reason TEXT NOT NULL DEFAULT 'nms';
+-- Fragments of a mapped building ('ref_fragment') keep that building: it is not missing_on_image.
+ALTER TABLE det_suppressed ADD COLUMN IF NOT EXISTS ref_id BIGINT REFERENCES buildings_ref(id) ON DELETE CASCADE;
 
 -- Scoring features behind discrepancies.confidence (for error analysis and reproducibility).
 CREATE TABLE IF NOT EXISTS discrepancy_features (
@@ -126,7 +128,8 @@ $$;
 --                      geom = union(ref, det), iou = pair IoU.
 --   missing_in_map:    every other unmatched (and not suppressed) det; iou = max IoU with any
 --                      osm ref (NULL when nothing intersects); geom = det.
---   missing_on_image:  osm ref that is neither matched nor the partner of a geometry_mismatch;
+--   missing_on_image:  osm ref that is neither matched, nor the partner of a geometry_mismatch,
+--                      nor holds a suppressed 'ref_fragment';
 --                      iou = max IoU with any det of the model version; geom = ref.
 -- When p_aoi_geojson is given, refs that do not intersect the AOI are ignored (no imagery there).
 -- `confidence` is provisional (score / 1 - iou / 0.5); geoqc matching run replaces it with the
@@ -198,7 +201,9 @@ BEGIN
       AND NOT EXISTS (SELECT 1 FROM matches m
                       WHERE m.model_version = p_model_version AND m.ref_id = r.id)
       AND NOT EXISTS (SELECT 1 FROM discrepancies x
-                      WHERE x.model_version = p_model_version AND x.ref_id = r.id);
+                      WHERE x.model_version = p_model_version AND x.ref_id = r.id)
+      AND NOT EXISTS (SELECT 1 FROM det_suppressed s
+                      WHERE s.model_version = p_model_version AND s.ref_id = r.id);
 
     RETURN QUERY
         SELECT x.class, count(*)::bigint
@@ -333,6 +338,39 @@ BEGIN
     ON CONFLICT (det_id) DO NOTHING;
     GET DIAGNOSTICS n_nested = ROW_COUNT;
     RETURN n_small + n_nested;
+END
+$$;
+
+-- Pieces of a mapped building ('ref_fragment', D-025): at least p_cover of the detection lies inside
+-- one osm building that it does not match (IoU < p_iou_match), i.e. the model saw that building in
+-- parts. Neither the piece (missing_in_map / geometry_mismatch) nor the building (missing_on_image)
+-- is a map error; ref_id keeps the building so that geoqc_classify skips it. Appends to
+-- det_suppressed (run after geoqc_dedup_detections). Returns the number suppressed.
+CREATE OR REPLACE FUNCTION geoqc_suppress_ref_fragments(
+    p_model_version text,
+    p_metric_srid   integer,
+    p_cover         double precision,
+    p_iou_match     double precision
+)
+RETURNS integer
+LANGUAGE plpgsql AS $$
+DECLARE
+    n integer;
+BEGIN
+    INSERT INTO det_suppressed (det_id, model_version, kept_det_id, iou, reason, ref_id)
+    SELECT DISTINCT ON (d.id) d.id, p_model_version, NULL, geoqc_iou(r.geom, d.geom, p_metric_srid),
+           'ref_fragment', r.id
+    FROM buildings_det d
+    JOIN buildings_ref r ON r.source = 'osm' AND ST_Intersects(r.geom, d.geom)
+    WHERE d.model_version = p_model_version
+      AND NOT EXISTS (SELECT 1 FROM det_suppressed s WHERE s.det_id = d.id)
+      AND ST_Area(ST_Intersection(ST_Transform(d.geom, p_metric_srid), ST_Transform(r.geom, p_metric_srid)))
+          >= p_cover * ST_Area(ST_Transform(d.geom, p_metric_srid))
+      AND geoqc_iou(r.geom, d.geom, p_metric_srid) < p_iou_match
+    ORDER BY d.id, r.id
+    ON CONFLICT (det_id) DO NOTHING;
+    GET DIAGNOSTICS n = ROW_COUNT;
+    RETURN n;
 END
 $$;
 
