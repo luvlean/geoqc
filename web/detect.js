@@ -225,9 +225,10 @@
     view.classList.remove("hidden");
     if (!viewer) {
       var m = L.map("detect-map", {
-        crs: L.CRS.Simple, minZoom: -6, maxZoom: 4, zoomSnap: 0, zoomDelta: 0.5,
+        crs: L.CRS.Simple, minZoom: -6, maxZoom: 4, zoomSnap: 0, zoomDelta: 0.5, scrollWheelZoom: false,
         maxBoundsViscosity: 1, attributionControl: false
       });
+      g.smoothWheelZoom(m);
       viewer = { map: m, overlay: null, polys: null, byId: {}, bounds: null };
       m.on("resize", function () { fillView(false); });
     }

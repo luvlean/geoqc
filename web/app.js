@@ -367,11 +367,60 @@
     if (id > 0) selectFeature(id, { zoom: true });
   });
 
+  // ---------------------------------------------------------------- smooth wheel zoom
+  // Leaflet's scroll handler debounces the wheel, squashes the delta through a sigmoid (at most
+  // 4 levels per burst) and drops wheel events that arrive during its 250 ms zoom animation, so
+  // zooming feels stepped. Here every wheel event moves a target zoom linearly and an animation
+  // frame loop eases the real zoom towards it around the cursor.
+  var WHEEL_PX_PER_ZOOM = 10;   // wheel/trackpad pixels per zoom level (Leaflet default: 60)
+  var WHEEL_EASE_MS = 60;       // time to cover ~63% of the remaining distance to the target
+
+  function smoothWheelZoom(map) {
+    var target = null, point = null, frame = null, last = 0, moving = false;
+    // Drive the map the way Leaflet's pinch handler does: _move with {pinch: true} only re-scales
+    // the layers with CSS transforms, and tiles are (re)loaded once at _moveEnd. A plain setZoom
+    // per frame would reset the view every frame and make the tiles flash instead of scale.
+    function step(now) {
+      frame = null;
+      if (map._animatingZoom) { frame = L.Util.requestAnimFrame(step); return; }
+      var zoom = map.getZoom();
+      var k = 1 - Math.exp(-(now - last) / WHEEL_EASE_MS);
+      last = now;
+      var next = Math.abs(target - zoom) < 0.001 ? target : zoom + (target - zoom) * k;
+      if (!moving) {
+        map._stop(); map._moveStart(true, false); moving = true;
+        L.DomUtil.addClass(map.getContainer(), "leaflet-wheel-zoom");
+      }
+      var half = map.getSize().divideBy(2);
+      var offset = point.subtract(half).multiplyBy(1 - 1 / map.getZoomScale(next, zoom));
+      var center = map._limitCenter(map.containerPointToLatLng(half.add(offset)), next, map.options.maxBounds);
+      map._move(center, next, { pinch: true, round: false });
+      if (next !== target) { frame = L.Util.requestAnimFrame(step); return; }
+      target = null; moving = false;
+      L.DomUtil.removeClass(map.getContainer(), "leaflet-wheel-zoom");
+      map._moveEnd(true);
+    }
+    L.DomEvent.on(map.getContainer(), "wheel", function (e) {
+      L.DomEvent.stop(e);
+      if (map.getZoom() === undefined) return;
+      if (target === null) {
+        target = map._animatingZoom ? map._animateToZoom : map.getZoom();
+        last = performance.now();
+      }
+      target += L.DomEvent.getWheelDelta(e) / WHEEL_PX_PER_ZOOM;
+      target = Math.max(map.getMinZoom(), Math.min(map.getMaxZoom(), target));
+      point = map.mouseEventToContainerPoint(e);
+      if (frame === null) frame = L.Util.requestAnimFrame(step);
+    });
+  }
+
   // ---------------------------------------------------------------- map bootstrap
   function initMap(cfg) {
     state.cfg = cfg;
     if (cfg.aoi && cfg.aoi.name) $("#aoi-name").textContent = cfg.aoi.name;
-    var map = L.map("map", { maxZoom: 22, zoomControl: true });
+    // zoomSnap 0: fractional zoom so the wheel loop below is not rounded to whole levels.
+    var map = L.map("map", { maxZoom: 22, zoomControl: true, zoomSnap: 0, zoomDelta: 0.5, scrollWheelZoom: false });
+    smoothWheelZoom(map);
     state.map = map;
     map.attributionControl.setPrefix('<a href="/docs" target="_blank" rel="noopener">geoqc API</a>');
 
@@ -422,6 +471,10 @@
         minZoom: isFinite(minZoom) ? minZoom : 0,
         maxNativeZoom: 20,
         maxZoom: 22,
+        // Dense MVT tiles are drawn synchronously on canvas; creating them mid-gesture stalls the
+        // smooth wheel zoom. Scale the loaded tiles while moving and redraw once the map settles.
+        updateWhenIdle: true,
+        updateWhenZooming: false,
         interactive: true,
         vectorTileLayerStyles: tileStyles,
         getFeatureId: featureKey,
@@ -470,6 +523,7 @@
     addTab: addTab,
     showTab: showTab,
     map: function () { return state.map; },
+    smoothWheelZoom: smoothWheelZoom,
     fetchJSON: fetchJSON,
     showNote: showNote,
     escapeHtml: escapeHtml,

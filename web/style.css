@@ -76,3 +76,7 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; margin: 
   #sidebar { right: 0; bottom: 55%; width: auto; border-right: 0; border-bottom: 1px solid var(--line); }
   #map { top: 45%; left: 0; }
 }
+
+/* Wheel zoom (app.js smoothWheelZoom) re-scales the panes every frame: keep them on the compositor
+   for the duration of the gesture, otherwise the browser re-rasterises the tiles each frame. */
+.leaflet-wheel-zoom .leaflet-zoom-animated { will-change: transform; }
