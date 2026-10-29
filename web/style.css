@@ -7,9 +7,9 @@
 * { box-sizing: border-box; }
 html, body { height: 100%; overflow: hidden; overscroll-behavior: none; margin: 0; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--text); background: var(--bg); }
 /* Pinned to the window edges. The sidebar itself never scrolls (Safari trackpad swipes did not
-   reach it): header, tabs and card keep their size, the active tab scrolls inside itself. */
+   reach it): header and tabs keep their size, the active tab scrolls inside itself. */
 #sidebar { position: fixed; top: 0; bottom: 0; left: 0; width: var(--sidebar-w); display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--line); background: var(--panel); }
-#sidebar > header, #sidebar > .tabs, #card { flex: none; }
+#sidebar > header, #sidebar > .tabs { flex: none; }
 .tabs { display: flex; border-bottom: 1px solid var(--line); }
 .tabs button { flex: 1; padding: 8px 6px; border: 0; border-bottom: 2px solid transparent; background: none; font: inherit; color: var(--muted); cursor: pointer; }
 .tabs button.active { color: var(--text); border-bottom-color: var(--text); font-weight: 600; }
@@ -17,7 +17,6 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; margin: 
 .tab { position: absolute; top: 0; right: 0; bottom: 0; left: 0; overflow-y: auto; overscroll-behavior: contain; display: none; }
 .tab.active { display: block; }
 .tab.list-tab.active { display: flex; flex-direction: column; }
-#card { max-height: 30%; overflow-y: auto; overscroll-behavior: contain; border-top: 1px solid var(--line); border-bottom: 0; }
 #map { position: fixed; top: 0; bottom: 0; left: var(--sidebar-w); right: 0; }
 .panel { padding: 10px 14px; border-bottom: 1px solid var(--line); }
 .panel h1 { margin: 0 0 4px; font-size: 20px; }
@@ -57,17 +56,6 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; margin: 
 .list li.status-confirmed .title::after { content: " ✓"; color: var(--ok); }
 .list li.status-rejected { opacity: .55; }
 .list li.status-rejected .title::after { content: " ✗"; color: var(--bad); }
-#card-body dl { display: grid; grid-template-columns: 110px 1fr; gap: 2px 8px; margin: 0; }
-#card-body dt { color: var(--muted); }
-#card-body dd { margin: 0; overflow-wrap: anywhere; }
-.badge { display: inline-block; padding: 1px 6px; border-radius: 10px; font-size: 12px; color: #fff; }
-.badge.missing_in_map { background: var(--missing_in_map); }
-.badge.missing_on_image { background: var(--missing_on_image); }
-.badge.geometry_mismatch { background: var(--geometry_mismatch); }
-.badge.new { background: #64748b; }
-.badge.confirmed { background: var(--ok); }
-.badge.rejected { background: var(--bad); }
-.actions { display: flex; gap: 6px; margin-top: 8px; }
 .search { display: flex; gap: 6px; margin-top: 8px; }
 .search input { flex: 1; min-width: 0; padding: 5px 8px; border: 1px solid var(--line); border-radius: 4px; font: inherit; }
 .leaflet-container { font: inherit; }

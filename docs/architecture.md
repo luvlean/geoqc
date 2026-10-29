@@ -151,7 +151,7 @@ erDiagram
 - `GET /discrepancies?bbox&class&min_conf&status&limit&offset` → GeoJSON, сортировка `confidence DESC`; `GET /discrepancies/{id}`; `PATCH /discrepancies/{id}` `{"status": ...}`.
 - `GET /tiles/{z}/{x}/{y}.mvt` — слои `discrepancies`, `buildings_ref`, `buildings_det` (`ST_AsMVT`); `GET /imagery/{z}/{x}/{y}.png` — тайлы COG (rio-tiler); `GET /export` — контракт §3.8.
 - Esri-подложка — только через серверный прокси с подстановкой `ARCGIS_API_KEY` (ключ на клиент не уходит), см. D-002.
-- `web/` — Leaflet без сборщика: подложки (OSM / снимок / Esri), слои по классам, фильтры, список топ-N, карточка, «Принять / Отклонить», экспорт.
+- `web/` — Leaflet без сборщика: подложки (OSM / снимок / Esri), слои по классам, фильтры, список топ-N, подсветка объекта, экспорт.
 
 ## 7. Конфигурация и секреты
 

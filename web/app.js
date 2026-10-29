@@ -1,6 +1,6 @@
-/* geoqc web map: Leaflet 1.9 + Leaflet.VectorGrid (MVT from /tiles), list/card from /discrepancies.
+/* geoqc web map: Leaflet 1.9 + Leaflet.VectorGrid (MVT from /tiles), list from /discrepancies.
  * Vector path chosen: MVT (all three layers come from one tile request); the JSON list endpoint is
- * used only for the top-N panel and the feature card. No bundler, no npm. */
+ * used only for the top-N panel. No bundler, no npm. */
 (function () {
   "use strict";
 
@@ -17,7 +17,6 @@
     missing_on_image: "Нет на снимке",
     geometry_mismatch: "Геометрия"
   };
-  var STATUS_LABELS = { new: "новое", confirmed: "подтверждено", rejected: "отклонено" };
 
   var state = {
     cfg: null,
@@ -168,57 +167,6 @@
     selectFeature(Number(li.getAttribute("data-id")), { zoom: true });
   });
 
-  // ---------------------------------------------------------------- card
-  function osmLink(osmId) {
-    // Data stores multipolygon relations as -id (data/osm.py), ways as +id.
-    var id = Number(osmId);
-    var path = id < 0 ? "relation/" + -id : "way/" + id;
-    var url = "https://www.openstreetmap.org/" + path;
-    return '<a href="' + url + '" target="_blank" rel="noopener">' + path + "</a>";
-  }
-
-  // Scoring inputs from discrepancy_features (DECISIONS D-012), present only on GET /discrepancies/{id}.
-  function scoringRows(f) {
-    if (!f) return "";
-    var fmt = function (v, d) { return v == null ? "—" : (typeof v === "number" ? v.toFixed(d) : String(v)); };
-    return "<dt>Площадь, м²</dt><dd>" + fmt(f.area_m2, 1) + "</dd>" +
-      "<dt>2-й источник</dt><dd>" + (f.has_secondary ? "да, покрытие " + fmt(f.secondary_coverage, 2) : "нет") + "</dd>" +
-      "<dt>max IoU</dt><dd>" + fmt(f.max_iou_any, 3) + "</dd>" +
-      "<dt>Край AOI</dt><dd>" + (f.aoi_edge ? "да" : "нет") + "</dd>" +
-      "<dt>Score модели</dt><dd>" + fmt(f.score, 3) + "</dd>";
-  }
-
-  function renderCard(feat) {
-    var body = $("#card-body");
-    var idEl = $("#card-id");
-    var buttons = ["#btn-accept", "#btn-reject", "#btn-reset"].map(function (s) { return $(s); });
-    if (!feat) {
-      idEl.textContent = "";
-      body.className = "muted";
-      body.textContent = "Выберите объект на карте или в списке.";
-      buttons.forEach(function (b) { b.disabled = true; });
-      return;
-    }
-    var p = feat.properties;
-    idEl.textContent = "#" + feat.id;
-    body.className = "";
-    body.innerHTML = "<dl>" +
-      "<dt>Класс</dt><dd><span class='badge " + p["class"] + "'>" + p["class"] + "</span> " + escapeHtml(CLASS_LABELS[p["class"]] || "") + "</dd>" +
-      "<dt>Confidence</dt><dd>" + Number(p.confidence).toFixed(3) + "</dd>" +
-      "<dt>IoU</dt><dd>" + (p.iou != null ? Number(p.iou).toFixed(3) : "—") + "</dd>" +
-      "<dt>Статус</dt><dd><span class='badge " + p.status + "'>" + escapeHtml(STATUS_LABELS[p.status] || p.status) + "</span></dd>" +
-      "<dt>OSM</dt><dd>" + (p.ref_osm_id ? osmLink(p.ref_osm_id) : "—") + "</dd>" +
-      "<dt>ref_id / det_id</dt><dd>" + (p.ref_id != null ? p.ref_id : "—") + " / " + (p.det_id != null ? p.det_id : "—") + "</dd>" +
-      "<dt>Модель</dt><dd>" + escapeHtml(p.model_version || "—") + "</dd>" +
-      "<dt>Обновлено</dt><dd>" + escapeHtml((p.updated_at || "").replace("T", " ").slice(0, 19)) + "</dd>" +
-      scoringRows(p.features) +
-      "</dl>";
-    $("#btn-accept").disabled = p.status === "confirmed";
-    $("#btn-reject").disabled = p.status === "rejected";
-    $("#btn-reset").disabled = p.status === "new";
-    state.onSelect.forEach(function (fn) { fn(feat); });
-  }
-
   function setHighlight(feat) {
     if (state.highlight) { state.map.removeLayer(state.highlight); state.highlight = null; }
     if (!feat) return;
@@ -266,11 +214,10 @@
       li.classList.toggle("active", Number(li.getAttribute("data-id")) === id);
     });
     var cached = state.features[id];
-    var promise = (cached && "features" in cached.properties)
-      ? Promise.resolve(cached) : fetchJSON("/discrepancies/" + id);
+    var promise = cached ? Promise.resolve(cached) : fetchJSON("/discrepancies/" + id);
     return promise.then(function (feat) {
       state.features[id] = feat;
-      renderCard(feat);
+      state.onSelect.forEach(function (fn) { fn(feat); });
       setHighlight(feat);
       if (opts.zoom && state.highlight) {
         state.map.fitBounds(state.highlight.getBounds(), { maxZoom: 19, padding: [40, 40] });
@@ -279,30 +226,6 @@
       if (li && opts.scrollList !== false) scrollWithin($("#list"), li);
     }).catch(function (err) { showNote(err.message); });
   }
-
-  function patchStatus(status) {
-    var id = state.selectedId;
-    if (id == null) return;
-    return fetchJSON("/discrepancies/" + id, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: status })
-    }).then(function (feat) {
-      state.features[id] = feat;
-      renderCard(feat);
-      if (state.vg) {
-        var props = Object.assign({}, feat.properties, { layer: "discrepancies" });
-        var style = (state.layers.discrepancies && passesFilter(props)) ? discrepancyStyle(props) : [];
-        state.vg.setFeatureStyle(featureKey(props), style);
-      }
-      loadList();
-      loadStats();
-    }).catch(function (err) { showNote(err.message); });
-  }
-
-  $("#btn-accept").addEventListener("click", function () { patchStatus("confirmed"); });
-  $("#btn-reject").addEventListener("click", function () { patchStatus("rejected"); });
-  $("#btn-reset").addEventListener("click", function () { patchStatus("new"); });
 
   // ---------------------------------------------------------------- stats / export / controls
   function loadStats() {

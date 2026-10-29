@@ -46,7 +46,7 @@ flowchart LR
 | `geoqc.cv` | Находит здания на снимке и превращает маски в полигоны. Ведёт веса, `model_version`, подбор порога и датасет для дообучения | `detections.geojson`, `buildings_det` |
 | `geoqc.matching` | Превращает две карты в очередь работы: сопоставляет детекции с OSM 1:1, делит расхождения на три класса и ранжирует по уверенности | `matches`, `discrepancies`, `reports/discrepancies.geojson` |
 | `geoqc.eval` | Считает все числа отчёта: качество детекции (G3–G5), точность очереди по ручной проверке (G6, G7), анализ ошибок, сравнение со вторым источником, итоговые гейты | `reports/metrics*.json`, `error_analysis.md` |
-| `geoqc.api` + `web/` | Даёт валидатору работать с очередью: карта, фильтры, карточка, «Принять / Отклонить», экспорт для MapRoulette и JOSM; вкладка «Снимок» — детекция зданий на любом загруженном снимке (D-026) | HTTP API, веб-карта |
+| `geoqc.api` + `web/` | Даёт валидатору работать с очередью: карта, фильтры, список и подсветка объекта, экспорт для MapRoulette и JOSM; вкладка «Снимок» — детекция зданий на любом загруженном снимке (D-026) | HTTP API, веб-карта |
 | ядро (`config.py`, `db.py`, `cli.py`) | Общий конфиг, доступ к PostGIS, единая команда `geoqc` | — |
 
 Вне пакета:
@@ -126,7 +126,7 @@ PLAN.md  DECISIONS.md  LOG.md  README.md
 2. **Дообучение модели** (если бейзлайн не проходит G3 на `val`): `notebooks/train_finetune.ipynb` (CUDA/MPS/CPU) на своей разметке или `scripts/experiments/airs_night.py` (своя разметка + AIRS, D-024); после обучения веса кладутся в `models/`, `model_version` обновляется в `config/cv.yaml` и `models/MODEL_CARD.md`. `data/labels/test/` в обучении и подборе порогов не участвует — проверяется статическим тестом QA.
 3. **Ручная верификация расхождений** (≥ 50 шт., по классам): `geoqc eval verification-sample` → `reports/verification_sample.csv`; студент ставит `verdict ∈ {map_error, model_error, image_issue, unsure}` во вкладке «Верификация» веб-карты (`make demo REVIEW=1`; вердикты пишутся в `reports/verification.csv`) или вручную в CSV → `geoqc eval discrepancies --verification reports/verification.csv` (гейты G6, G7).
 
-Веб-сценарий для валидатора: выбрать зону → список расхождений по убыванию `confidence` → карточка (класс, confidence, IoU, ссылка на osm.org) → «Принять / Отклонить» (`PATCH /discrepancies/{id}`) → «Экспорт GeoJSON» (`/export`, формат пригоден для MapRoulette / JOSM).
+Веб-сценарий для валидатора: выбрать зону → список расхождений по убыванию `confidence` → подсветка объекта на карте → «Экспорт GeoJSON» (`/export`, формат пригоден для MapRoulette / JOSM).
 
 ## Метрики и гейты
 
